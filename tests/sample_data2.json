@@ -1,0 +1,68 @@
+[
+  {
+    "target_index": 0,
+    "target_name": "A",
+    "models": {
+      "sparse-lr": {
+        "intercept": 0.0,
+        "coeffs": [
+          {
+            "col_index": 1,
+            "col_name": "B",
+            "coeff": 1.0
+          }
+        ]
+      }
+    },
+    "sizes": {
+      "sparse-lr": {
+        "base": 2,
+        "virtual": 1
+      }
+    }
+  },
+  {
+    "target_index": 0,
+    "target_name": "B",
+    "models": {
+      "sparse-lr": {
+        "intercept": 0.0,
+        "coeffs": [
+          {
+            "col_index": 1,
+            "col_name": "C",
+            "coeff": 1.0
+          }
+        ]
+      }
+    },
+    "sizes": {
+      "sparse-lr": {
+        "base": 2,
+        "virtual": 1
+      }
+    }
+  },
+  {
+    "target_index": 0,
+    "target_name": "A",
+    "models": {
+      "sparse-lr": {
+        "intercept": 0.0,
+        "coeffs": [
+          {
+            "col_index": 1,
+            "col_name": "C",
+            "coeff": 1.0
+          }
+        ]
+      }
+    },
+    "sizes": {
+      "sparse-lr": {
+        "base": 2,
+        "virtual": 0.5
+      }
+    }
+  }
+]

@@ -1,0 +1,28 @@
+[project]
+name = "virtual-parquet"
+version = "0.1.0"
+description = "A booster 💪 for your Parquet files"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{name = "UTN Data Systems Lab", email = "data-systems@utn.de"}]
+keywords = ["correlation-aware compression", "semantic compression"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "pandas",
+  "duckdb",
+  "pyarrow",
+  "pyyaml",
+  "scikit-learn"
+]
+
+[tool.setuptools]
+packages = ["virtual", "virtual.schema_inference", "virtual.models"]
+
+ 
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

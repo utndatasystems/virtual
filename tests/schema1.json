@@ -1,0 +1,32 @@
+[
+  {
+    "name": "A",
+    "type": "BIGINT",
+    "null": {
+      "any": false,
+      "all": false
+    },
+    "scale": 0,
+    "precision": 0
+  },
+  {
+    "name": "B",
+    "type": "BIGINT",
+    "null": {
+      "any": false,
+      "all": false
+    },
+    "scale": 0,
+    "precision": 0
+  },
+  {
+    "name": "C",
+    "type": "BIGINT",
+    "null": {
+      "any": false,
+      "all": false
+    },
+    "scale": 0,
+    "precision": 0
+  }
+]
