@@ -16,7 +16,9 @@ import v_reconstructor
 from typing import Optional
 import schema_inference
 import pandas as pd
+import duckdb
 import utils
+import time
 import re
 
 # TODO: We should add `nrows`. Maybe also the sample_size.
@@ -160,7 +162,7 @@ def from_format(parquet_path, functions=None, schema=None):
   # TODO: @Ping.
   pass
 
-def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True):
+def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, return_execution_time=False):
   """
     Query the Parquet file via SQL.
 
@@ -183,9 +185,13 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True):
 
   # Fallback for queries where there is no read from a file.
   if match is None:
-    con = utils.get_duckdb_conn()
-    ans = con.execute(sql_query).fetchdf()
-    con.close()
+    start_time = time.time_ns()
+    ans = duckdb.sql(sql_query).fetchdf()
+    stop_time = time.time_ns()
+
+    # Should we also return the execution time?
+    if return_execution_time:
+      return ans, stop_time - start_time
     return ans
 
   # Infer the format type and the file path.
@@ -196,10 +202,15 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True):
   if format_type not in ['parquet']:
     assert False, f'Format {format_type} not yet supported!'
 
+  # Get the metadata, along with the header.
+  # NOTE: We rely on the fact the variable names remain `schema` and `functions`.
+  format_metadata = get_metadata_from_file(format_type, file_path, ['header'] + [key for key in ['schema', 'functions'] if locals().get(key) is None])
+
   # Read the schema.
   if schema is None:
     if format_type == 'parquet':
-      schema = get_metadata_from_file(format_type, file_path, 'schema')
+      assert format_metadata is not None, 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
+      schema = format_metadata['schema']
     else:
       assert 0, f'File format {format_type} not supported yet.'
   elif isinstance(schema, str):
@@ -208,7 +219,11 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True):
 
   # Read the functions.
   if functions is None:
-    functions = get_metadata_from_file(format_type, file_path, 'functions')
+    if format_type == 'parquet':
+      assert format_metadata is not None, 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
+      functions = format_metadata['functions']
+    else:
+      assert 0, f'File format {format_type} not supported yet.'
   elif isinstance(functions, str):
     functions = utils._read_json(functions)
   assert functions is not None
@@ -225,11 +240,10 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True):
       # TODO: @Ping.
       pass
 
-  # Open the connection.
-  con = utils.get_duckdb_conn()
-
   # Fetch the parquet header.
-  parquet_header = utils._get_parquet_header(con, file_path)
+  # TODO: Maybe combine with the metadata reading to be faster.
+  assert format_metadata is not None, 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
+  header = format_metadata['header']
 
   # TODO: Update the naming convention in the layout file to avoid this `greedy` and `chosen`.
   matches = []
@@ -240,7 +254,7 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True):
 
   for iter in functions['greedy']['chosen']:
     # Generate the formula.
-    _, raw_formula = v_reconstructor.generate_formula(schema, parquet_header, iter, functions['greedy']['chosen'], enforce_replacement=True)
+    _, raw_formula = v_reconstructor.generate_formula(schema, header, iter, functions['greedy']['chosen'], enforce_replacement=True)
 
     pattern = re.compile(rf"\"?\b{re.escape(iter['target_name'])}\b\"?")
 
@@ -264,19 +278,24 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True):
     sql_query = sql_query[:start] + after + sql_query[end:]
 
   # Execute.
-  ans = con.execute(sql_query).fetchdf()
+  start_time = time.time_ns()
+  ans = duckdb.sql(sql_query).fetchdf()
+  stop_time = time.time_ns()
 
   # Rename the columns to maintain consistency with the default output by pandas.
   if fancy:
-    col_dict = dict()
-    for col in ans.columns:
-      new_col = col
-      for _, _, before, after in sorted_matches:
-        new_col = re.sub(re.escape(after), before, new_col)
-      col_dict[col] = new_col
+    # Compile the patterns.
+    replacements = [(re.compile(re.escape(after)), before) for _, _, before, after in sorted_matches]
+
+    # Update the names.
+    col_dict = { col: re.sub(rep[0], rep[1], col) for col in ans.columns for rep in replacements }
+
+    # And rename the columns.
     ans = ans.rename(columns=col_dict)
 
   # And return.
+  if return_execution_time:
+    return ans, stop_time - start_time
   return ans
 
 def functions_to_json(functions, json_path):
@@ -285,9 +304,9 @@ def functions_to_json(functions, json_path):
 def get_functions_from_json(json_path):
   return utils._read_json(json_path)
 
-def get_metadata_from_file(format_type, file_path, metadata_type):
+def get_metadata_from_file(format_type, file_path, metadata_types):
   if format_type == 'parquet':
-    return utils.get_metadata_pq(file_path, metadata_type)
+    return utils.get_metadata_pq(file_path, metadata_types)
   elif format_type == 'csv':
     # TODO: @Ping.
     pass

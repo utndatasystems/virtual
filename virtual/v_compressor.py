@@ -37,6 +37,7 @@ def _compress_impl(con, fn, data: pd.DataFrame | pathlib.Path, schema, target_co
   # Flush from duckdb.
   con.execute(fn(con, schema, target_columns, tmp_path))
 
+  # No Arrow to apply?
   if not apply_arrow:
     return {
       'tmp_path' : tmp_path,

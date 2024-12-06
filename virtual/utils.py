@@ -1,18 +1,21 @@
-import os
-import duckdb
 import pandas as pd
 import numpy as np
-import pyarrow.parquet as pq
+import duckdb
+import time
 import json
+import os
 import re
-from multiprocessing import Lock
-from typing import TypedDict
+
+# Our utils
+import schema_inference
+import btrblocks_utils
+
+# Other utils
+import pyarrow.parquet as pq
 from typing import List
 import pathlib
 import hashlib
 import csv
-import btrblocks_utils
-import schema_inference
 
 def to_csv(parquet_path, format_path):
   df = pd.read_parquet(parquet_path)
@@ -95,6 +98,7 @@ def get_duckdb_conn():
 def rename(src, dst):
   os.rename(src, dst)
 
+# TODO: Maybe also slow.
 def add_metadata_pq(parquet_path, info, info_name, new_parquet_path=None):
   table = pq.read_table(parquet_path)
   metadata = table.schema.metadata
@@ -115,17 +119,28 @@ def add_metadata_pq(parquet_path, info, info_name, new_parquet_path=None):
     pq.write_table(fixed_table, parquet_path)
   return 1
 
-def get_metadata_pq(parquet_path, info_name):
-  table = pq.read_table(parquet_path)
-  metadata = table.schema.metadata
+def get_metadata_pq(parquet_path, metadata_types):
+  # Read the metadata.
+  parquet_file = pq.ParquetFile(parquet_path)
+  metadata = parquet_file.schema_arrow.metadata
+
+  # No metadata?
   if metadata is None:
     print('Nothing in parquet metadata.')
     return None
-  elif info_name.encode('utf-8') not in metadata:
-    print('The functions are not present the metadata.')
-    return None
-  metadata = metadata[info_name.encode('utf-8')].decode('utf-8')
-  return json.loads(metadata)
+
+  # Take for each `metadata_type`.
+  ret = {}
+  for metadata_type in metadata_types:
+    ret[metadata_type] = None
+    if metadata_type == 'header':
+      assert parquet_file.schema_arrow.names is not None
+      ret[metadata_type] = parquet_file.schema_arrow.names
+    else:
+      if metadata_type.encode('utf-8') not in metadata:
+        continue
+      ret[metadata_type] = json.loads(metadata[metadata_type.encode('utf-8')].decode('utf-8'))
+  return ret
 
 def rreplace(text, old, new):
   return new.join(text.rsplit(old, 1))
@@ -138,10 +153,6 @@ formula_pattern = re.compile(r'^f\d+$')
 
 def is_formula(token):
   return bool(formula_pattern.match(token))
-
-class SchemaEntry(TypedDict):
-  type: str
-  scale: int
 
 class ModelType:
   def __init__(self, name):
@@ -236,8 +247,8 @@ def _get_curr_columns(con):
 def _get_size(con):
   return list(con.execute('select count(*) as size from base_table;').fetchdf()["size"])[0]
 
-def _get_parquet_header(con, parquet_path):
-  return list(con.execute(f"select distinct path_in_schema from parquet_metadata('{parquet_path}')").df()["path_in_schema"])
+def _get_parquet_header(parquet_path):
+  return pq.ParquetFile(parquet_path).schema_arrow.names
 
 def _get_distinct_counts(con):
   curr_columns = _get_curr_columns(con)
@@ -416,3 +427,20 @@ def compute_avg_stats(parquet_file, config_path, model_type='sparse-lr'):
     compare_value = list(con.execute(f"select avg(\"{col_config['target_name']}\") as res from read_parquet('{parquet_file}');").fetchdf()["res"])[0]
     avgs[col_config['target_name']] = compare_value
   return avgs
+
+class TimeTracker:
+  def __init__(self):
+    self.prev_time = time.time_ns()
+    self.register = dict()
+    pass
+
+  def add(self, name):
+    curr_time = time.time_ns()
+    time_diff = curr_time - self.prev_time
+    self.prev_time = curr_time
+    self.register[name] = time_diff / 1_000_000
+  
+  def log(self):
+    sorted_register = sorted(self.register.items(), key=lambda x: -x[1])
+    for k, v in sorted_register:
+      print(f'{k}: {v} ms')
