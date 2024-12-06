@@ -209,7 +209,7 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
   # Read the schema.
   if schema is None:
     if format_type == 'parquet':
-      assert format_metadata is not None, 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
+      assert format_metadata is not None and format_metadata['schema'] is not None, 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
       schema = format_metadata['schema']
     else:
       assert 0, f'File format {format_type} not supported yet.'
@@ -220,7 +220,7 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
   # Read the functions.
   if functions is None:
     if format_type == 'parquet':
-      assert format_metadata is not None, 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
+      assert format_metadata is not None and format_metadata['schema'], 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
       functions = format_metadata['functions']
     else:
       assert 0, f'File format {format_type} not supported yet.'
