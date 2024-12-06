@@ -11,6 +11,7 @@ from typing import Optional
 
 PARQUET_COMPRESSION_TYPE = 'snappy'
 
+# TODO: At compression time, we should also put the schema and functions to avoid the slow table rewrite at the end.
 def arrow_compress_parquet(in_file, out_file):
   table = pq.read_table(in_file)
   pq.write_table(table, out_file, compression=PARQUET_COMPRESSION_TYPE)
