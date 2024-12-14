@@ -5,13 +5,13 @@ A booster 💪 for your Parquet file sizes.
 # 🛠 Build
 
 ```
-pip3 install virtual-parquet
+pip install virtual-parquet
 ```
 
 or 
 
 ```
-pip3 install .
+pip install .
 ```
 
 # 🔗 Examples

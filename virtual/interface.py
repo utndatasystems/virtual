@@ -22,7 +22,7 @@ import time
 import re
 
 # TODO: We should add `nrows`. Maybe also the sample_size.
-def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_000, model_types: Optional[list[str]]=None, prefix=None):
+def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_000, model_types: Optional[list[str]]=['sparse-lr'], prefix=None):
   """
     Computes the functions hidden in `data`.
 
