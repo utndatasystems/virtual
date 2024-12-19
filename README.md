@@ -1,6 +1,8 @@
 # `virtual`
 
-A booster 💪 for your Parquet file sizes: `virtual` is a lightweight library that transparently compresses Parquet files by using correlations between columns, all while giving you the same familiar interface you are used to. How `virtual` works it's magic is described in our recent research papers (see below).
+A booster 💪 for your Parquet file sizes.
+
+`virtual` is a lightweight framework that transparently compresses Parquet files by using functions between columns, all while giving you the same familiar interface you are used to. How `virtual` works is magic, and is described in our recent research papers (see below).
 
 # 🛠 Build
 
@@ -17,7 +19,7 @@ pip install .
 
 # 🔗 Examples
 
-A demo can be found at [`examples/demo-csv.ipynb`](examples/demo-csv.ipynb).
+A demo can be found at [`examples/demo-parquet.ipynb`](examples/demo-parquet.ipynb).
 
 ## 🗜️ Compress
 
@@ -47,7 +49,7 @@ df = virtual.from_parquet('file_virtual.parquet')
 
 ## 📊 Query
 
-Or, directly run SQL queries (powered by [duckdb](https://github.com/duckdb/duckdb)) on the compressed parquet file (without decompression) with `virtual.query([SQL])`:
+Or directly run SQL queries on the virtualized Parquet file via [duckdb](https://github.com/duckdb/duckdb):
 
 ```python
 import virtual
@@ -58,7 +60,7 @@ virtual.query(
 )
 ```
 
-# Expert-user Features
+# Expert-User Features
 
 ## 🔍 Inspect the Functions Found
 
