@@ -23,7 +23,7 @@ A demo can be found at [`examples/demo-parquet.ipynb`](examples/demo-parquet.ipy
 
 ## 🗜️ Compress
 
-Simply compress a Pandas data frame with `virtual.to_parquet(df)`:
+Simply compress a Pandas DataFrame with `virtual.to_parquet(df)`:
 
 ```python
 import pandas as pd
@@ -49,7 +49,7 @@ df = virtual.from_parquet('file_virtual.parquet')
 
 ## 📊 Query
 
-Or directly run SQL queries on the virtualized Parquet file via [duckdb](https://github.com/duckdb/duckdb):
+Or directly run SQL queries on the virtualized Parquet file via [duckdb](https://github.com/duckdb/duckdb) with `virtual.query([SQL])`:
 
 ```python
 import virtual
