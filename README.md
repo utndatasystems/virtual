@@ -1,6 +1,6 @@
 # `virtual`
 
-A booster 💪 for your Parquet file sizes.
+A booster 💪 for your Parquet file sizes: `virtual` is a lightweight library that transparently compresses Parquet files by using correlations between columns, all while giving you the same familiar interface you are used to. How `virtual` works it's magic is described in our recent research papers (see below).
 
 # 🛠 Build
 
@@ -11,14 +11,17 @@ pip install virtual-parquet
 or 
 
 ```
+git clone https://github.com/utndatasystems/virtual.git && cd virtual
 pip install .
 ```
 
 # 🔗 Examples
 
-A demo can be found at `examples/demo.ipynb`.
+A demo can be found at [`examples/demo-csv.ipynb`](examples/demo-csv.ipynb).
 
 ## 🗜️ Compress
+
+Simply compress a Pandas data frame with `virtual.to_parquet(df)`:
 
 ```python
 import pandas as pd
@@ -30,9 +33,11 @@ df = pd.read_csv('file.csv')
 
 virtual.to_parquet(df, 'file_virtual.parquet')
 ```
-> % Virtualization finished: Check out 'file.parquet'.
+> % Virtualization finished: Check out 'file_virtual.parquet'.
 
 ## 🥢 Read
+
+Reading in a virtual compress parquet file with `virtual.from_parquet([path])`:
 
 ```python
 import virtual
@@ -41,6 +46,8 @@ df = virtual.from_parquet('file_virtual.parquet')
 ```
 
 ## 📊 Query
+
+Or, directly run SQL queries (powered by [duckdb](https://github.com/duckdb/duckdb)) on the compressed parquet file (without decompression) with `virtual.query([SQL])`:
 
 ```python
 import virtual
@@ -51,9 +58,9 @@ virtual.query(
 )
 ```
 
-# Additional Features
+# Expert-user Features
 
-## 🔍 Discover the Functions Found
+## 🔍 Inspect the Functions Found
 
 ```python
 import pandas as pd
