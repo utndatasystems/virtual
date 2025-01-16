@@ -23,7 +23,7 @@ A demo can be found at [`examples/demo-parquet.ipynb`](examples/demo-parquet.ipy
 
 ## 🗜️ Compress
 
-Simply compress a Pandas DataFrame with `virtual.to_parquet(df)`:
+Simply compress a Pandas DataFrame with `virtual.to_format(df)`:
 
 ```python
 import pandas as pd
@@ -33,18 +33,18 @@ df = pd.read_csv('file.csv')
 
 ...
 
-virtual.to_parquet(df, 'file_virtual.parquet')
+virtual.to_format(df, 'file_virtual.parquet')
 ```
 > % Virtualization finished: Check out 'file_virtual.parquet'.
 
 ## 🥢 Read
 
-Reading in a virtual compress parquet file with `virtual.from_parquet([path])`:
+Reading in a virtual compress parquet file with `virtual.from_format([path])`:
 
 ```python
 import virtual
 
-df = virtual.from_parquet('file_virtual.parquet')
+df = virtual.from_format('file_virtual.parquet')
 ```
 
 ## 📊 Query

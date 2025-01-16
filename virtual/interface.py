@@ -60,7 +60,7 @@ def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_00
 # TODO: Check whether all cases for `nrows` work out.
 def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=None, schema=None, nrows=None, model_types: Optional[list[str]]=None, prefix=None):
   """
-    Converts `data` to a Parquet file.
+    Converts `data` into a file of the specified format.
 
     Args:
       data (pd.DataFrame | pathlib.Path | str): The data source.
