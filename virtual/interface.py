@@ -158,9 +158,57 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
     utils._write_json(os.path.join(format_path, 'schema.json'), schema)  
   return
 
-def from_format(parquet_path, functions=None, schema=None):
+def from_format(format_path, functions=None, schema=None):
   # TODO: @Ping.
-  pass
+  assert '.' in format_path, "The `format_path` is invalid!"
+  format_type = os.path.splitext(format_path)[-1]
+  assert format_type[1:], "The `format_path` is invalid!"
+  if format_type[1:] not in ['csv', 'parquet']:
+    assert False, f"Format {format_type[1:]} not yet supported!"
+
+  # Get the data from the format and also check the metadata (functions and schema).
+  if format_type[1:] == 'parquet':
+    if functions is None:
+      functions = utils.get_metadata_pq(format_path, ['functions'])['functions']
+    if schema is None:
+      schema = utils.get_metadata_pq(format_path, ['schema'])['schema']
+    # df = pd.read_parquet(format_path)
+    # con = utils.get_duckdb_conn()
+    # header = utils._get_parquet_header(format_path)
+    pass
+  elif format_type[1:] == 'csv':
+    folder_path = os.path.dirname(os.path.abspath(format_path))
+    base_name = os.path.splitext(os.path.basename(format_path))[0]
+    if functions is None:
+      functions = utils._read_json(os.path.join(folder_path, f'{base_name}-functions.json'))
+    if schema is None:
+      schema = utils._read_json(os.path.join(folder_path, f'{base_name}-schema.json'))
+    # df = pd.read_csv(format_path)
+    pass
+  elif format_type[1:] == 'btrblocks':
+    if functions is None:
+      functions = utils._read_json(os.path.join(format_path, 'functions.json'))
+    if schema is None:
+      schema = utils._read_json(os.path.join(format_path, 'schema.json'))
+    pass
+  else:
+    pass
+
+  ori_col_name = ''
+  for row in schema:
+    if ori_col_name == '':
+      ori_col_name = f'"{row['name']}"'
+    else:
+      ori_col_name += ', ' + f'"{row['name']}"'
+
+  if format_type[1:] == 'parquet':
+    sql_query = 'SELECT ' + ori_col_name + f' FROM read_parquet("{format_path}")'
+  elif format_type[1:] == 'csv':
+    sql_query = 'SELECT ' + ori_col_name + f' FROM read_csv("{format_path}")'
+  # con.close()
+  ori_df = query(sql_query, functions, schema, engine='duckdb')
+  
+  return ori_df
 
 def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, return_execution_time=False):
   """
@@ -199,12 +247,13 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
   file_path = match.group(3) if match else None
 
   # Check if we support this format.
-  if format_type not in ['parquet']:
+  if format_type not in ['parquet', 'csv']:
     assert False, f'Format {format_type} not yet supported!'
 
   # Get the metadata, along with the header.
   # NOTE: We rely on the fact the variable names remain `schema` and `functions`.
-  format_metadata = get_metadata_from_file(format_type, file_path, ['header'] + [key for key in ['schema', 'functions'] if locals().get(key) is None])
+  if format_type == 'parquet':
+    format_metadata = get_metadata_from_file(format_type, file_path, ['header'] + [key for key in ['schema', 'functions'] if locals().get(key) is None])
 
   # Read the schema.
   if schema is None:
@@ -238,12 +287,17 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
       sql_query.replace(f"read_parquet('{file_path}')", "df")
     elif format_type == 'csv':
       # TODO: @Ping.
+      df = pd.read_csv(file_path)
+      sql_query.replace(f"read_csv('{file_path}')", "df")
       pass
 
   # Fetch the parquet header.
   # TODO: Maybe combine with the metadata reading to be faster.
-  assert format_metadata is not None, 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
-  header = format_metadata['header']
+  if format_type == 'parquet':
+    assert format_metadata is not None, 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
+    header = format_metadata['header']
+  if format_type == 'csv':
+    header = utils.get_csv_header(file_path)
 
   # TODO: Update the naming convention in the layout file to avoid this `greedy` and `chosen`.
   matches = []

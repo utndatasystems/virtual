@@ -17,6 +17,12 @@ import pathlib
 import hashlib
 import csv
 
+def get_csv_header(csv_path):
+  with open(csv_path, 'r', encoding='utf-8') as f:
+    header = f.readline().strip()
+  header = header.split(',')
+  return header
+
 def to_csv(parquet_path, format_path):
   df = pd.read_parquet(parquet_path)
   df.to_csv(format_path, index=False)
