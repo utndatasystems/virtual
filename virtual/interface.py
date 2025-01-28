@@ -260,6 +260,10 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
     if format_type == 'parquet':
       assert format_metadata is not None and format_metadata['schema'] is not None, 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
       schema = format_metadata['schema']
+    elif format_type == 'csv':
+      folder_path = os.path.dirname(os.path.abspath(file_path))
+      base_name = os.path.splitext(os.path.basename(file_path))[0]
+      schema = utils._read_json(os.path.join(folder_path, f'{base_name}-schema.json'))
     else:
       assert 0, f'File format {format_type} not supported yet.'
   elif isinstance(schema, str):
@@ -271,6 +275,10 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
     if format_type == 'parquet':
       assert format_metadata is not None and format_metadata['schema'], 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
       functions = format_metadata['functions']
+    elif format_type == 'csv':
+      folder_path = os.path.dirname(os.path.abspath(file_path))
+      base_name = os.path.splitext(os.path.basename(file_path))[0]
+      functions = utils._read_json(os.path.join(folder_path, f'{base_name}-functions.json'))
     else:
       assert 0, f'File format {format_type} not supported yet.'
   elif isinstance(functions, str):
