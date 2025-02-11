@@ -1,4 +1,4 @@
-from virtual.interface import train, to_format, query
+from virtual.interface import train, to_format, query, from_format
 import pandas as pd
 import numpy as np
 from .utils import extract_functions, compare_fns
@@ -40,6 +40,20 @@ def test_query_sum():
     act = duckdb.query(f'select sum({col}) as test from data').fetchdf()
     assert ret['test'].dtype == act['test'].dtype
     assert list(ret['test'])[0] == list(act['test'])[0]
+
+  # Remove the file
+  os.remove('test_query_sum.parquet')
+
+def test_from_format():
+  model_types = get_model_types()
+  data = sum_data()
+  ret = train(data, model_types=model_types)
+
+  # Save.
+  to_format(data, 'test_query_sum.parquet', functions=ret)
+
+  df = from_format('test_query_sum.parquet')
+  assert df == data
 
   # Remove the file
   os.remove('test_query_sum.parquet')
