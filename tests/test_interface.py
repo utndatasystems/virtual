@@ -57,3 +57,21 @@ def test_from_format():
 
   # Remove the file
   os.remove('test_query_sum.parquet')
+
+def test_for_hf_url():
+  # Test for csv url
+  csv_url = 'hf://datasets/fka/awesome-chatgpt-prompts/prompts.csv'
+  to_format(csv_url, 'test_hf.parquet')
+  df = from_format('test_hf.parquet')
+
+  # Remove the file
+  os.remove('test_hf.parquet')
+
+  # Test for parquet url
+  parquet_url = 'hf://datasets/simplescaling/s1K/data/train-00000-of-00001.parquet'
+  to_format(csv_url, 'test_hf.parquet')
+  df = from_format('test_hf.parquet')
+
+  # Remove the file
+  os.remove('test_hf.parquet')
+

@@ -41,7 +41,10 @@ def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_00
 
   # Convert into an actual `Path`.
   if isinstance(data, str):
-    data = pathlib.Path(data)
+    if data.startswith('hf://'):
+      data = pd.read_csv(data)
+    else:
+      data = pathlib.Path(data)
   assert isinstance(data, (pd.DataFrame, pathlib.Path))
 
   # Check that we're dealing with a file.
@@ -90,7 +93,10 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
 
   # Convert into an actual `Path`.
   if isinstance(data, str):
-    data = pathlib.Path(data)
+    if data.startswith('hf://'):
+      data = pd.read_csv(data)
+    else:
+      data = pathlib.Path(data)
   assert isinstance(data, (pd.DataFrame, pathlib.Path))
 
   # Check that we're dealing with a file.
