@@ -84,17 +84,24 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
   """
 
   # Check the format path.
-  assert '.' in format_path, 'The `format_path` is invalid!'
+  assert '.' in format_path, 'The `format_path` is invalid.'
   format_type = os.path.splitext(format_path)[-1]
   format_type = format_type[1:]
   assert format_type, 'The `format_path` is invalid!'
   if format_type not in ['csv', 'parquet', 'btrblocks']:
-    assert False, f'Format {format_type[1:]} not yet supported!'
+    assert False, f'Format {format_type[1:]} not yet supported.'
 
   # Convert into an actual `Path`.
   if isinstance(data, str):
     if data.startswith('hf://'):
+      # TODO: We need to check whether the data is actually `.csv` or `.parquet`.
       data = pd.read_csv(data)
+    if data.startswith('s3://'):
+      if format_type == 'parquet':
+        # Read the parquet file.
+        data = duckdb.read_parquet(data).fetchdf()
+      else:
+        assert 0, f'Reading this format from S3 is not yet supported.'
     else:
       data = pathlib.Path(data)
   assert isinstance(data, (pd.DataFrame, pathlib.Path))
