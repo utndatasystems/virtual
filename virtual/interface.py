@@ -338,6 +338,7 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
       # Double-quote?
       if m.group()[0].startswith('"'):
         # Should be the same, but without the double quotes (if any).
+        # TODO: Do we also replace with the double-quoted column names?
         if m.group().strip('"') == iter['target_name'].strip('"'):
           add_match(m, raw_formula)
       else:
