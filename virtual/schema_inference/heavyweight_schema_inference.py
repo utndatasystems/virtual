@@ -90,7 +90,7 @@ class HWSchemaInferer:
   def infer(self, nrows=None):
     # Infer the schema via DuckDB.
     inferer = LWSchemaInferer(self.data)
-    type_mapping, _ = inferer.infer(nrows=nrows)
+    _, col_types = inferer.infer(nrows=nrows)
 
     print(self.data.suffix)
 
@@ -109,7 +109,7 @@ class HWSchemaInferer:
           nrows=nrows,
           # If the file contains a header row, then you should explicitly pass header=0 to override the column names.
           header=0,
-          names=type_mapping.keys(),
+          names=[elem['name'] for elem in col_types],
           delimiter=csv_dialect['delimiter'],
           quotechar=csv_dialect['quotechar']
         )
@@ -154,17 +154,17 @@ class HWSchemaInferer:
       return type_checker.left_precision + type_checker.right_precision, type_checker.right_precision
 
     schema = []
-    for col_name in type_mapping:
+    for index in range(len(col_types)):
       col_dict = {
         # NOTE: We remove the trailing spaces so that the column name matching is more efficient in the actual code.
-        'name': col_name.strip(),
-        'type' : type_mapping[col_name],
-        'null': check_for_null(col_name),
+        'name': col_types[index]['name'],
+        'type' : col_types[index]['type'],
+        'null': check_for_null(col_types[index]['name']),
         'scale' : 0,
         'precision' : 0
       }
-      if type_mapping[col_name] == 'DOUBLE':
-        col_dict['precision'], col_dict['scale'] = calculate_precision_and_scale(col_name)
+      if col_types[index]['type'] == 'DOUBLE':
+        col_dict['precision'], col_dict['scale'] = calculate_precision_and_scale(col_types[index]['name'])
 
       # Add to the schema.
       schema.append(col_dict)

@@ -266,6 +266,8 @@ def dump_data(csv_filename, data, filename, prefix, key=None):
   csv_basename_noext = os.path.splitext(csv_basename)[0]
   json_filename = os.path.join(prefix, f'{filename}_{csv_basename_noext}.json')
   
+  print(data)
+
   with open(json_filename, 'w', encoding='utf-8') as f:
     if key is not None:
       json.dump(sorted(data, key=key), f, ensure_ascii=False, indent=2)
@@ -333,18 +335,19 @@ def select_models(model_types: List[str], functions):
 
 def sample_parquet_file_without_nulls(parquet_filepath: pathlib.Path, sample_size, valid_column_names):
   assert isinstance(parquet_filepath, pathlib.Path)
-  select_clause = ', '.join(valid_column_names)
+  select_clause = ', '.join([f'"{col}"' for col in valid_column_names])
   where_clause = ' and '.join([f'"{col}" is not null' for col in valid_column_names])
 
-  return duckdb.sql(f"""
+  # And sample.
+  return duckdb.sql(f'''
     select *
     from (
       select {select_clause}
-      from read_parquet('{str(parquet_filepath)}')
+      from read_parquet(\'{str(parquet_filepath)}\')
       where {where_clause}
-    )"
+    )
     using sample reservoir({sample_size} ROWS) REPEATABLE (0)
-  """).fetchdf()
+  ''').fetchdf().reset_index(drop=True).to_numpy()
 
 def natural_rounding(coeff):
   return round(coeff, 4)

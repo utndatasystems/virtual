@@ -3,8 +3,8 @@ import numpy as np
 import pathlib
 from typing import Optional
 
-# Helper scripts
-from data_handler import DataParser
+# Data wrapper
+from data_handler import DataWrapper
 
 MAX_MSE_ALLOWED = 5
 
@@ -65,12 +65,12 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
   assert isinstance(data, (pd.DataFrame, pathlib.Path))
   
   # Instantiate the data parser.
-  parser = DataParser(data, nrows)
+  parser = DataWrapper(data, nrows)
 
   # Inspect the columns that we support. This also sets the valid column names and indices.
   parser.inspect_columns()
 
-  # Analzye the coefficients of the regression.
+  # Analyze the coefficients of the regression.
   def reduce_coeffs(coeffs, valid_column_indices):
     selected = []
     for index, coeff in enumerate(coeffs):
@@ -104,10 +104,9 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
     return {}
   
   # TODO: We can try multiple samples.
-  sample = parser.extract_sample(sample_size=sample_size)
-  
-  # Convert to numpy.
-  sample = sample.to_numpy()
+  sample = parser.sample(sample_size=sample_size)
+
+  print(sample)
 
   debug_path = ''
   if isinstance(data, pathlib.Path):
@@ -141,6 +140,7 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
     assert local_results is not None
 
     # Try the standard models.
+    # NOTE: We later try `k-regression` as well.
     for model_type in ['sparse-lr']:
       # Check if this model is allowed.
       # NOTE: If `allowed_model_types` is not None, we actually want to run this model!

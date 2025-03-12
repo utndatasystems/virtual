@@ -51,5 +51,10 @@ class LWSchemaInferer:
     else:
       has_header = None
 
-    type_mapping = {columns[i]: str(column_types[i]) for i in range(len(columns))}  
-    return type_mapping, has_header
+    col_types = []
+    for index in range(len(columns)):
+      col_types.append({
+        'name' : columns[index],
+        'type' : str(column_types[index])
+      })
+    return has_header, col_types

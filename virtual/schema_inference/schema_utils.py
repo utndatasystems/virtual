@@ -3,7 +3,6 @@ from schema_inference.heavyweight_schema_inference import HWSchemaInferer
 from virtual.utils import infer_dialect, get_default_csv_dialect
 import pandas as pd
 import pathlib
-import re
 
 # Generate the schema by the heavyweight variant (it takes a while if there are many columns).
 def generate_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
@@ -18,10 +17,8 @@ def generate_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
   return inferer.infer(nrows)
 
 def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
-  column_names = []
-
   # The column categories.
-  column_categories = {
+  type_categories = {
     'date' : [],
     'string' : [],
     # TODO: Fix this later. The issue is that DuckDB interprets as `BOOLEAN` any binary column.
@@ -33,19 +30,26 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
   inferer = LWSchemaInferer(data)
 
   # And infer
-  schema, has_header = inferer.infer(nrows=nrows)
+  has_header, col_types = inferer.infer(nrows=nrows)
 
-  # Categorize the column names.
-  for col in schema:
-    column_names.append(col)
-    sql_type = schema[col]
+  print(col_types)
 
-    if sql_type in ['datetime', 'timestamp', 'time', 'date']:
-      column_categories['date'].append(col)
-    elif sql_type in ['varchar', 'char']:
-      column_categories['string'].append(col)
-    elif sql_type in ['boolean']:
-      column_categories['boolean'].append(col)
+  # Categorize the column types.
+  column_names = []
+  for index in range(len(col_types)):
+    cn = col_types[index]['name']
+    sql_type = col_types[index]['type']
+
+    if sql_type.lower() in ['datetime', 'timestamp', 'time', 'date']:
+      type_categories['date'].append(cn)
+    elif sql_type.lower() in ['varchar', 'char']:
+      type_categories['string'].append(cn)
+    elif sql_type.lower() in ['boolean']:
+      type_categories['boolean'].append(cn)
+
+    # Add to the column names.
+    # NOTE: This is the original order in the dataframe / file.
+    column_names.append(cn)
 
   # Infer the csv dialect (if any).
   csv_dialect = None
@@ -58,5 +62,7 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
   else:
     assert 0
 
+  print(type_categories)
+
   # And return.
-  return column_names, csv_dialect, has_header, column_categories
+  return column_names, csv_dialect, has_header, type_categories
