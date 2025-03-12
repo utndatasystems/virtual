@@ -1,5 +1,6 @@
-import pandas as pd
+import duckdb
 import pathlib
+import pandas as pd
 from virtual.utils import infer_dialect
 from .lightweight_schema_inference import LWSchemaInferer
 
@@ -91,24 +92,31 @@ class HWSchemaInferer:
     inferer = LWSchemaInferer(self.data)
     type_mapping, _ = inferer.infer(nrows=nrows)
 
+    print(self.data.suffix)
+
     # Is `data` a path?
     if isinstance(self.data, pathlib.Path):
-      # TODO: Do this better.
-      # Infer the csv dialect.
-      csv_dialect = infer_dialect(self.data)
+      if self.data.suffix == '.csv':
+        # TODO: Do this better.
+        # Infer the csv dialect.
+        csv_dialect = infer_dialect(self.data)
 
-      # Read dataframe. NOTE: If `nrows` is `None`, then the entire file is read.
-      # TODO: Replace by DuckDB?
-      df = pd.read_csv(
-        self.data,
-        dtype=str,
-        nrows=nrows,
-        # If the file contains a header row, then you should explicitly pass header=0 to override the column names.
-        header=0,
-        names=type_mapping.keys(),
-        delimiter=csv_dialect['delimiter'],
-        quotechar=csv_dialect['quotechar']
-      )
+        # Read dataframe. NOTE: If `nrows` is `None`, then the entire file is read.
+        # TODO: Replace by DuckDB?
+        df = pd.read_csv(
+          self.data,
+          dtype=str,
+          nrows=nrows,
+          # If the file contains a header row, then you should explicitly pass header=0 to override the column names.
+          header=0,
+          names=type_mapping.keys(),
+          delimiter=csv_dialect['delimiter'],
+          quotechar=csv_dialect['quotechar']
+        )
+      elif self.data.suffix == '.parquet':
+        df = duckdb.read_parquet(str(self.data)).fetchdf()
+      else:
+        assert 0, 'File format not (yet) supported.'
     elif isinstance(self.data, pd.DataFrame):
       # Do we have a number of rows specified.
       if nrows is not None:

@@ -2,3 +2,5 @@ demo-debug/
 *.parquet
 *.json
 *_virtual.csv
+!example.csv
+!example.parquet

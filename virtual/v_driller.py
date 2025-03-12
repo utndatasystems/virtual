@@ -64,12 +64,11 @@ def run_model(model_type, X, y, col_name=None):
 def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
   assert isinstance(data, (pd.DataFrame, pathlib.Path))
   
-  # Parse data.
+  # Instantiate the data parser.
   parser = DataParser(data, nrows)
-  df = parser.parse()
 
-  # Select the valid column indices.
-  valid_column_indices = parser.compute_valid_column_indices(df)
+  # Inspect the columns that we support. This also sets the valid column names and indices.
+  parser.inspect_columns()
 
   # Analzye the coefficients of the regression.
   def reduce_coeffs(coeffs, valid_column_indices):
@@ -100,15 +99,14 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
     return ret
 
   results = []
-  if len(valid_column_indices) <= 1:
+  if len(parser.valid_column_indices) <= 1:
     print('Only one numerical column.')
     return {}
   
   # TODO: We can try multiple samples.
-  sample = parser.extract_sample(df, sample_size=sample_size)
+  sample = parser.extract_sample(sample_size=sample_size)
   
   # Convert to numpy.
-  df = df.to_numpy()
   sample = sample.to_numpy()
 
   debug_path = ''
@@ -116,8 +114,8 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
     debug_path = str(data.name)
 
   # Try each column.
-  for target_index in valid_column_indices:
-    input_columns = valid_column_indices.copy()
+  for target_index in parser.valid_column_indices:
+    input_columns = parser.valid_column_indices.copy()
     input_columns.remove(target_index)
 
     # TODO: Maybe try multiple samples.

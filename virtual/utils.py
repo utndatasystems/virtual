@@ -331,6 +331,21 @@ def select_models(model_types: List[str], functions):
   # Map to `ModelType`.
   return validated
 
+def sample_parquet_file_without_nulls(parquet_filepath: pathlib.Path, sample_size, valid_column_names):
+  assert isinstance(parquet_filepath, pathlib.Path)
+  select_clause = ', '.join(valid_column_names)
+  where_clause = ' and '.join([f'"{col}" is not null' for col in valid_column_names])
+
+  return duckdb.sql(f"""
+    select *
+    from (
+      select {select_clause}
+      from read_parquet('{str(parquet_filepath)}')
+      where {where_clause}
+    )"
+    using sample reservoir({sample_size} ROWS) REPEATABLE (0)
+  """).fetchdf()
+
 def natural_rounding(coeff):
   return round(coeff, 4)
 
