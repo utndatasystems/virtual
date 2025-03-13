@@ -96,6 +96,7 @@ class HWSchemaInferer:
     _, col_types = inferer.infer(nrows=nrows)
 
     # Is `data` a path?
+    df = None
     if isinstance(self.data, pathlib.Path):
       if self.data.suffix == '.csv':
         # TODO: Do this better.
@@ -115,7 +116,8 @@ class HWSchemaInferer:
           quotechar=csv_dialect['quotechar']
         )
       elif self.data.suffix == '.parquet':
-        df = duckdb.read_parquet(str(self.data)).fetchdf()
+        pass
+        # df = duckdb.read_parquet(str(self.data)).fetchdf()
       else:
         assert 0, 'File format not (yet) supported.'
     elif isinstance(self.data, pd.DataFrame):
@@ -134,11 +136,26 @@ class HWSchemaInferer:
 
     # Check if `col_name` has NULLs.
     def check_for_null(col_name):
-      tmp = df[col_name].isnull()
-      return {
-        'any' : bool(tmp.any()),
-        'all' : bool(tmp.all())
-      }
+      if df is not None:
+        tmp = df[col_name].isnull()
+        return {
+          'any' : bool(tmp.any()),
+          'all' : bool(tmp.all())
+        }
+      else:
+        assert isinstance(self.data, pathlib.Path)
+        if self.data.suffix == '.parquet':
+          table_size, null_count = duckdb.sql(f"""
+            select 
+            count(*) as total, 
+            sum(case when {col_name} is null then 1 else 0 end) AS null_count
+            from read_parquet('{str(self.data)}')
+          """).fetchone()
+          
+          return {
+            'any': null_count > 0,
+            'all': null_count == table_size
+          }
 
     # Calculate the precision and the scale of `col_name`.
     def calculate_precision_and_scale(col_name):

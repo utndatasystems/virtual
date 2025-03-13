@@ -101,8 +101,9 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
     if data.startswith('s3://'):
       if format_type == 'parquet':
         # Read the parquet file.
-        print(f'Reading parquet file..')
-        data = duckdb.read_parquet(data).fetchdf()
+        # print(f'Reading parquet file..')
+        # data = duckdb.read_parquet(data).fetchdf()
+        pass
       else:
         assert 0, f'Reading this format from S3 is not yet supported.'
     else:
