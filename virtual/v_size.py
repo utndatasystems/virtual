@@ -28,11 +28,11 @@ def _model_has_null_reference_columns(schema, model, model_type: ModelType):
     # TODO: I mean, if that's the case, we should directly drop it in the explorer, right?
     for local_model in model['config']:
       for iter in local_model['coeffs']:
-        if _get_column(schema, iter['col_name'])['null']['any']:
+        if _get_column(schema, iter['col-name'])['null']['any']:
           return True
   else:
     for iter in model['coeffs']:
-      if _get_column(schema, iter['col_name'])['null']['any']:
+      if _get_column(schema, iter['col-name'])['null']['any']:
         return True
   return False
 
@@ -161,7 +161,15 @@ def _create_sample(data: pd.DataFrame | pathlib.Path, sample_path, sample_size):
   # If there is only a path, first read it.
   if isinstance(data, pathlib.Path):
     # TODO: We should ensure there is no header!
-    df = pd.read_csv(data, dtype=str, nrows=sample_size, header=None)
+    # TODO: What if is a S3 path?
+    if data.suffix == '.csv':
+      df = pd.read_csv(data, dtype=str, nrows=sample_size, header=None)
+    elif data.suffix == '.parquet':
+      df = duckdb.sql(f"""
+        select *
+        from read_parquet('{data}')
+        limit {sample_size};
+      """).fetchdf().reset_index(drop=True)
   elif isinstance(data, pd.DataFrame):
     # Otherwise, use the dataframe we already have.
     if sample_size < len(data):
@@ -169,6 +177,8 @@ def _create_sample(data: pd.DataFrame | pathlib.Path, sample_path, sample_size):
     else:
       df = data
   
+  print(df)
+
   # Dump to `sample_path`.
   df.to_csv(sample_path, index=False, header=False)
 
@@ -180,23 +190,40 @@ def create_copy_csv(data: pd.DataFrame | pathlib.Path, schema, nrows=None):
 
   # Path?
   if isinstance(data, pathlib.Path):
-    # Infer the delimiter.
-    dialect = utils.infer_dialect(data)
+    if data.suffix == '.csv':
+      # Infer the dialect.
+      dialect = utils.infer_dialect(data)
 
-    # Create the load SQL.
-    # TODO: I now know why it works with the estimator and not with this one.
-    # TODO: We always created the sample that uses `_create_sample` (pandas.df), which probably removed the NULLs.
-    # TODO: We can do this better, really.
-    load_sql = f"insert into base_table({columns}) select * from read_csv('{data}', header=true, delim='{dialect['delimiter']}', quote='{dialect['quotechar']}'" \
-            + (f", sample_size={nrows}" if nrows is not None else "") \
-            + ", nullstr=['NULL', 'null', '', 'None'])"
+      # Create the load SQL.
+      # TODO: I now know why it works with the estimator and not with this one.
+      # TODO: We always created the sample that uses `_create_sample` (pandas.df), which probably removed the NULLs.
+      # TODO: We can do this better, really.
+      load_sql = f"insert into base_table({columns}) select * from read_csv('{data}', header=true, delim='{dialect['delimiter']}', quote='{dialect['quotechar']}'" \
+        + (f", sample_size={nrows}" if nrows is not None else "") \
+        + ", nullstr=['NULL', 'null', '', 'None'])"
+    elif data.suffix == '.parquet':
+      # Specify the `LIMIT`-clause (if we are to upper bound the number of rows read).
+      limit_clause = ''
+      if nrows is not None:
+        limit_clause = f'limit {nrows}'
+
+      # Specify the load query.
+      load_sql = f"""
+        insert into base_table({columns})
+        select * from read_parquet('{data}')
+        {limit_clause};
+      """
+    else:
+      assert 0, f'Format {data.suffix.replace} not (yet) supported.'
   elif isinstance(data, pd.DataFrame):
     # Then we have a dataframe.
     # TODO: Do we still need this one?
     # TODO: Should we actually say `TIMESTAMP` instead of `timestamp`?
     # TODO: Wait -- we might actually modify user's data?
+
+    # TODO: Check again here!!!
     for i in schema:
-      if i['type'] == 'timestamp':
+      if i['type'].lower() == 'timestamp':
         data[i['name']] = pd.to_datetime(data[i['name']])
     load_sql = f'insert into base_table({columns}) select * from data'
   else:
@@ -230,15 +257,15 @@ def _create_regression(model, schema, target_name):
     # TODO: What if the coefficient is 0? We could skip this.
     # TODO: But then we also need to adapt this for the `is null` part.
     # TODO: This is wrong.
-    if not utils.is_integer(_get_info(schema, iter['col_name'])['type']):
+    if not utils.is_integer(_get_info(schema, iter['col-name'])['type']):
       formula_has_only_integers = False
 
     # Take the current scale.
-    scales.append(_get_info(schema, iter['col_name'])['scale'])
+    scales.append(_get_info(schema, iter['col-name'])['scale'])
 
     # Optimize out a 1.0 coefficient.
     if math.isclose(iter['coeff'], 1.0):
-      regression.append(f"\"{iter['col_name']}\"")
+      regression.append(f"\"{iter['col-name']}\"")
     else:
       rounded_coeff = utils.custom_round(iter['coeff'])
 
@@ -248,7 +275,7 @@ def _create_regression(model, schema, target_name):
         all_coeffs_are_integers = False
       else:
         rounded_coeff = int(rounded_coeff)
-      regression.append(f"{rounded_coeff} * \"{iter['col_name']}\"")
+      regression.append(f"{rounded_coeff} * \"{iter['col-name']}\"")
 
   # Analyze the intercept.
   intercept = utils.custom_round(model['intercept'])
@@ -447,8 +474,8 @@ def create_virtual_column_layout(con, target_iter, schema, model_type: Optional[
     # TODO: But this is _not_ the point, since we just want to check if it is null.
     # TODO: Not that this is nullable.
     # TODO: Even in that case - why should be the switch column NULL when all are nulls?
-    reference_columns = [it for it in model["coeffs"] if _get_column(schema, it["col_name"])["null"]]
-    reference_columns = [f"\"{it['col_name']}\" is null" for it in reference_columns]
+    reference_columns = [it for it in model["coeffs"] if _get_column(schema, it["col-name"])["null"]]
+    reference_columns = [f"\"{it['col-name']}\" is null" for it in reference_columns]
     reference_columns = ' or '.join(reference_columns)
 
     # If we really do not have any nullable columns, just return `false` (the boolean SQL type).
@@ -638,7 +665,7 @@ def _size_impl(con, schema, target_column, model_type=None, data_hash=None):
   target_column['sizes'][model_type.name]['virtual'] = virtual_target_column_size
   return
 
-# We use this function to estimate the {arquet sizes for the columns.
+# We use this function to estimate the parquet sizes for the columns.
 # We say "estimate", since we only analyze a sample size of 10K tuples.
 def compute_sizes_of_target_columns(functions, data: pd.DataFrame | pathlib.Path, schema, model_types: List[ModelType], sample_size=10_000):
   assert isinstance(data, (pd.DataFrame, pathlib.Path))

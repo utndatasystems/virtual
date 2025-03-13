@@ -202,7 +202,7 @@ def is_attached_column_of(target_name, column_name):
 def collect_lr_column_names(model):
   cols = []
   for iter in model['coeffs']:
-    cols.append(iter['col_name'])
+    cols.append(iter['col-name'])
   return cols
 
 def _get_column(schema, column_name):
@@ -394,7 +394,7 @@ def compute_metrics(table, combs):
   def estimate_y(model):
     intercept = model['intercept']
     coeffs = np.array([entry['coeff'] for entry in model['coeffs']])
-    col_indices = [entry['col_index'] for entry in model['coeffs']]
+    col_indices = [entry['col-index'] for entry in model['coeffs']]
 
     # Estimate the y-values.
     y_est = intercept + np.dot(table[:, col_indices], coeffs)

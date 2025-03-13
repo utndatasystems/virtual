@@ -25,6 +25,12 @@ class DataWrapper:
     # And also store the corresponding column names.
     self.valid_column_names = [self.column_names[i] for i in self.valid_column_indices]
 
+  def get_rank(self, idxs):
+    if isinstance(idxs, list):
+      return [self.valid_column_indices.index(idx) for idx in idxs]
+    return self.valid_column_indices.index(idxs)  
+
+
   def sample(self, sample_size=None):
     df = None
     if isinstance(self.data, pathlib.Path):

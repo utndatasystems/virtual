@@ -64,21 +64,21 @@ def run_model(model_type, X, y, col_name=None):
 def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
   assert isinstance(data, (pd.DataFrame, pathlib.Path))
   
-  # Instantiate the data parser.
-  parser = DataWrapper(data, nrows)
+  # Instantiate the data wrapper.
+  data_wrapper = DataWrapper(data, nrows)
 
   # Inspect the columns that we support. This also sets the valid column names and indices.
-  parser.inspect_columns()
+  data_wrapper.inspect_columns()
 
   # Analyze the coefficients of the regression.
-  def reduce_coeffs(coeffs, valid_column_indices):
+  def reduce_coeffs(coeffs, input_columns):
     selected = []
     for index, coeff in enumerate(coeffs):
       if abs(coeff) < 1e-6:
         continue
       selected.append({
-        'col_index' : valid_column_indices[index],
-        'col_name' : parser.column_names[valid_column_indices[index]],
+        'col-index' : input_columns[index],
+        'col-name' : data_wrapper.column_names[input_columns[index]],
         'coeff' : coeff,
       })
     return selected
@@ -99,35 +99,36 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
     return ret
 
   results = []
-  if len(parser.valid_column_indices) <= 1:
+  if len(data_wrapper.valid_column_indices) <= 1:
     print('Only one numerical column.')
     return {}
   
   # TODO: We can try multiple samples.
-  sample = parser.sample(sample_size=sample_size)
+  sample = data_wrapper.sample(sample_size=sample_size)
 
-  print(sample)
+  print(data_wrapper.valid_column_indices)
+  print(sample.shape)
 
   debug_path = ''
   if isinstance(data, pathlib.Path):
     debug_path = str(data.name)
 
   # Try each column.
-  for target_index in parser.valid_column_indices:
-    input_columns = parser.valid_column_indices.copy()
+  for target_index in data_wrapper.valid_column_indices:
+    input_columns = data_wrapper.valid_column_indices.copy()
     input_columns.remove(target_index)
 
     # TODO: Maybe try multiple samples.
     # TODO: This would also be helpful for k-regression.
-    X = sample[:, input_columns]
-    y = sample[:, target_index]
+    X = sample[:, data_wrapper.get_rank(input_columns)]
+    y = sample[:, data_wrapper.get_rank(target_index)]
 
     # Init the local results.
     local_results = None
     try:
       local_results = {
         'target_index': target_index,
-        'target_name': parser.column_names[target_index],
+        'target_name': data_wrapper.column_names[target_index],
         'target_stats': {
           'mean': y.mean(),
           'max': float(y.max()),
@@ -149,7 +150,7 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
           continue
 
       # Run the model.
-      err, intercept, coeffs = run_model(model_type, X, y, parser.column_names[target_index])
+      err, intercept, coeffs = run_model(model_type, X, y, data_wrapper.column_names[target_index])
 
       # Do we exceed the max. allowed mse?
       if err > MAX_MSE_ALLOWED:
@@ -169,7 +170,7 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
     # Try k-regression, only if it's actually allowed.
     if allowed_model_types is None or 'k-regression' in allowed_model_types:
       # Run the model.
-      k_config = run_model('k-regression', X, y, parser.column_names[target_index])
+      k_config = run_model('k-regression', X, y, data_wrapper.column_names[target_index])
 
       # Analyze the result found.
       # It could be that the actual _valid_ models are fewer than the group size we ran for.
