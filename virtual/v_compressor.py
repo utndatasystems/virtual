@@ -71,6 +71,9 @@ def _load_data(data: pd.DataFrame | pathlib.Path, schema, layout, nrows):
   return con, target_columns
 
 def compress(data: pd.DataFrame | pathlib.Path, schema, layout, optimize_layout=True, nrows=None, enforce_base=False):
+  # Be verbose.
+  print(f'Creating virtual file..')
+  
   # Get the data hash.
   data_hash = utils.get_data_hash(data)
   

@@ -51,7 +51,7 @@ def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_00
   if isinstance(data, pathlib.Path):
     assert data.is_file()
 
-  print('start virtualize')
+  print(f'Drilling functions..')
 
   # Virtualize the table. Note that for this particular step we don't require a schema.
   functions = v_driller.virtualize_table(data, nrows=nrows, sample_size=sample_size, allowed_model_types=model_types)
@@ -101,6 +101,7 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
     if data.startswith('s3://'):
       if format_type == 'parquet':
         # Read the parquet file.
+        print(f'Reading parquet file..')
         data = duckdb.read_parquet(data).fetchdf()
       else:
         assert 0, f'Reading this format from S3 is not yet supported.'
@@ -118,13 +119,8 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
   elif isinstance(schema, str):
     schema = utils._read_json(schema)
 
-  print(f'Schema')
-  print(schema)
-
   # Dump `schema`.
   utils.dump_json_data(data, schema, 'schema', prefix)
-
-  print('train')
 
   # If no functions provided, drill them.
   if functions is None:

@@ -88,11 +88,12 @@ class HWSchemaInferer:
     self.data = data
 
   def infer(self, nrows=None):
+    # Be verbose.
+    print(f'Running schema inference..')
+
     # Infer the schema via DuckDB.
     inferer = LWSchemaInferer(self.data)
     _, col_types = inferer.infer(nrows=nrows)
-
-    print(self.data.suffix)
 
     # Is `data` a path?
     if isinstance(self.data, pathlib.Path):

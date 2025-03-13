@@ -106,9 +106,6 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
   # TODO: We can try multiple samples.
   sample = data_wrapper.sample(sample_size=sample_size)
 
-  print(data_wrapper.valid_column_indices)
-  print(sample.shape)
-
   debug_path = ''
   if isinstance(data, pathlib.Path):
     debug_path = str(data.name)
