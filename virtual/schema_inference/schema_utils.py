@@ -3,7 +3,6 @@ from schema_inference.heavyweight_schema_inference import HWSchemaInferer
 from virtual.utils import infer_dialect, get_default_csv_dialect
 import pandas as pd
 import pathlib
-import re
 
 # Generate the schema by the heavyweight variant (it takes a while if there are many columns).
 def generate_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
@@ -17,67 +16,44 @@ def generate_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
   # And return.
   return inferer.infer(nrows)
 
-def map_sql_to_pandas(sql_type):
-  type_mapping = {
-    'timestamp': 'datetime64[ns]',
-    'datetime' : 'datetime64[ns]',
-    'date' : 'datetime64[ns]',
-    'time' : 'datetime64[ns]',
-    'decimal': 'float64',
-    'double': 'float64',
-    # TODO: Fix this later. The issue is that DuckDB interprets as `BOOLEAN` any binary column.
-    'boolean': 'str',
-    'varchar': 'str',
-    'char' : 'str',
-    # TODO: is this a problem?
-    'smallint': pd.Int16Dtype(),
-    'int': pd.Int32Dtype(),
-    'bigint': pd.Int64Dtype()
-    # Add other types as needed
-  }
-    
-  # Extract the base SQL type (ignore size specifiers in parentheses)
-  base_type = re.match(r'^\w+', sql_type.lower()).group(0)
-
-  # If the base type is decimal, handle precision and scale
-  if base_type == 'decimal':
-    # Note: `pandas`` will use float64 for decimals
-    return 'float64'
-
-  return type_mapping.get(base_type, 'object')
-
 def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
-  dtype_mapping = {}
-  column_names, date_cns, string_cns, boolean_cns = [], [], [], []
+  # The column categories.
+  type_categories = {
+    'date' : [],
+    'string' : [],
+    # TODO: Fix this later. The issue is that DuckDB interprets as `BOOLEAN` any binary column.
+    'boolean' : []
+  }
 
   # Read the colum types.
+  # TODO: Are we calling this twice?
   inferer = LWSchemaInferer(data)
 
   # And infer
-  schema, has_header = inferer.infer(nrows=nrows)
+  has_header, col_types = inferer.infer(nrows=nrows)
 
-  # Build the type mapping.
-  # TODO: I don't get why we still need this one.
-  # TODO: I mean, if we'll switch to DuckDB, then there is no reason, why we should still do this.
-  for col in schema:
-    column_names.append(col)
-    typ = schema[col]
+  # Categorize the column types.
+  column_names = []
+  for index in range(len(col_types)):
+    cn = col_types[index]['name']
+    sql_type = col_types[index]['type']
 
-    # TODO: There are still some hacks we did. 
-    pandas_type = map_sql_to_pandas(typ)
+    if sql_type.lower() in ['datetime', 'timestamp', 'time', 'date']:
+      type_categories['date'].append(cn)
+    elif sql_type.lower() in ['varchar', 'char']:
+      type_categories['string'].append(cn)
+    elif sql_type.lower() in ['boolean']:
+      type_categories['boolean'].append(cn)
 
-    if pandas_type == 'datetime64[ns]':
-      date_cns.append(col)
-    else:
-      dtype_mapping[col] = pandas_type
-      if pandas_type == 'str':
-        string_cns.append(col)
-      elif pandas_type == 'boolean':
-        boolean_cns.append(col)
+    # Add to the column names.
+    # NOTE: This is the original order in the dataframe / file.
+    column_names.append(cn)
 
-  # Infer the delimiter.
+  # Infer the csv dialect (if any).
+  csv_dialect = None
   if isinstance(data, pathlib.Path):
-    csv_dialect = infer_dialect(data)
+    if data.suffix == '.csv':
+      csv_dialect = infer_dialect(data)
   elif isinstance(data, pd.DataFrame):
     # Default.
     csv_dialect = get_default_csv_dialect()
@@ -85,8 +61,4 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
     assert 0
 
   # And return.
-  return column_names, dtype_mapping, csv_dialect, has_header, {
-    'date' : date_cns,
-    'string' : string_cns,
-    'boolean' : boolean_cns
-  }
+  return column_names, csv_dialect, has_header, type_categories

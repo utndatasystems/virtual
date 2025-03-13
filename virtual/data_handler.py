@@ -4,44 +4,91 @@ import duckdb
 
 # Custom helper scripts.
 from virtual.schema_inference.schema_utils import handle_schema
-from virtual.utils import build_query, get_csv_null_options
+from virtual.utils import build_query, get_csv_null_options, sample_parquet_file_without_nulls
 
 USE_DUCKDB_PARSER = False
 
-class DataParser:
+class DataWrapper:
   def __init__(self, data: pd.DataFrame | pathlib.Path, nrows=None):
     self.data = data
     self.nrows = nrows
 
+  def inspect_columns(self):
+    # Inspect the schema.
+    self.column_names, self.csv_dialect, self.has_header, self.type_categories = handle_schema(self.data)
+
+    # Select the valid column indices.
+    self.valid_column_indices = self.get_valid_column_indices()
+
+    # And also store the corresponding column names.
+    self.valid_column_names = [self.column_names[i] for i in self.valid_column_indices]
+
+  def get_rank(self, idxs):
+    if isinstance(idxs, list):
+      return [self.valid_column_indices.index(idx) for idx in idxs]
+    return self.valid_column_indices.index(idxs)
+
+  def sample(self, sample_size=None):
+    df = None
+    if isinstance(self.data, pathlib.Path):
+      # TODO: Move this support later, since we can directly sample from the CSV file.
+      if self.data.suffix == '.csv':
+        df = self.parse()
+    elif isinstance(self.data, pd.DataFrame):
+      df = self.parse()
+
+    # Have at least a sample size.
+    if sample_size is None:
+      sample_size = 1_000
+
+    # Sample now.
+    if df is not None:
+      # Take care of NULLs.
+      df_without_null = df.dropna(subset=self.valid_column_names)
+
+      # Note: If this doesn't hold, then it's a bit problematic for linear regression.
+      # This is because this is an indeterminate system.
+      if len(df_without_null) < len(self.valid_column_names):
+        df_without_null = df.fillna(0)
+
+      # Handle special cases.
+      if len(df) == 0:
+        sample = df_without_null
+        ratio = 1.0
+      else:
+        ratio = sample_size / len(df_without_null)
+
+      # (Trivially) upper-bound the ratio. This happens if the sample size was larger than the data itself.
+      ratio = min(ratio, 1.0)
+
+      # And sample.
+      sample = df_without_null.sample(frac=ratio, replace=False, random_state=0).to_numpy()
+    else:
+      # We can extract the sample from the data itself.
+      if isinstance(self.data, pathlib.Path):
+        if self.data.suffix == '.parquet':
+          sample = sample_parquet_file_without_nulls(self.data, sample_size, self.valid_column_names)
+
+    # Return the sample.
+    assert sample is not None
+    return sample
+
   def parse(self):    
-    # Parse the schema.
-
-    # TODO: Indeed, do we still use `dtype_mapping`?
-    self.column_names, dtype_mapping, csv_dialect, has_header, self.type_cns = handle_schema(self.data)
-
     # Read the CSV with the dtype mapping and date parsing, and without headers
     # TODO: Why does the other need a `dtype_mapping`?
     # TODO: I think this was because we always used SQL to infer the types.
     # TODO: So we can remove that part, also in the schema inference.
 
     # Specify the column indices we want to parse.
-    # TODO: Also remove strings.
-    use_col_idxs = [index for index, cn in enumerate(self.column_names) if cn not in self.type_cns['date']]
     if isinstance(self.data, pathlib.Path):
       if USE_DUCKDB_PARSER:
-        # Take the selected columns.
-        selected_columns = (
-          [self.column_names[idx] for idx in use_col_idxs]
-          if use_col_idxs else "*"
-        )
-
         # Construct the DuckDB query
         query = build_query(
-          select_stmt=', '.join(selected_columns),
+          select_stmt=', '.join(self.valid_column_indices),
           input=self.data,
-          header=has_header,
-          delim=csv_dialect['delimiter'],
-          quotechar=csv_dialect['quotechar'],
+          header=self.has_header,
+          delim=self.csv_dialect['delimiter'],
+          quotechar=self.csv_dialect['quotechar'],
           nullstr=get_csv_null_options(),
           sample_size=self.nrows
         )
@@ -61,64 +108,35 @@ class DataParser:
           # dtype=dtype_mapping,
           # TODO: Removed this, since it's really slow and we don't need date columns anyway.
           # parse_dates=date_columns,
-          usecols=use_col_idxs,
-          header=has_header,
-          delimiter=csv_dialect['delimiter'],
-          quotechar=csv_dialect['quotechar'],
+          usecols=self.valid_column_indices,
+          header=self.has_header,
+          delimiter=self.csv_dialect['delimiter'],
+          quotechar=self.csv_dialect['quotechar'],
           nrows=self.nrows
         )
     elif isinstance(self.data, pd.DataFrame):
       df = self.data
-      if use_col_idxs is not None:
-        df = df.iloc[:, use_col_idxs]
+      if self.valid_column_indices is not None:
+        df = df.iloc[:, self.valid_column_indices]
       
       # Limit the number of rows.
       if self.nrows is not None:
         df = df.head(self.nrows)
     else:
-      # Unsupport data source. Unreachable for now.
+      # Unsupported data source. Unreachable for now.
       assert 0
     
-    # Note: Very important. Update the column names.
-    self.column_names = df.columns
+    # NOTE: Very important. Update the column names.
+    # NOTE: Not needed anymore since we always set the valid columns.
+    # self.column_names = df.columns
 
     # And return the dataframe.
     return df
     
-  def compute_valid_column_indices(self, df):
+  def get_valid_column_indices(self):
     valid_column_indices = []
-    for i, cn in enumerate(df.columns):
-      if cn in self.type_cns['date'] or cn in self.type_cns['string'] or cn in self.type_cns['boolean']:
+    for i, cn in enumerate(self.column_names):
+      if cn in self.type_categories['date'] or cn in self.type_categories['string'] or cn in self.type_categories['boolean']:
         continue
       valid_column_indices.append(i)
     return valid_column_indices
-
-  def extract_sample(self, df, sample_size=None):
-    valid_column_indices = self.compute_valid_column_indices(df)
-    valid_column_names = [self.column_names[i] for i in valid_column_indices]
-
-    df_without_null = df.dropna(subset=valid_column_names)
-
-    # Note: If this doesn't hold, then it's a bit problematic for linear regression.
-    # This is because this is an indeterminate system.
-    if len(df_without_null) < len(valid_column_indices):
-      df_without_null = df.fillna(0)
-
-    if sample_size is None:
-      sample_size = 1_000
-
-    # Handle special cases.
-    if len(df) == 0:
-      sample = df_without_null
-      ratio = 1
-    else:
-      ratio = sample_size / len(df_without_null)
-
-    if ratio > 1:
-      ratio = 1
-
-    # And sample.
-    sample = df_without_null.sample(frac=ratio, replace=False, random_state=0)
-
-    # Return the sample.
-    return sample

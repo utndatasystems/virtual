@@ -24,14 +24,14 @@ def collect_refs(model, model_type: ModelType):
   if model_type.is_k_regression():
     for local_model in model['config']:
       for coeff in local_model['coeffs']:
-        if coeff['col_index'] not in ref_idxs:
-          assert coeff['col_name'] not in ref_names
-          ref_idxs.append(coeff['col_index'])
-          ref_names.append(coeff['col_name'])
+        if coeff['col-index'] not in ref_idxs:
+          assert coeff['col-name'] not in ref_names
+          ref_idxs.append(coeff['col-index'])
+          ref_names.append(coeff['col-name'])
   else:  
     for coeff in model['coeffs']:
-      ref_idxs.append(coeff['col_index'])
-      ref_names.append(coeff['col_name'])
+      ref_idxs.append(coeff['col-index'])
+      ref_names.append(coeff['col-name'])
   return ref_idxs, ref_names
 
 def conflict(e1, e2):

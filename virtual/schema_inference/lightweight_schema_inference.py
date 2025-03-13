@@ -17,13 +17,22 @@ class LWSchemaInferer:
     # Start by defining the query
     query = None
     if isinstance(self.data, pathlib.Path):
-      # Infer the dialect.
-      dialect = infer_dialect(self.data)
+      if self.data.suffix == '.csv':
+        # Infer the dialect.
+        dialect = infer_dialect(self.data)
 
-      # Specify the query.
-      query = f"select * from read_csv('{self.data}', header=true, delim='{dialect['delimiter']}', quote='{dialect['quotechar']}'" \
-        + (f", sample_size={nrows}" if nrows is not None else ", sample_size=-1") \
-        + ", nullstr=['NULL', 'null', '', 'None'])"
+        # Specify the query.
+        query = f"select * from read_csv('{self.data}', header=true, delim='{dialect['delimiter']}', quote='{dialect['quotechar']}'" \
+          + (f", sample_size={nrows}" if nrows is not None else ", sample_size=-1") \
+          + ", nullstr=['NULL', 'null', '', 'None'])"
+      elif self.data.suffix == '.parquet':
+        query = f"""
+          select *
+          from read_parquet('{self.data}')
+          limit 0;
+        """
+      else:
+        assert 0, 'File format not (yet) supported.'
     elif isinstance(self.data, pd.DataFrame):
       duckdb.register("mydf", self.data)
       query = f'SELECT * FROM mydf' + (f'LIMIT {nrows}' if nrows is not None else '')
@@ -42,5 +51,10 @@ class LWSchemaInferer:
     else:
       has_header = None
 
-    type_mapping = {columns[i]: str(column_types[i]) for i in range(len(columns))}  
-    return type_mapping, has_header
+    col_types = []
+    for index in range(len(columns)):
+      col_types.append({
+        'name' : columns[index],
+        'type' : str(column_types[index])
+      })
+    return has_header, col_types

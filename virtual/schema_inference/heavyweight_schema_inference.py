@@ -1,5 +1,6 @@
-import pandas as pd
+import duckdb
 import pathlib
+import pandas as pd
 from virtual.utils import infer_dialect
 from .lightweight_schema_inference import LWSchemaInferer
 
@@ -87,28 +88,36 @@ class HWSchemaInferer:
     self.data = data
 
   def infer(self, nrows=None):
+    # Be verbose.
+    print(f'Running schema inference..')
+
     # Infer the schema via DuckDB.
     inferer = LWSchemaInferer(self.data)
-    type_mapping, _ = inferer.infer(nrows=nrows)
+    _, col_types = inferer.infer(nrows=nrows)
 
     # Is `data` a path?
     if isinstance(self.data, pathlib.Path):
-      # TODO: Do this better.
-      # Infer the csv dialect.
-      csv_dialect = infer_dialect(self.data)
+      if self.data.suffix == '.csv':
+        # TODO: Do this better.
+        # Infer the csv dialect.
+        csv_dialect = infer_dialect(self.data)
 
-      # Read dataframe. NOTE: If `nrows` is `None`, then the entire file is read.
-      # TODO: Replace by DuckDB?
-      df = pd.read_csv(
-        self.data,
-        dtype=str,
-        nrows=nrows,
-        # If the file contains a header row, then you should explicitly pass header=0 to override the column names.
-        header=0,
-        names=type_mapping.keys(),
-        delimiter=csv_dialect['delimiter'],
-        quotechar=csv_dialect['quotechar']
-      )
+        # Read dataframe. NOTE: If `nrows` is `None`, then the entire file is read.
+        # TODO: Replace by DuckDB?
+        df = pd.read_csv(
+          self.data,
+          dtype=str,
+          nrows=nrows,
+          # If the file contains a header row, then you should explicitly pass header=0 to override the column names.
+          header=0,
+          names=[elem['name'] for elem in col_types],
+          delimiter=csv_dialect['delimiter'],
+          quotechar=csv_dialect['quotechar']
+        )
+      elif self.data.suffix == '.parquet':
+        df = duckdb.read_parquet(str(self.data)).fetchdf()
+      else:
+        assert 0, 'File format not (yet) supported.'
     elif isinstance(self.data, pd.DataFrame):
       # Do we have a number of rows specified.
       if nrows is not None:
@@ -146,17 +155,17 @@ class HWSchemaInferer:
       return type_checker.left_precision + type_checker.right_precision, type_checker.right_precision
 
     schema = []
-    for col_name in type_mapping:
+    for index in range(len(col_types)):
       col_dict = {
         # NOTE: We remove the trailing spaces so that the column name matching is more efficient in the actual code.
-        'name': col_name.strip(),
-        'type' : type_mapping[col_name],
-        'null': check_for_null(col_name),
+        'name': col_types[index]['name'],
+        'type' : col_types[index]['type'],
+        'null': check_for_null(col_types[index]['name']),
         'scale' : 0,
         'precision' : 0
       }
-      if type_mapping[col_name] == 'DOUBLE':
-        col_dict['precision'], col_dict['scale'] = calculate_precision_and_scale(col_name)
+      if col_types[index]['type'] == 'DOUBLE':
+        col_dict['precision'], col_dict['scale'] = calculate_precision_and_scale(col_types[index]['name'])
 
       # Add to the schema.
       schema.append(col_dict)

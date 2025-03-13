@@ -202,7 +202,7 @@ def is_attached_column_of(target_name, column_name):
 def collect_lr_column_names(model):
   cols = []
   for iter in model['coeffs']:
-    cols.append(iter['col_name'])
+    cols.append(iter['col-name'])
   return cols
 
 def _get_column(schema, column_name):
@@ -275,7 +275,7 @@ def dump_data(csv_filename, data, filename, prefix, key=None):
 
 def dump_data_without_filename(data, filename, prefix, key=None):
   json_filename = os.path.join(prefix, f"{filename}.json")
-  
+
   with open(json_filename, 'w', encoding='utf-8') as f:
     if key is not None:
       json.dump(sorted(data, key=key), f, ensure_ascii=False, indent=2)
@@ -331,6 +331,22 @@ def select_models(model_types: List[str], functions):
   # Map to `ModelType`.
   return validated
 
+def sample_parquet_file_without_nulls(parquet_filepath: pathlib.Path, sample_size, valid_column_names):
+  assert isinstance(parquet_filepath, pathlib.Path)
+  select_clause = ', '.join([f'"{col}"' for col in valid_column_names])
+  where_clause = ' and '.join([f'"{col}" is not null' for col in valid_column_names])
+
+  # And sample.
+  return duckdb.sql(f'''
+    select *
+    from (
+      select {select_clause}
+      from read_parquet(\'{str(parquet_filepath)}\')
+      where {where_clause}
+    )
+    using sample reservoir({sample_size} ROWS) REPEATABLE (0)
+  ''').fetchdf().reset_index(drop=True).to_numpy()
+
 def natural_rounding(coeff):
   return round(coeff, 4)
 
@@ -376,7 +392,7 @@ def compute_metrics(table, combs):
   def estimate_y(model):
     intercept = model['intercept']
     coeffs = np.array([entry['coeff'] for entry in model['coeffs']])
-    col_indices = [entry['col_index'] for entry in model['coeffs']]
+    col_indices = [entry['col-index'] for entry in model['coeffs']]
 
     # Estimate the y-values.
     y_est = intercept + np.dot(table[:, col_indices], coeffs)
