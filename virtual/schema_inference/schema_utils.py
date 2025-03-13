@@ -32,8 +32,6 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
   # And infer
   has_header, col_types = inferer.infer(nrows=nrows)
 
-  print(col_types)
-
   # Categorize the column types.
   column_names = []
   for index in range(len(col_types)):
@@ -61,8 +59,6 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
     csv_dialect = get_default_csv_dialect()
   else:
     assert 0
-
-  print(type_categories)
 
   # And return.
   return column_names, csv_dialect, has_header, type_categories

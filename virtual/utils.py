@@ -266,8 +266,6 @@ def dump_data(csv_filename, data, filename, prefix, key=None):
   csv_basename_noext = os.path.splitext(csv_basename)[0]
   json_filename = os.path.join(prefix, f'{filename}_{csv_basename_noext}.json')
   
-  print(data)
-
   with open(json_filename, 'w', encoding='utf-8') as f:
     if key is not None:
       json.dump(sorted(data, key=key), f, ensure_ascii=False, indent=2)
@@ -277,7 +275,7 @@ def dump_data(csv_filename, data, filename, prefix, key=None):
 
 def dump_data_without_filename(data, filename, prefix, key=None):
   json_filename = os.path.join(prefix, f"{filename}.json")
-  
+
   with open(json_filename, 'w', encoding='utf-8') as f:
     if key is not None:
       json.dump(sorted(data, key=key), f, ensure_ascii=False, indent=2)

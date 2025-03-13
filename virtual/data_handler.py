@@ -17,8 +17,6 @@ class DataWrapper:
     # Inspect the schema.
     self.column_names, self.csv_dialect, self.has_header, self.type_categories = handle_schema(self.data)
 
-    print(self.column_names)
-
     # Select the valid column indices.
     self.valid_column_indices = self.get_valid_column_indices()
 
@@ -28,8 +26,7 @@ class DataWrapper:
   def get_rank(self, idxs):
     if isinstance(idxs, list):
       return [self.valid_column_indices.index(idx) for idx in idxs]
-    return self.valid_column_indices.index(idxs)  
-
+    return self.valid_column_indices.index(idxs)
 
   def sample(self, sample_size=None):
     df = None

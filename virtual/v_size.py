@@ -177,8 +177,6 @@ def _create_sample(data: pd.DataFrame | pathlib.Path, sample_path, sample_size):
     else:
       df = data
   
-  print(df)
-
   # Dump to `sample_path`.
   df.to_csv(sample_path, index=False, header=False)
 
