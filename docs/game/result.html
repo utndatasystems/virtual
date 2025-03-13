@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Results</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        color: white;
+        text-align: center;
+        overflow: hidden;
+      }
+
+      header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px 20px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        font-size: 1.2rem;
+        font-weight: bold;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .result-box {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
+        width: 70%;
+        max-width: 500px;
+        text-align: center;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 1.4rem;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      table th,
+      table td {
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 10px;
+        text-align: center;
+        color: white;
+        font-size: 0.9rem;
+      }
+
+      table th {
+        background: rgba(255, 255, 255, 0.3);
+        font-weight: bold;
+      }
+
+      .summary {
+        font-size: 1.2rem;
+        margin-top: 10px;
+        font-weight: bold;
+      }
+
+      footer {
+        display: flex;
+        justify-content: space-between; /* Push buttons to edges */
+        align-items: center;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-top: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      /* Center the footer text */
+      .footer-text {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        font-weight: bold;
+      }
+
+      /* Footer Buttons */
+      .footer-button {
+        background: linear-gradient(135deg, #007bff, #00c6ff);
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
+      }
+
+      .footer-button:hover {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, #00c6ff, #007bff);
+        box-shadow: 0px 6px 15px rgba(255, 255, 255, 0.6);
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      .result-box {
+        animation: float 2s infinite ease-in-out;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>📊 <code style="font-size: 1.5rem">Quiz Results</code></div>
+    </header>
+
+    <div class="container">
+      <div class="result-box">
+        <h2>Congratulations, <span id="playerName"></span>! 🎉</h2>
+        <p>Here is your quiz performance:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Quiz Number</th>
+              <th>Correct</th>
+              <th>Time Spent</th>
+            </tr>
+          </thead>
+          <tbody id="resultTableBody"></tbody>
+        </table>
+
+        <div class="summary">Total Correct: <span id="totalCorrect">0</span> / 5</div>
+      </div>
+    </div>
+
+    <footer>
+      <button class="footer-button" onclick="goHome()">🏠 Back to Home</button>
+      <span class="footer-text">✨ Well done! ✨</span>
+      <button class="footer-button" onclick="goLeaderboard()">🏆 Leaderboard</button>
+    </footer>
+
+    <script>
+      const playerName = localStorage.getItem("playerName") || "Player";
+
+      function updateLeaderboard(playerName, correctAnswers, totalTime) {
+        let leaderboardData = JSON.parse(localStorage.getItem("leaderboard")) || [];
+
+        // Check if player already exists in the leaderboard
+        let player = leaderboardData.find((p) => p.name === playerName);
+
+        if (player) {
+          // Update existing player data
+          player.correctAnswers = correctAnswers;
+          player.totalTime = totalTime;
+        } else {
+          // Add new player
+          leaderboardData.push({ name: playerName, correctAnswers, totalTime });
+        }
+
+        // Save updated data back to localStorage
+        localStorage.setItem("leaderboard", JSON.stringify(leaderboardData));
+      }
+
+      function formatTime(ms) {
+        let minutes = Math.floor(ms / 60000); // Get minutes
+        let seconds = Math.floor((ms % 60000) / 1000); // Get seconds
+        let centiseconds = Math.floor((ms % 1000) / 10); // Get centiseconds
+
+        // Format with leading zeros if necessary
+        let formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+          2,
+          "0"
+        )}.${String(centiseconds).padStart(2, "0")}`;
+
+        return formattedTime;
+      }
+
+      async function loadResults() {
+        try {
+          let resultData = JSON.parse(localStorage.getItem("globalQuizData")) || {};
+          console.log("Results:", resultData);
+
+          document.getElementById("playerName").textContent = playerName;
+
+          let quizArray = Object.keys(resultData).map((quizNum) => ({
+            quizNum: quizNum,
+            input: resultData[quizNum].input,
+            correct: resultData[quizNum].status === "correct",
+            timeSpent: resultData[quizNum].time
+          }));
+          displayResults(quizArray);
+        } catch (error) {
+          console.error("Error fetching results:", error);
+        }
+      }
+
+      function displayResults(quizResults) {
+        const tableBody = document.getElementById("resultTableBody");
+        tableBody.innerHTML = "";
+
+        let totalCorrect = 0;
+        let totalTime = 0;
+
+        quizResults.forEach((quiz, index) => {
+          const tr = document.createElement("tr");
+
+          const tdQuizNum = document.createElement("td");
+          tdQuizNum.textContent = `Quiz ${index + 1}`;
+          tr.appendChild(tdQuizNum);
+
+          const tdCorrect = document.createElement("td");
+          tdCorrect.textContent = quiz.correct ? "✔ Correct" : "❌ Incorrect";
+          tdCorrect.style.color = quiz.correct ? "lightgreen" : "lightcoral";
+          tr.appendChild(tdCorrect);
+
+          const tdTime = document.createElement("td");
+          tdTime.textContent = `${formatTime(quiz.timeSpent)}`;
+          tr.appendChild(tdTime);
+
+          tableBody.appendChild(tr);
+
+          totalTime += quiz.timeSpent;
+          if (quiz.correct) totalCorrect++;
+        });
+        updateLeaderboard(playerName, totalCorrect, formatTime(totalTime));
+        document.getElementById("totalCorrect").textContent = `${totalCorrect}`;
+      }
+
+      function goHome() {
+        window.location.href = "../game.html";
+      }
+
+      function goLeaderboard() {
+        window.location.href = "leaderboard.html";
+      }
+
+      window.onload = loadResults;
+    </script>
+  </body>
+</html>

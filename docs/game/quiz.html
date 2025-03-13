@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Game</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        color: white;
+        text-align: center;
+        overflow: hidden;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px 20px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        font-size: 1.2rem;
+        font-weight: bold;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .container {
+        display: flex;
+        flex: 1;
+        flex-direction: row;
+      }
+
+      .left {
+        flex: 2;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-right: 2px solid rgba(255, 255, 255, 0.3);
+        overflow: auto;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 90%;
+        margin: auto;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      table th,
+      table td {
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 12px;
+        text-align: center;
+        color: white;
+      }
+
+      table th {
+        background: rgba(255, 255, 255, 0.3);
+        font-weight: bold;
+      }
+
+      .right {
+        flex: 1;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .right input[type="text"],
+      .right button {
+        width: 90%;
+        margin: 10px 0;
+        padding: 12px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 25px;
+        outline: none;
+        /* text-align: center; */
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        transition: all 0.3s ease-in-out;
+      }
+
+      .right input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .right input:focus {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .right button {
+        background: linear-gradient(135deg, #ff512f, #dd2476);
+        color: white;
+        cursor: pointer;
+        border-radius: 25px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0px 4px 10px rgba(255, 0, 150, 0.3);
+        opacity: 0.9;
+      }
+
+      .right button:hover {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #dd2476, #ff512f);
+        box-shadow: 0px 6px 15px rgba(255, 0, 150, 0.6);
+      }
+
+      footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-top: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      footer button {
+        padding: 12px 20px;
+        font-size: 1rem;
+        cursor: pointer;
+        border: none;
+        background: linear-gradient(135deg, #007bff, #00c6ff);
+        color: white;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+      }
+
+      footer button:hover {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #00c6ff, #007bff);
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <font size="+2"><code>Virtual</code></font
+        >: Game 🎮
+      </div>
+      <div>Quiz <span id="quiz_id">1</span></div>
+      <div>⏰ <span id="timer">00:00:00</span></div>
+    </header>
+
+    <div class="container">
+      <div class="left">
+        <table id="quizTable">
+          <thead id="quizTableHead"></thead>
+          <tbody id="quizTableBody"></tbody>
+        </table>
+      </div>
+      <div class="right">
+        <label for="functionInput">✏️ Write functions:</label>
+        <input type="text" id="functionInput" placeholder="a = ..." />
+        <button id="verifyButton">Verify</button>
+      </div>
+    </div>
+
+    <footer>
+      <!-- <button id="prevButton">←</button> -->
+      <button class="home-button" onclick="goHome()">🏠 Back to Home</button>
+      <button id="nextButton">→</button>
+    </footer>
+
+    <script>
+      let timerPaused = false;
+      const timerElement = document.getElementById("timer");
+      const quizNum = parseInt(localStorage.getItem("quizNum"), 10) || 0;
+      let totalMilliseconds = parseInt(localStorage.getItem("timeStart"), 10) || 0;
+      const startTime = totalMilliseconds;
+      document.getElementById("quiz_id").textContent = `${quizNum}`;
+      console.log("quizNum", quizNum);
+
+      // Timer function
+      function updateTimer() {
+        if (!timerPaused) {
+          totalMilliseconds -= 10; // Increase by 100 milliseconds
+
+          const totalSeconds = totalMilliseconds / 1000;
+          const minutes = Math.floor(totalSeconds / 60)
+            .toString()
+            .padStart(2, "0");
+          const seconds = (totalSeconds % 60).toFixed(2).padStart(5, "0"); // Keep one decimal place
+
+          timerElement.textContent = `${minutes}:${seconds}`; // Display time
+        }
+      }
+
+      // Update every 100ms to show 1 decimal place
+      setInterval(updateTimer, 10);
+
+      async function loadCSV(quizNum) {
+        try {
+          const response = await fetch(`quizzes/quiz${quizNum}.csv`);
+          if (!response.ok) {
+            throw new Error("Failed to load CSV file");
+          }
+
+          const csvText = await response.text();
+          const rows = csvToArray(csvText);
+          displayCSV(rows);
+        } catch (error) {
+          console.error("Error loading CSV:", error);
+        }
+      }
+
+      // 📌 Function to Convert CSV Text into an Array of Objects
+      function csvToArray(csvText) {
+        const lines = csvText.trim().split("\n"); // Split into lines
+        const headers = lines[0].split(","); // Extract headers
+
+        return lines.slice(1).map((line) => {
+          const values = line.split(",");
+          return headers.reduce((obj, header, index) => {
+            obj[header] = values[index]; // Assign values to corresponding keys
+            return obj;
+          }, {});
+        });
+      }
+
+      function displayCSV(data) {
+        const tableHead = document.getElementById("quizTableHead");
+        const tableBody = document.getElementById("quizTableBody");
+
+        tableHead.innerHTML = "";
+        tableBody.innerHTML = "";
+
+        if (data.length === 0) {
+          tableBody.innerHTML = "<tr><td colspan='100%'>No data available</td></tr>";
+          return;
+        }
+
+        // Extract headers dynamically from the first object
+        const headers = Object.keys(data[0]);
+
+        // Create the table header
+        const headerRow = document.createElement("tr");
+        headers.forEach((header) => {
+          const th = document.createElement("th");
+          th.textContent = header;
+          headerRow.appendChild(th);
+        });
+        tableHead.appendChild(headerRow);
+
+        // Populate rows with data
+        data.forEach((row) => {
+          const tr = document.createElement("tr");
+          headers.forEach((header) => {
+            const td = document.createElement("td");
+            td.textContent = row[header]; // Fetch value using key
+            tr.appendChild(td);
+          });
+          tableBody.appendChild(tr);
+        });
+      }
+
+      async function verifyEquation(quizNum, functionInput) {
+        quizNum = parseInt(quizNum);
+
+        try {
+          const response = await fetch(`quizzes/quiz${quizNum}.csv`);
+          if (!response.ok) {
+            console.error("CSV file not found:", response.status);
+            return false;
+          }
+
+          const csvText = await response.text();
+          const rows = csvToArray(csvText);
+
+          if (functionInput === "None") return false;
+
+          console.log("Checking equation:", functionInput);
+          return checkEquation(rows, functionInput);
+        } catch (error) {
+          console.error("Error loading CSV:", error);
+          return false;
+        }
+      }
+
+      function checkEquation(rows, equation) {
+        try {
+          equation = equation.replace("=", "==");
+          let equationParts = equation.split("==");
+
+          if (equationParts.length !== 2) {
+            console.error("Invalid equation format");
+            return false;
+          }
+
+          let equationLeft = equationParts[0].trim();
+          let equationRight = equationParts[1].trim();
+
+          // Verify the equation for each row in the dataset
+          return rows.every((row) => {
+            try {
+              // Evaluate the equation for the current row
+              let leftValue = Number(math.evaluate(equationLeft, row));
+              let rightValue = Number(math.evaluate(equationRight, row));
+              return leftValue === rightValue;
+            } catch (error) {
+              console.error("Equation Evaluation Error:", error);
+              return false;
+            }
+          });
+        } catch (error) {
+          console.error("Equation Processing Error:", error);
+          return false;
+        }
+      }
+
+      async function Verify(isSkip = false) {
+        const functionInput = document.getElementById("functionInput").value.trim();
+
+        if (functionInput === "") {
+          if (!isSkip) {
+            alert("Please enter a function before verifying.");
+          }
+          return false;
+        }
+
+        timerPaused = true;
+
+        try {
+          let result = await verifyEquation(quizNum, functionInput);
+
+          let globalQuizData = JSON.parse(localStorage.getItem("globalQuizData")) || {};
+
+          globalQuizData[quizNum] = {
+            input: functionInput,
+            status: result ? "correct" : "incorrect",
+            time: startTime - totalMilliseconds
+          };
+          localStorage.setItem("globalQuizData", JSON.stringify(globalQuizData));
+          console.log("Global Quiz Data:", globalQuizData);
+
+          console.log("Result:", result);
+
+          // Show result window based on verification
+          const resultWindow = window.open(
+            `showResult.html?correct=${result.toString()}`,
+            "Result",
+            "width=300,height=300"
+          );
+          return new Promise((resolve) => {
+            let timeElapsed = 0;
+            const timeoutLimit = 5000; // 5 seconds timeout
+
+            const checkClosed = setInterval(() => {
+              timeElapsed += 500; // Increase check time by 500ms
+
+              if (resultWindow.closed) {
+                timerPaused = false;
+                resolve(true);
+                return true;
+              } else if (timeElapsed >= timeoutLimit) {
+                resultWindow.close(); // Close the window after timeout
+                timerPaused = false;
+                resolve(true);
+              }
+            }, 500);
+          });
+        } catch (error) {
+          console.error("Verification error:", error);
+          waitingWindow.close();
+          alert("An error occurred during verification.");
+          return true;
+        }
+      }
+
+      document.getElementById("nextButton").addEventListener("click", async () => {
+        const isVerified = await Verify((isSkip = true)); // Wait for verification
+        console.log("isVerified", isVerified);
+
+        if (isVerified) {
+          localStorage.setItem("quizNum", quizNum + 1);
+          localStorage.setItem("timeStart", totalMilliseconds);
+          window.location.href = `quiz.html`;
+        } else {
+          // Show confirmation dialog before skipping
+          const confirmSkip = window.confirm(
+            "You haven't verified your answer. Do you want to skip?"
+          );
+
+          if (confirmSkip) {
+            timerPaused = true;
+            let globalQuizData = JSON.parse(localStorage.getItem("globalQuizData")) || {};
+
+            globalQuizData[quizNum] = {
+              input: "None",
+              status: "incorrect",
+              time: startTime - totalMilliseconds
+            };
+            localStorage.setItem("globalQuizData", JSON.stringify(globalQuizData));
+            timerPaused = false;
+            localStorage.setItem("quizNum", quizNum + 1);
+            localStorage.setItem("timeStart", totalMilliseconds);
+            window.location.href = `quiz.html`;
+          }
+        }
+      });
+      document.getElementById("verifyButton").addEventListener("click", async () => {
+        const isVerified = await Verify(); // Wait for verification
+
+        if (isVerified) {
+          localStorage.setItem("quizNum", quizNum + 1);
+          localStorage.setItem("timeStart", totalMilliseconds);
+          window.location.href = `quiz.html`;
+        }
+      });
+      if (quizNum === 6) {
+        window.location.href = "name.html";
+      }
+      function goHome() {
+        window.location.href = "../game.html";
+      }
+      window.onload = () => loadCSV(quizNum);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Game & Leaderboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet" />
+    <style>
+      /* Ensure body has no horizontal scrolling */
+      body {
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Full viewport height */
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        color: white;
+        overflow-x: hidden; /* Prevent horizontal scrolling */
+      }
+
+      /* Header */
+      header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px 20px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        font-size: 1.5rem;
+        font-weight: bold;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Container should take remaining space */
+      .container {
+        display: flex;
+        flex: 1;
+        width: 100%;
+        height: calc(100vh - 100px); /* Prevent overlap */
+        overflow: hidden; /* Prevent extra scrollbars */
+      }
+
+      /* Left Section */
+      .left {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-right: 2px solid rgba(255, 255, 255, 0.3);
+        overflow: hidden;
+      }
+
+      .left,
+      .right {
+        flex: 1; /* Ensures both sections take equal space */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        overflow: hidden;
+      }
+
+      /* Start Game Button */
+      .btn {
+        font-size: 1.5rem;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #ff512f, #dd2476);
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0px 4px 10px rgba(255, 0, 150, 0.3);
+        animation: float 2s infinite ease-in-out;
+      }
+
+      .btn:hover {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #dd2476, #ff512f);
+        box-shadow: 0px 6px 15px rgba(255, 0, 150, 0.6);
+      }
+
+      /* Floating Animation */
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      /* Right Section */
+      .right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        overflow: hidden;
+        height: 90%;
+      }
+
+      /* Leaderboard Box */
+      .leaderboard-box {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
+        width: 90%;
+        max-width: 90%;
+        text-align: center;
+        height: 80%;
+        max-height: 100%;
+        overflow-y: auto;
+      }
+
+      /* Table Styling */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        height: 80%;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+        table-layout: fixed; /* Ensures consistent column width */
+      }
+
+      table th,
+      table td {
+        height: 40px; /* Set a fixed row height */
+        line-height: 40px; /* Ensures text is vertically centered */
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 10px;
+        text-align: center;
+        color: white;
+        font-size: 0.9rem;
+        white-space: nowrap; /* Prevent text wrapping */
+        overflow: hidden; /* Hide overflowing text */
+        text-overflow: ellipsis; /* Add "..." when text is too long */
+        max-width: 100px; /* Adjust the max width to your preference */
+      }
+
+      table th {
+        background: rgba(255, 255, 255, 0.3);
+        font-weight: bold;
+      }
+
+      /* Keep table responsive */
+      .leaderboard-box table {
+        max-width: 100%;
+        table-layout: fixed;
+      }
+
+      /* Special Styling for Top 3 */
+      @keyframes crown-glow {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 10px gold;
+        }
+        50% {
+          transform: scale(1.1);
+          box-shadow: 0 0 20px gold;
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 10px gold;
+        }
+      }
+      .first-place {
+        background: gold;
+        color: black;
+        font-weight: bold;
+        animation: crown-glow 1.5s infinite ease-in-out;
+      }
+      @keyframes silver-glow {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 10px silver;
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 20px silver;
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 10px silver;
+        }
+      }
+      .second-place {
+        background: silver;
+        color: black;
+        font-weight: bold;
+        animation: silver-glow 1.5s infinite ease-in-out;
+      }
+      @keyframes bronze-bounce {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 10px #cd7f32;
+        }
+        50% {
+          transform: scale(1.01);
+          box-shadow: 0 0 20px #cd7f32;
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 10px #cd7f32;
+        }
+      }
+      .third-place {
+        background: #cd7f32;
+        color: black;
+        font-weight: bold;
+        animation: bronze-bounce 1.2s infinite ease-in-out;
+      }
+
+      /* Footer */
+      footer {
+        position: relative;
+        width: 100%;
+        padding: 20px 20px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.2);
+        border-top: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+        font-weight: bold;
+        display: flex;
+        align-items: center; /* Centers text vertically */
+        justify-content: center; /* Centers text horizontally */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <div>🎮 Virtual Game & 🏆 Leaderboard</div>
+    </header>
+
+    <div class="container">
+      <!-- Left Section -->
+      <div class="left">
+        <button id="startButton" class="btn">Start Game</button>
+      </div>
+
+      <!-- Right Section -->
+      <div class="right">
+        <div class="leaderboard-box">
+          <h2>🏆 Leaderboard</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Correct Answers</th>
+                <th>Total Time</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardTableBody">
+              <tr class="first-place">
+                <td>👑 1st</td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr class="second-place">
+                <td>🥈 2nd</td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr class="third-place">
+                <td>🥉 3rd</td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>✨ Get ready to play! ✨</footer>
+
+    <script>
+      localStorage.setItem("quizNum", 1);
+      localStorage.setItem("timeStart", 180000);
+      localStorage.setItem("globalQuizData", JSON.stringify({}));
+      localStorage.setItem("playerName", "Player");
+      document.getElementById("startButton").addEventListener("click", () => {
+        window.location.href = `game/quiz.html`;
+      });
+
+      async function loadLeaderboard() {
+        try {
+          // Try to get leaderboard data from localStorage
+          let leaderboardData = JSON.parse(localStorage.getItem("leaderboard"));
+
+          // If no parameter is provided (leaderboardData is null or missing), load from JSON file
+          if (!leaderboardData) {
+            const response = await fetch("game/leaderboard.json");
+            if (!response.ok) {
+              throw new Error("Failed to load leaderboard data");
+            }
+
+            leaderboardData = await response.json();
+
+            // Save to localStorage for future use
+            localStorage.setItem("leaderboard", JSON.stringify(leaderboardData));
+          }
+
+          // Display leaderboard
+          displayLeaderboard(leaderboardData);
+        } catch (error) {
+          console.error("Error fetching leaderboard:", error);
+        }
+      }
+
+      function displayLeaderboard(players) {
+        const tableBody = document.getElementById("leaderboardTableBody");
+        tableBody.innerHTML = "";
+
+        players.sort((a, b) => b.correctAnswers - a.correctAnswers || a.totalTime - b.totalTime);
+
+        players.forEach((player, index) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${
+              index === 0 ? "👑 1st" : index === 1 ? "🥈 2nd" : index === 2 ? "🥉 3rd" : index + 1
+            }</td>
+            <td>${player.name}</td>
+            <td>${player.correctAnswers}</td>
+            <td>${player.totalTime}</td>
+          `;
+          if (index === 0) tr.classList.add("first-place");
+          if (index === 1) tr.classList.add("second-place");
+          if (index === 2) tr.classList.add("third-place");
+          tableBody.appendChild(tr);
+        });
+        // if (tableBody.innerHTML === "") {
+        //   tableBody.innerHTML = originalTableBody;
+        // }
+      }
+
+      window.onload = loadLeaderboard;
+    </script>
+  </body>
+</html>

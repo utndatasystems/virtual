@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Game</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet" />
+    <style>
+      /* Apply background gradient */
+      body {
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        color: white;
+        text-align: center;
+        overflow: hidden;
+      }
+
+      /* Header Styling */
+      header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px 20px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        font-size: 1.5rem;
+        font-weight: bold;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Game Title */
+      header div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Main Container */
+      .container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      /* Stylish Input Box */
+      .input-container {
+        position: relative;
+        width: 300px;
+        display: flex;
+      }
+
+      .input-container input {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 25px;
+        outline: none;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        transition: all 0.3s ease-in-out;
+      }
+
+      .input-container input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .input-container input:focus {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Fancy Start Button */
+      .btn {
+        font-size: 1.5rem;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #ff512f, #dd2476);
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0px 4px 10px rgba(255, 0, 150, 0.3);
+        position: relative;
+        overflow: hidden;
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      /* Activate Button when User Inputs Name */
+      .btn.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Glowing Button Effect */
+      .btn:hover {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #dd2476, #ff512f);
+        box-shadow: 0px 6px 15px rgba(255, 0, 150, 0.6);
+      }
+
+      /* Footer Styling */
+      footer {
+        display: flex;
+        justify-content: center;
+        padding: 15px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-top: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Floating Animation */
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      .btn {
+        animation: float 2s infinite ease-in-out;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div><code style="font-size: 1.5rem">Virtual: Game 🎮</code></div>
+    </header>
+
+    <div class="container">
+      <!-- Name Input Field -->
+      <div class="input-container">
+        <input type="text" id="playerName" placeholder="Enter your name" />
+      </div>
+
+      <!-- Start Game Button -->
+      <button id="enterButton" class="btn">Enter</button>
+    </div>
+
+    <footer>
+      <span>✨ Enter your name & check your result! ✨</span>
+    </footer>
+
+    <script>
+      const playerNameInput = document.getElementById("playerName");
+      const enterButton = document.getElementById("enterButton");
+
+      // Enable button only if user inputs a name
+      playerNameInput.addEventListener("input", () => {
+        if (playerNameInput.value.trim() !== "") {
+          enterButton.classList.add("active");
+        } else {
+          enterButton.classList.remove("active");
+        }
+      });
+
+      // Start game when button is clicked
+      enterButton.addEventListener("click", () => {
+        if (playerNameInput.value.trim() === "") {
+          alert("Please enter your name before starting!");
+          return;
+        }
+
+        const playerName = playerNameInput.value.trim();
+        alert(`Welcome, ${playerName}! Let's see your result! 🎮`);
+        localStorage.setItem("playerName", playerName);
+        window.location.href = `result.html`;
+
+        // You can also send the name to Electron backend if needed
+        // window.electronAPI.openQuiz(1, playerName);
+      });
+    </script>
+  </body>
+</html>

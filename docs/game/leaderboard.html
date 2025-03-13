@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        color: white;
+        text-align: center;
+        overflow: hidden;
+      }
+
+      header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px 20px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        font-size: 1.5rem;
+        font-weight: bold;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .leaderboard-box {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
+        width: 80%;
+        max-width: 600px;
+        text-align: center;
+        max-height: 350px;
+        overflow-y: auto; /* Makes the leaderboard scrollable */
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 1.4rem;
+      }
+
+      /* Styled Table */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      table th,
+      table td {
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 10px;
+        text-align: center;
+        color: white;
+        font-size: 0.9rem;
+      }
+
+      table th {
+        background: rgba(255, 255, 255, 0.3);
+        font-weight: bold;
+      }
+
+      /* Special Styling for Top 3 */
+      /* First Place Animation - Crown & Glowing Effect */
+      @keyframes crown-glow {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 10px gold;
+        }
+        50% {
+          transform: scale(1.1);
+          box-shadow: 0 0 20px gold;
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 10px gold;
+        }
+      }
+
+      .first-place {
+        background: gold;
+        color: black;
+        font-weight: bold;
+        animation: crown-glow 1.5s infinite ease-in-out;
+      }
+
+      /* Second Place - Smooth Glow */
+      @keyframes silver-glow {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 10px silver;
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 20px silver;
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 10px silver;
+        }
+      }
+
+      .second-place {
+        background: silver;
+        color: black;
+        font-weight: bold;
+        animation: silver-glow 1.5s infinite ease-in-out;
+      }
+
+      /* Third Place - Subtle Bounce Effect */
+      @keyframes bronze-bounce {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 10px #cd7f32;
+        }
+        50% {
+          transform: scale(1.01);
+          box-shadow: 0 0 20px #cd7f32;
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 10px #cd7f32;
+        }
+      }
+
+      .third-place {
+        background: #cd7f32;
+        color: black;
+        font-weight: bold;
+        animation: bronze-bounce 1.2s infinite ease-in-out;
+      }
+
+      /* Go Home Button */
+      .home-button {
+        background: linear-gradient(135deg, #007bff, #00c6ff);
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
+        margin-top: 15px;
+      }
+
+      .home-button:hover {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, #00c6ff, #007bff);
+        box-shadow: 0px 6px 15px rgba(255, 255, 255, 0.6);
+      }
+
+      footer {
+        display: flex;
+        justify-content: center; /* Center everything initially */
+        align-items: center;
+        padding: 10px 15px;
+        background: rgba(255, 255, 255, 0.2);
+        border-top: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+        font-size: 0.9rem;
+        position: relative; /* Allows absolute positioning inside */
+      }
+
+      /* Centered Footer Text */
+      .footer-text {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        font-weight: bold;
+      }
+
+      /* Back to Home Button */
+      .home-button {
+        background: linear-gradient(135deg, #007bff, #00c6ff);
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
+        margin-left: auto; /* Moves button to the right */
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>🏆 <code style="font-size: 1.5rem">Leaderboard</code></div>
+    </header>
+
+    <div class="container">
+      <div class="leaderboard-box">
+        <h2>Top Players</h2>
+
+        <!-- Leaderboard Table -->
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Name</th>
+              <th>Correct Answers</th>
+              <th>Total Time</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardTableBody">
+            <tr class="first-place">
+              <td>👑 1st</td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="second-place">
+              <td>🥈 2nd</td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="third-place">
+              <td>🥉 3rd</td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Go Home Button -->
+      <!-- <button class="home-button" onclick="goHome()">🏠 Back to Home</button> -->
+    </div>
+
+    <footer>
+      <span class="footer-text">✨ Keep improving and reach the top! ✨</span>
+      <button class="home-button" onclick="goHome()">🏠 Back to Home</button>
+    </footer>
+
+    <script>
+      async function loadLeaderboard() {
+        try {
+          let leaderboardData = JSON.parse(localStorage.getItem("leaderboard")) || [];
+          console.log("Leaderboard Data:", leaderboardData);
+          displayLeaderboard(leaderboardData);
+        } catch (error) {
+          console.error("Error fetching leaderboard:", error);
+        }
+      }
+
+      function displayLeaderboard(players) {
+        const tableBody = document.getElementById("leaderboardTableBody");
+        let originalTableBody = tableBody.innerHTML;
+        tableBody.innerHTML = ""; // Clear table before adding rows
+
+        // Sort players by correct answers DESC, and total time ASC (less time is better)
+        players.sort((a, b) => b.correctAnswers - a.correctAnswers || a.totalTime - b.totalTime);
+
+        players.forEach((player, index) => {
+          const tr = document.createElement("tr");
+
+          // Rank
+          const tdRank = document.createElement("td");
+          tdRank.textContent = index + 1;
+
+          // Add crown for 1st place
+          if (index === 0) {
+            tdRank.innerHTML = "👑 1st"; // Crown emoji for top rank
+          } else if (index === 1) {
+            tdRank.innerHTML = "🥈 2nd"; // Silver medal
+          } else if (index === 2) {
+            tdRank.innerHTML = "🥉 3rd"; // Bronze medal
+          } else {
+            tdRank.textContent = index + 1;
+          }
+
+          tr.appendChild(tdRank);
+
+          // Player Name
+          const tdName = document.createElement("td");
+          tdName.textContent = player.name;
+          tr.appendChild(tdName);
+
+          // Correct Answers
+          const tdCorrect = document.createElement("td");
+          tdCorrect.textContent = player.correctAnswers;
+          tr.appendChild(tdCorrect);
+
+          // Total Time
+          const tdTime = document.createElement("td");
+          tdTime.textContent = player.totalTime;
+          tr.appendChild(tdTime);
+
+          // Apply special styling for top 3
+          if (index === 0) tr.classList.add("first-place");
+          if (index === 1) tr.classList.add("second-place");
+          if (index === 2) tr.classList.add("third-place");
+
+          tableBody.appendChild(tr);
+        });
+        if (tableBody.innerHTML === "") {
+          tableBody.innerHTML = originalTableBody;
+        }
+      }
+
+      function goHome() {
+        window.location.href = "../game.html"; // Change if home page has a different filename
+      }
+
+      // Load leaderboard on page load
+      window.onload = loadLeaderboard;
+    </script>
+  </body>
+</html>
