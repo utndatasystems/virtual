@@ -107,6 +107,13 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
   # TODO: We can try multiple samples.
   sample = data_wrapper.sample(sample_size=sample_size)
 
+  print(sample)
+
+  # sample.to_csv('sample.csv', index=False)
+
+  # Convert to numpy.
+  sample = sample.to_numpy()
+
   debug_path = ''
   if isinstance(data, pathlib.Path):
     debug_path = str(data.name)
@@ -115,6 +122,13 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
   for target_index in data_wrapper.valid_column_indices:
     input_columns = data_wrapper.valid_column_indices.copy()
     input_columns.remove(target_index)
+
+    print(f'BBBBBBBBB')
+    print(input_columns)
+    print(data_wrapper.valid_column_names)
+    print(data_wrapper.valid_column_indices)
+    print([data_wrapper.valid_column_names[i] for i in data_wrapper.get_rank(input_columns)])
+    print(data_wrapper.valid_column_names[data_wrapper.get_rank(target_index)])
 
     # TODO: Maybe try multiple samples.
     # TODO: This would also be helpful for k-regression.

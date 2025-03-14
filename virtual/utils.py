@@ -232,13 +232,13 @@ def is_integer(type):
 
 # Check if the type is a floting point.
 # TODO: Extend with decimal for the future.
-def is_double(type):
+def is_fp(type):
   if 'decimal' in type.lower():
     assert 0
   return any(x in type.lower() for x in ['double', 'float'])
 
 def is_virtualizable(type):
-  return is_integer(type) or is_double(type)
+  return is_integer(type) or is_fp(type)
 
 def is_attached_column_of(target_name, column_name):
   # TODO: This was a real hack.
@@ -263,8 +263,9 @@ def _get_nullable(schema, column_name):
 def _get_info(schema, column_name):
   column = _get_column(schema, column_name)
 
-  if column['type'] == 'DOUBLE':
-    return {'type' : 'DOUBLE', 'scale' : column['scale']}
+  # Also put the scale if it's a FP number.
+  if is_fp(column['type']):
+    return {'type' : column['type'], 'scale' : column['scale']}
   return {'type' : column['type'], 'scale' : 0}
 
 def _read_json(json_path):
@@ -378,7 +379,7 @@ def select_models(model_types: List[str], functions):
   # Map to `ModelType`.
   return validated
 
-def sample_parquet_file_without_nulls(parquet_filepath: pathlib.Path | URLPath, nrows, sample_size, valid_column_names):
+def sample_parquet_file(parquet_filepath: pathlib.Path | URLPath, nrows, sample_size, valid_column_names):
   assert isinstance(parquet_filepath, (pathlib.Path, URLPath))
   # select_clause = ', '.join([f'"{col}"' for col in valid_column_names])
   select_clause = ', '.join([f'coalesce("{col}", 0) as "{col}"' for col in valid_column_names])
@@ -400,7 +401,7 @@ def sample_parquet_file_without_nulls(parquet_filepath: pathlib.Path | URLPath, 
   '''
 
   # And sample.
-  return duckdb.sql(sql_query).fetchdf().reset_index(drop=True).to_numpy()
+  return duckdb.sql(sql_query).fetchdf().reset_index(drop=True)
 
 def natural_rounding(coeff):
   return round(coeff, 4)

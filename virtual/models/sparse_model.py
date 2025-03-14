@@ -39,6 +39,9 @@ class SparseLR:
 
     # Compute the original MSE.
     original_mse = root_mean_squared_error(y_true=y, y_pred=y_pred)
+
+    print(original_mse)
+
     if original_mse > self.max_mse_allowed:
       return init_model
 
@@ -60,7 +63,10 @@ class SparseLR:
 
     # Is it work? Then take the original model.
     # TODO: Sometimes this actually happens.
-    if test_mse > original_mse + 1e-6:
+    if test_mse > self.max_mse_allowed:
+      print(f'original_mse={original_mse}')
+      print(f'test_mse={test_mse}')
+      print(f'what???????')
       return init_model
     
     # If there is one attribute, then we don't have anything to remove.
@@ -71,55 +77,92 @@ class SparseLR:
     fixed_window_mse = original_mse
     lazy_counter = 0
 
-    # TODO: Maybe we can sort by the error from the previous iteration.
-    while len(selected) > 1:
-      # Set to false.
-      has_removed_feature = False
+    vs = []
+    for feature_index in selected:
+      # Fit
+      new_selected = [index for index in selected if index != feature_index]
+      curr_model = LinearRegression().fit(x[:, new_selected], y)
+      curr_y_pred = curr_model.predict(x[:, new_selected])
+      curr_mse = root_mean_squared_error(y_true=y, y_pred=curr_y_pred)
 
-      # Take each feature.
-      for feature_index in selected:
-        # Fit
-        new_selected = [index for index in selected if index != feature_index]
-        curr_model = LinearRegression().fit(x[:, new_selected], y)
-        curr_y_pred = curr_model.predict(x[:, new_selected])
-        curr_mse = root_mean_squared_error(y_true=y, y_pred=curr_y_pred)
+      diff = curr_mse - temp_mse
+      vs.append({
+        'feature' : feature_index,
+        'diff' : diff,
+      })
+    vs = sorted(vs, key=lambda elem: -elem['diff'])
 
-        # Did we improve?
-        if curr_mse < temp_mse + 1e-6:
-          # Try to avoid sequences of errors that don't lead anywhere.
-          lazy_counter += 1
-          if lazy_counter == 2:
-            # No improve since the last step?
-            # Assumption: `fixed_window_mse` is much larger and `temp_mse` decreased compared to it.
-            # If the decrease is not that much, try with another attribute.
-            if fixed_window_mse - temp_mse < 1e-6:
-              # Update the counter.
-              lazy_counter -= 1
-              continue
+    selected = [vs[0]['feature']]
 
-            # If the decrease is significantly, update the metadata, as follows:
-            # Update the fixed-window mse.
-            fixed_window_mse = temp_mse
+    # temp_selected = []
+    # for index in range(len(vs)):
+    #   temp_selected.append(vs[index]['feature'])
+    #   curr_model = LinearRegression().fit(x[:, temp_selected], y)
+    #   curr_y_pred = curr_model.predict(x[:, temp_selected])
+    #   curr_mse = root_mean_squared_error(y_true=y, y_pred=curr_y_pred)
 
-            # Update the counter.
-            lazy_counter = 0
+    #   print(f'curr_mse={curr_mse}')
+      
 
-          # Regular path: We remove this feature.
-          # Remove this feature.
-          selected.remove(feature_index)
 
-          # Mark that we removed.
-          has_removed_feature = True
+    print(vs)
 
-          # Update the error.
-          temp_mse = curr_mse
+    # print(f'start: {selected}')
 
-          # Out of the for loop.
-          break
+    # # TODO: Maybe we can sort by the error from the previous iteration.
+    # while len(selected) > 1:
+    #   # Set to false.
+    #   has_removed_feature = False
 
-      # No feature removed?
-      if not has_removed_feature:
-        break
+    #   # Take each feature.
+    #   for feature_index in selected:
+    #     # Fit
+    #     new_selected = [index for index in selected if index != feature_index]
+    #     curr_model = LinearRegression().fit(x[:, new_selected], y)
+    #     curr_y_pred = curr_model.predict(x[:, new_selected])
+    #     curr_mse = root_mean_squared_error(y_true=y, y_pred=curr_y_pred)
+
+    #     print(f'feature_index={feature_index}, curr_mse={curr_mse}, temp_mse={temp_mse}')
+
+
+
+    #     # Did we improve?
+    #     # TODO: Maybe we can use instead the max. mse error?
+    #     if curr_mse < temp_mse + 1e-6:
+    #       # Try to avoid sequences of errors that don't lead anywhere.
+    #       lazy_counter += 1
+    #       if lazy_counter == 2:
+    #         # No improve since the last step?
+    #         # Assumption: `fixed_window_mse` is much larger and `temp_mse` decreased compared to it.
+    #         # If the decrease is not that much, try with another attribute.
+    #         if fixed_window_mse - temp_mse < 1e-6:
+    #           # Update the counter.
+    #           lazy_counter -= 1
+    #           continue
+
+    #         # If the decrease is significantly, update the metadata, as follows:
+    #         # Update the fixed-window mse.
+    #         fixed_window_mse = temp_mse
+
+    #         # Update the counter.
+    #         lazy_counter = 0
+
+    #       # Regular path: We remove this feature.
+    #       # Remove this feature.
+    #       selected.remove(feature_index)
+
+    #       # Mark that we removed.
+    #       has_removed_feature = True
+
+    #       # Update the error.
+    #       temp_mse = curr_mse
+
+    #       # Out of the for loop.
+    #       break
+
+    #   # No feature removed?
+    #   if not has_removed_feature:
+    #     break
 
     # Fit again.
     best_model = LinearRegression().fit(x[:, selected], y)

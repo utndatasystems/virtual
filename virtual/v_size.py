@@ -329,7 +329,7 @@ def _create_regression(model, schema, target_name):
     # TODO: Probably problems with overflow?
     if not formula_has_only_integers:
       formula = f'round({formula}, 0)::{actual_type}'
-  elif virtual.utils.is_double(info['type']):
+  elif virtual.utils.is_fp(info['type']):
     scale = info['scale']
 
     # If we only have this scale.
@@ -686,8 +686,8 @@ def _size_impl(con, schema, target_column, model_type=None, data_hash=None):
   return
 
 # We use this function to estimate the parquet sizes for the columns.
-# We say "estimate", since we only analyze a sample size of 10K tuples.
-def compute_sizes_of_target_columns(functions, data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath, schema, model_types: List[ModelType], sample_size=10_000):
+# We say "estimate", since we only analyze a sample.
+def compute_sizes_of_target_columns(functions, data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath, schema, sample_size, model_types: List[ModelType]):
   assert isinstance(data, (pd.DataFrame, pathlib.Path, virtual.utils.URLPath))
   # TODO: Maybe we can sample only once?
 

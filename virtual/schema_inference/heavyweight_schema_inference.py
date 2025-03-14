@@ -176,7 +176,7 @@ class HWSchemaInferer:
         }
 
         # Double?
-        if col_types[index]['type'] == 'DOUBLE':
+        if virtual.utils.is_fp(col_types[index]['type']):
           col_dict['precision'], col_dict['scale'] = calculate_precision_and_scale(col_types[index]['name'])
 
         # Add to the schema.
@@ -185,7 +185,7 @@ class HWSchemaInferer:
       assert isinstance(self.data, (pathlib.Path, virtual.utils.URLPath))
       assert self.data.suffix == '.parquet'
       cns = list(map(lambda elem: elem['name'], col_types))
-      double_cns = list(map(lambda elem: elem['name'], filter(lambda elem: elem['type'] == 'DOUBLE', col_types)))
+      double_cns = list(map(lambda elem: elem['name'], filter(lambda elem: virtual.utils.is_fp(elem['type']), col_types)))
 
       # Define the NULL counts.
       null_counts = list(map(lambda cn: f"sum(case when \"{cn}\" is null then 1 else 0 end) as \"{cn}_null_count\"", cns))
@@ -232,7 +232,7 @@ class HWSchemaInferer:
       for index in range(len(col_types)):
         null_count = ret[index + 1]
         scale, precision = 0, 0
-        if col_types[index]['type'] == 'DOUBLE':
+        if virtual.utils.is_fp(col_types[index]['type']):
           # Take the precisions.
           left_precision = ret[1 + len(col_types) + num_double_sofar]
           right_precision = ret[1 + len(col_types) + len(double_cns) + num_double_sofar]
