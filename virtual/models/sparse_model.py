@@ -40,8 +40,6 @@ class SparseLR:
     # Compute the original MSE.
     original_mse = root_mean_squared_error(y_true=y, y_pred=y_pred)
 
-    print(original_mse)
-
     if original_mse > self.max_mse_allowed:
       return init_model
 
@@ -61,21 +59,14 @@ class SparseLR:
     test_y_pred = test_model.predict(x[:, selected])
     test_mse = root_mean_squared_error(y_true=y, y_pred=test_y_pred)
 
-    # Is it work? Then take the original model.
+    # Is it worse? Then take the original model.
     # TODO: Sometimes this actually happens.
     if test_mse > self.max_mse_allowed:
-      print(f'original_mse={original_mse}')
-      print(f'test_mse={test_mse}')
-      print(f'what???????')
       return init_model
     
     # If there is one attribute, then we don't have anything to remove.
     if len(selected) == 1:
       return init_model
-
-    temp_mse = original_mse
-    fixed_window_mse = original_mse
-    lazy_counter = 0
 
     all_mses = []
     for feature_index in selected:
@@ -85,15 +76,16 @@ class SparseLR:
       curr_y_pred = curr_model.predict(x[:, new_selected])
       curr_mse = root_mean_squared_error(y_true=y, y_pred=curr_y_pred)
 
-      diff = curr_mse - temp_mse
+      # Collect the MSEs.
       all_mses.append({
         'feature' : feature_index,
-        'diff' : diff,
+        'mse w/o' : curr_mse,
       })
-    all_mses = sorted(all_mses, key=lambda elem: -elem['diff'])
+    
+    # Sort by the amplitude.
+    all_mses = sorted(all_mses, key=lambda elem: +elem['mse w/o'])
 
-    # selected = [vs[0]['feature'], vs[1]['feature']]
-
+    # Now gradually insert.
     temp_selected = []
     for index in range(len(all_mses)):
       temp_selected.append(all_mses[index]['feature'])
@@ -102,76 +94,20 @@ class SparseLR:
       curr_mse = root_mean_squared_error(y_true=y, y_pred=curr_y_pred)
       all_mses[index]['mse'] = curr_mse
 
+    # And decide when to stop.
     selected = []
     last = all_mses[-1]['mse']
     for index in range(len(all_mses)):
+      # Add the feature.
       selected.append(all_mses[index]['feature'])
-      mse = all_mses[index]['mse']
 
-      # Already perfect MSE.
-      if mse < 1e-4:
+      # Already perfect MSE?
+      if all_mses[index]['mse'] < 1e-4:
         break
 
-      # Already dropped a sanity threshold.
-      if (mse < 1) or (mse < last + 0.5):
+      # Already dropped below sanity threshold?
+      if all_mses[index]['mse'] < last + 0.5:
         break
-
-    # print(f'start: {selected}')
-
-    # # TODO: Maybe we can sort by the error from the previous iteration.
-    # while len(selected) > 1:
-    #   # Set to false.
-    #   has_removed_feature = False
-
-    #   # Take each feature.
-    #   for feature_index in selected:
-    #     # Fit
-    #     new_selected = [index for index in selected if index != feature_index]
-    #     curr_model = LinearRegression().fit(x[:, new_selected], y)
-    #     curr_y_pred = curr_model.predict(x[:, new_selected])
-    #     curr_mse = root_mean_squared_error(y_true=y, y_pred=curr_y_pred)
-
-    #     print(f'feature_index={feature_index}, curr_mse={curr_mse}, temp_mse={temp_mse}')
-
-
-
-    #     # Did we improve?
-    #     # TODO: Maybe we can use instead the max. mse error?
-    #     if curr_mse < temp_mse + 1e-6:
-    #       # Try to avoid sequences of errors that don't lead anywhere.
-    #       lazy_counter += 1
-    #       if lazy_counter == 2:
-    #         # No improve since the last step?
-    #         # Assumption: `fixed_window_mse` is much larger and `temp_mse` decreased compared to it.
-    #         # If the decrease is not that much, try with another attribute.
-    #         if fixed_window_mse - temp_mse < 1e-6:
-    #           # Update the counter.
-    #           lazy_counter -= 1
-    #           continue
-
-    #         # If the decrease is significantly, update the metadata, as follows:
-    #         # Update the fixed-window mse.
-    #         fixed_window_mse = temp_mse
-
-    #         # Update the counter.
-    #         lazy_counter = 0
-
-    #       # Regular path: We remove this feature.
-    #       # Remove this feature.
-    #       selected.remove(feature_index)
-
-    #       # Mark that we removed.
-    #       has_removed_feature = True
-
-    #       # Update the error.
-    #       temp_mse = curr_mse
-
-    #       # Out of the for loop.
-    #       break
-
-    #   # No feature removed?
-    #   if not has_removed_feature:
-    #     break
 
     # Fit again.
     best_model = LinearRegression().fit(x[:, selected], y)

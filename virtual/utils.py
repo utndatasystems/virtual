@@ -233,9 +233,7 @@ def is_integer(type):
 # Check if the type is a floting point.
 # TODO: Extend with decimal for the future.
 def is_fp(type):
-  if 'decimal' in type.lower():
-    assert 0
-  return any(x in type.lower() for x in ['double', 'float'])
+  return any(x in type.lower() for x in ['double', 'float', 'decimal'])
 
 def is_virtualizable(type):
   return is_integer(type) or is_fp(type)
