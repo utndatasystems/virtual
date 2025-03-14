@@ -14,6 +14,40 @@ from models.sparse_model import SparseLR
 from models.k_regression import K_Regression, k_regression_settings, compute_error
 from sklearn.metrics import root_mean_squared_error
 
+def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
+  
+  # Instantiate the data wrapper.
+  data_wrapper = DataWrapper(data, nrows)
+
+  # Inspect the columns that we support. This also sets the valid column names and indices.
+  data_wrapper.inspect_columns()
+
+  # Check if there is anything to virtualize.
+  results = []
+  if len(data_wrapper.v_cols['num']['names']) <= 1 and len(data_wrapper.v_cols['date']['names']) <= 1:
+    print('Nothing to virtualize.')
+    return results
+
+  # Solve the numerical case.
+  if len(data_wrapper.v_cols['num']['names']) <= 1:
+    results.extend(solve_num_cols(data_wrapper, sample_size=sample_size, allowed_model_types=allowed_model_types))
+
+  # Solve the date case.
+  if len(data_wrapper.v_cols['date']['names']) <= 1:
+    results.extend(solve_date_cols(data_wrapper, sample_size=sample_size))
+
+  print(f'We found {len(results)} function(s) in your table.')
+  return results
+
+def solve_date_cols(data_wrapper, sample_size=None):
+  # TODO: We can try multiple samples.
+  sample = data_wrapper.sample('date', sample_size=sample_size)
+
+  print(sample)
+
+  return []
+
 def run_model(model_type, X, y, col_name=None):
   model, y_pred = None, None
   if model_type == 'lr':
@@ -62,15 +96,7 @@ def run_model(model_type, X, y, col_name=None):
   mse = root_mean_squared_error(y_true=y, y_pred=y_pred)
   return mse, model.intercept_, model.coef_
 
-def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
-  assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
-  
-  # Instantiate the data wrapper.
-  data_wrapper = DataWrapper(data, nrows)
-
-  # Inspect the columns that we support. This also sets the valid column names and indices.
-  data_wrapper.inspect_columns()
-
+def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
   # Analyze the coefficients of the regression.
   def reduce_coeffs(coeffs, input_columns):
     selected = []
@@ -99,13 +125,8 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
       })
     return ret
 
-  results = []
-  if len(data_wrapper.valid_column_indices) <= 1:
-    print('Only one numerical column.')
-    return {}
-  
   # TODO: We can try multiple samples.
-  sample = data_wrapper.sample(sample_size=sample_size)
+  sample = data_wrapper.sample('num', sample_size=sample_size)
 
   print(sample)
 
@@ -114,19 +135,16 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
   # Convert to numpy.
   sample = sample.to_numpy()
 
-  debug_path = ''
-  if isinstance(data, pathlib.Path):
-    debug_path = str(data.name)
-
   # Try each numeric column.
-  for target_index in data_wrapper.valid_column_indices:
-    input_columns = data_wrapper.valid_column_indices.copy()
+  results = []
+  for target_index in data_wrapper.valid_column_indices['num']:
+    input_columns = data_wrapper.valid_column_indices['num'].copy()
     input_columns.remove(target_index)
 
-    print(f'\nBBBBBBBBB >>>{data_wrapper.valid_column_names[data_wrapper.get_rank(target_index)]}')
+    print(f'\nBBBBBBBBB >>>{data_wrapper.valid_column_names['num'][data_wrapper.get_rank(target_index)]}')
     print(input_columns)
-    print(data_wrapper.valid_column_names)
-    print(data_wrapper.valid_column_indices)
+    print(data_wrapper.valid_column_names['num'])
+    print(data_wrapper.valid_column_indices['num'])
     print([data_wrapper.valid_column_names[i] for i in data_wrapper.get_rank(input_columns)])
     print(data_wrapper.valid_column_names[data_wrapper.get_rank(target_index)])
 
@@ -213,5 +231,5 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
     if local_results['models']:
       results.append(local_results)
 
-  print(f'We found {len(results)} function(s) in your table.')
+  # And return.
   return results

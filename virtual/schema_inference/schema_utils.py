@@ -18,7 +18,9 @@ def generate_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
 
 def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
   # The column categories.
-  type_categories = {
+  type2cns = {
+    'num' : [],
+    'time' : [],
     'date' : [],
     'string' : [],
     # TODO: Fix this later. The issue is that DuckDB interprets as `BOOLEAN` any binary column.
@@ -38,12 +40,18 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
     cn = col_types[index]['name']
     sql_type = col_types[index]['type']
 
-    if sql_type.lower() in ['datetime', 'timestamp', 'time', 'date']:
-      type_categories['date'].append(cn)
+    if virtual.utils.is_num_virtualizable(sql_type):
+      type2cns['num'].append(cn)
+    elif sql_type.lower() in ['date']:
+      type2cns['date'].append(cn) 
+    elif sql_type.lower() in ['datetime', 'timestamp', 'time']:
+      type2cns['time'].append(cn)
     elif sql_type.lower() in ['varchar', 'char']:
-      type_categories['string'].append(cn)
+      type2cns['string'].append(cn)
     elif sql_type.lower() in ['boolean']:
-      type_categories['boolean'].append(cn)
+      type2cns['boolean'].append(cn)
+    else:
+      assert 0
 
     # Add to the column names.
     # NOTE: This is the original order in the dataframe / file.
@@ -64,4 +72,4 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
     assert 0
 
   # And return.
-  return column_names, csv_dialect, has_header, type_categories
+  return column_names, csv_dialect, has_header, type2cns
