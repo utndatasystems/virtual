@@ -1,7 +1,7 @@
 import duckdb
 import pathlib
 import pandas as pd
-from virtual.utils import infer_dialect
+import virtual.utils
 
 def format_col_name(col_name):
   if col_name.startswith('"') and col_name.endswith('"'):
@@ -9,8 +9,8 @@ def format_col_name(col_name):
   return f'"{col_name}"'
 
 class LWSchemaInferer:
-  def __init__(self, data: pd.DataFrame | pathlib.Path):
-    assert isinstance(data, (pd.DataFrame, pathlib.Path))
+  def __init__(self, data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath):
+    assert isinstance(data, (pd.DataFrame, pathlib.Path, virtual.utils.URLPath))
     self.data = data
     
   def infer(self, nrows=None):
@@ -19,7 +19,7 @@ class LWSchemaInferer:
     if isinstance(self.data, pathlib.Path):
       if self.data.suffix == '.csv':
         # Infer the dialect.
-        dialect = infer_dialect(self.data)
+        dialect = virtual.utils.infer_dialect(self.data)
 
         # Specify the query.
         query = f"select * from read_csv('{self.data}', header=true, delim='{dialect['delimiter']}', quote='{dialect['quotechar']}'" \
@@ -33,6 +33,15 @@ class LWSchemaInferer:
         """
       else:
         assert 0, 'File format not (yet) supported.'
+    elif isinstance(self.data, virtual.utils.URLPath):
+      if self.data.suffix == '.parquet':
+        query = f"""
+          select *
+          from read_parquet('{str(self.data)}')
+          limit 0;
+        """
+      else:
+        assert 0, 'We don\'t support yet reading this format from an URL.'
     elif isinstance(self.data, pd.DataFrame):
       duckdb.register("mydf", self.data)
       query = f'SELECT * FROM mydf' + (f'LIMIT {nrows}' if nrows is not None else '')

@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import pathlib
+import utils
 from typing import Optional
 
 # Data wrapper
@@ -61,11 +62,11 @@ def run_model(model_type, X, y, col_name=None):
   mse = root_mean_squared_error(y_true=y, y_pred=y_pred)
   return mse, model.intercept_, model.coef_
 
-def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None, schema=None):
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
   
   # Instantiate the data wrapper.
-  data_wrapper = DataWrapper(data, nrows, schema)
+  data_wrapper = DataWrapper(data, nrows)
 
   # Inspect the columns that we support. This also sets the valid column names and indices.
   data_wrapper.inspect_columns()
@@ -119,8 +120,6 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
     # TODO: This would also be helpful for k-regression.
     X = sample[:, data_wrapper.get_rank(input_columns)]
     y = sample[:, data_wrapper.get_rank(target_index)]
-
-    print(y)
 
     # Init the local results.
     local_results = None

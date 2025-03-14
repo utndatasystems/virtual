@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import pyarrow.parquet as pq
 from typing import List
-import utils
+import virtual.utils
 from utils import ModelType, _get_info, _get_nullable, _get_column, get_data_hash
 import math
 import pathlib
@@ -150,14 +150,14 @@ def _create_base_table(target_columns, schema, model_type=None):
         columns.append(create_least_column(iter['target_name']))
 
     # Add a temporary offset column which can be null.
-    # if utils.is_k_regression(model_type):
+    # if virtual.utils.is_k_regression(model_type):
     #    columns.append(create_temp_offset_column(iter['target_name']))
 
   columns = " , ".join(columns)
 
   return f"CREATE TABLE base_table ({columns});"
 
-def _create_sample(data: pd.DataFrame | pathlib.Path, sample_path, sample_size):
+def _create_sample(data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath, sample_path, sample_size):
   # If there is only a path, first read it.
   if isinstance(data, pathlib.Path):
     # TODO: We should ensure there is no header!
@@ -165,11 +165,20 @@ def _create_sample(data: pd.DataFrame | pathlib.Path, sample_path, sample_size):
     if data.suffix == '.csv':
       df = pd.read_csv(data, dtype=str, nrows=sample_size, header=None)
     elif data.suffix == '.parquet':
+      # TODO: We also need `nrows` here (like the original one).
       df = duckdb.sql(f"""
         select *
         from read_parquet('{data}')
         limit {sample_size};
       """).fetchdf().reset_index(drop=True)
+  elif isinstance(data, virtual.utils.URLPath):
+    # TODO: We also need `nrows` here (like the original one).
+    assert data.suffix == '.parquet'
+    df = duckdb.sql(f"""
+      select *
+      from read_parquet('{str(data)}')
+      limit {sample_size};
+    """).fetchdf().reset_index(drop=True)
   elif isinstance(data, pd.DataFrame):
     # Otherwise, use the dataframe we already have.
     if sample_size < len(data):
@@ -180,8 +189,8 @@ def _create_sample(data: pd.DataFrame | pathlib.Path, sample_path, sample_size):
   # Dump to `sample_path`.
   df.to_csv(sample_path, index=False, header=False)
 
-def create_copy_csv(data: pd.DataFrame | pathlib.Path, schema, nrows=None):
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+def create_copy_csv(data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath, schema, nrows=None):
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, virtual.utils.URLPath))
 
   # Take all columns we have to read.
   columns = ','.join([f'"{iter["name"]}"' for iter in schema])
@@ -190,7 +199,7 @@ def create_copy_csv(data: pd.DataFrame | pathlib.Path, schema, nrows=None):
   if isinstance(data, pathlib.Path):
     if data.suffix == '.csv':
       # Infer the dialect.
-      dialect = utils.infer_dialect(data)
+      dialect = virtual.utils.infer_dialect(data)
 
       # Create the load SQL.
       # TODO: I now know why it works with the estimator and not with this one.
@@ -213,6 +222,19 @@ def create_copy_csv(data: pd.DataFrame | pathlib.Path, schema, nrows=None):
       """
     else:
       assert 0, f'Format {data.suffix.replace} not (yet) supported.'
+  elif isinstance(data, virtual.utils.URLPath):
+    assert data.suffix == '.parquet'
+    # Specify the `LIMIT`-clause (if we are to upper bound the number of rows read).
+    limit_clause = ''
+    if nrows is not None:
+      limit_clause = f'limit {nrows}'
+
+    # Specify the load query.
+    load_sql = f"""
+      insert into base_table({columns})
+      select * from read_parquet('{str(data)}')
+      {limit_clause};
+    """
   elif isinstance(data, pd.DataFrame):
     # Then we have a dataframe.
     # TODO: Do we still need this one?
@@ -255,7 +277,7 @@ def _create_regression(model, schema, target_name):
     # TODO: What if the coefficient is 0? We could skip this.
     # TODO: But then we also need to adapt this for the `is null` part.
     # TODO: This is wrong.
-    if not utils.is_integer(_get_info(schema, iter['col-name'])['type']):
+    if not virtual.utils.is_integer(_get_info(schema, iter['col-name'])['type']):
       formula_has_only_integers = False
 
     # Take the current scale.
@@ -265,7 +287,7 @@ def _create_regression(model, schema, target_name):
     if math.isclose(iter['coeff'], 1.0):
       regression.append(f"\"{iter['col-name']}\"")
     else:
-      rounded_coeff = utils.custom_round(iter['coeff'])
+      rounded_coeff = virtual.utils.custom_round(iter['coeff'])
 
       # Check if it is an integer.
       if not rounded_coeff.is_integer():
@@ -276,7 +298,7 @@ def _create_regression(model, schema, target_name):
       regression.append(f"{rounded_coeff} * \"{iter['col-name']}\"")
 
   # Analyze the intercept.
-  intercept = utils.custom_round(model['intercept'])
+  intercept = virtual.utils.custom_round(model['intercept'])
 
   # Not 0?
   if not math.isclose(intercept, 0.0):
@@ -299,7 +321,7 @@ def _create_regression(model, schema, target_name):
   # Is the target column an integer?
   # Then force the offset to also be one.
   # TODO: Note, this can also overflow.
-  if utils.is_integer(info['type']):
+  if virtual.utils.is_integer(info['type']):
     actual_type = info['type']
 
     # Only round if there was a different type than integer in the formula.
@@ -307,7 +329,7 @@ def _create_regression(model, schema, target_name):
     # TODO: Probably problems with overflow?
     if not formula_has_only_integers:
       formula = f'round({formula}, 0)::{actual_type}'
-  elif utils.is_double(info['type']):
+  elif virtual.utils.is_double(info['type']):
     scale = info['scale']
 
     # If we only have this scale.
@@ -346,7 +368,7 @@ def create_dump_base_target_column(con, schema, target_column, out_file):
 # NOTE: You need to adapt this part if you want change the layout.
 def is_auxiliary_column(cn):
   token = cn.split('_')[-1].strip('"')
-  return utils.is_formula(token) or token == 'least'
+  return virtual.utils.is_formula(token) or token == 'least'
 
 def is_special_column(cn):
   token = cn.split('_')[-1].strip('"')
@@ -359,13 +381,13 @@ def clean_base_table(all_columns, target_columns):
       # TODO: We also need to take into account "...", right?
       # TODO: This is really a hack.
       # NOTE: Pay attention at this case: average_admissions_30_49_covid_confirmed_per_100k vs average_admissions_30_49_covid_confirmed.
-      if utils.is_attached_column_of(target_column['target_name'], cn) and is_auxiliary_column(cn):
+      if virtual.utils.is_attached_column_of(target_column['target_name'], cn) and is_auxiliary_column(cn):
         rest.remove(cn)
   return rest
 
 def create_dump_virtual(con, schema, target_columns, out_file):
   # Get the current header.
-  all_columns = utils._get_curr_columns(con)
+  all_columns = virtual.utils._get_curr_columns(con)
 
   # Clean the table.
   all_columns = clean_base_table(all_columns, target_columns) 
@@ -382,7 +404,7 @@ def create_dump_virtual(con, schema, target_columns, out_file):
 
 def create_dump_virtual_target_column(con, schema, target_column, out_file):
   # Get the current header.
-  all_columns = utils._get_curr_columns(con)
+  all_columns = virtual.utils._get_curr_columns(con)
 
   # Clean the table.
   all_columns = clean_base_table(all_columns, [target_column]) 
@@ -394,7 +416,7 @@ def create_dump_virtual_target_column(con, schema, target_column, out_file):
   keep = []
   for cn in all_columns:
     # TODO: Do we need to use quotes?
-    if utils.is_attached_column_of(target_column['target_name'], cn):
+    if virtual.utils.is_attached_column_of(target_column['target_name'], cn):
         keep.append(cn)
   
   # If there is nothing to keep, just store a dummy parquet file.
@@ -526,7 +548,7 @@ def create_virtual_column_layout(con, target_iter, schema, model_type: Optional[
       formula = _create_regression(model, schema, target_iter['target_name'])
 
       # NOTE | TODO: The offset should also take the scale of the original column?
-      update = f"round(\"{target_iter['target_name']}\" - ({formula}), {utils._get_info(schema, target_iter['target_name'])['scale']})"
+      update = f"round(\"{target_iter['target_name']}\" - ({formula}), {virtual.utils._get_info(schema, target_iter['target_name'])['scale']})"
       update = f"coalesce({update}, 0)"
       update = f"\"{target_iter['target_name']}_offset\" = {update}"
       local_updates.append(update)
@@ -588,7 +610,7 @@ def create_virtual_table_layout(con, target_columns, schema, model_type=None):
   return
 
 def reoptimize_virtual_table_layout(con, target_columns):
-  freqs = utils._get_distinct_counts(con)
+  freqs = virtual.utils._get_distinct_counts(con)
 
   to_remove = []
   for target_column in target_columns:
@@ -598,14 +620,14 @@ def reoptimize_virtual_table_layout(con, target_columns):
         continue
 
       assert cn.endswith('_count')
-      cn = utils.rreplace(cn, '_count', '')
+      cn = virtual.utils.rreplace(cn, '_count', '')
 
       # NOTE: This is really important!
       if cn == target_column['target_name']:
         continue
 
       # Then remove it if it is an auxiliary column.
-      if utils.is_attached_column_of(target_column['target_name'], cn) and is_special_column(cn):
+      if virtual.utils.is_attached_column_of(target_column['target_name'], cn) and is_special_column(cn):
         to_remove.append(cn)
 
   if len(to_remove):
@@ -665,8 +687,8 @@ def _size_impl(con, schema, target_column, model_type=None, data_hash=None):
 
 # We use this function to estimate the parquet sizes for the columns.
 # We say "estimate", since we only analyze a sample size of 10K tuples.
-def compute_sizes_of_target_columns(functions, data: pd.DataFrame | pathlib.Path, schema, model_types: List[ModelType], sample_size=10_000):
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+def compute_sizes_of_target_columns(functions, data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath, schema, model_types: List[ModelType], sample_size=10_000):
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, virtual.utils.URLPath))
   # TODO: Maybe we can sample only once?
 
   # Construct an unique hash.

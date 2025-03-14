@@ -1,6 +1,6 @@
 from schema_inference.lightweight_schema_inference import LWSchemaInferer
 from schema_inference.heavyweight_schema_inference import HWSchemaInferer
-from virtual.utils import infer_dialect, get_default_csv_dialect
+import virtual.utils
 import pandas as pd
 import pathlib
 
@@ -53,10 +53,13 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
   csv_dialect = None
   if isinstance(data, pathlib.Path):
     if data.suffix == '.csv':
-      csv_dialect = infer_dialect(data)
+      csv_dialect = virtual.utils.infer_dialect(data)
+  elif isinstance(data, virtual.utils.URLPath):
+    # TODO: Support csv.
+    pass
   elif isinstance(data, pd.DataFrame):
     # Default.
-    csv_dialect = get_default_csv_dialect()
+    csv_dialect = virtual.utils.get_default_csv_dialect()
   else:
     assert 0
 

@@ -22,7 +22,7 @@ import time
 import re
 
 # TODO: We should add `nrows`. Maybe also the sample_size.
-def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_000, model_types: Optional[list[str]]=['sparse-lr'], schema=None, prefix=None):
+def train(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, nrows=None, sample_size=10_000, model_types: Optional[list[str]]=['sparse-lr'], schema=None, prefix=None):
   """
     Computes the functions hidden in `data`.
 
@@ -43,9 +43,11 @@ def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_00
   if isinstance(data, str):
     if data.startswith('hf://'):
       data = pd.read_csv(data)
+    elif data.startswith('s3://'):
+      data = utils.URLPath(data)
     else:
       data = pathlib.Path(data)
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
 
   # Check that we're dealing with a file.
   if isinstance(data, pathlib.Path):
@@ -55,7 +57,7 @@ def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_00
   print(f'Drilling functions..')
 
   # Virtualize the table. Note that for this particular step we don't require a schema.
-  functions = v_driller.virtualize_table(data, nrows=nrows, sample_size=sample_size, allowed_model_types=model_types, schema=schema)
+  functions = v_driller.virtualize_table(data, nrows=nrows, sample_size=sample_size, allowed_model_types=model_types)
 
   # Dump `functions`.
   utils.dump_json_data(data, functions, 'driller', prefix)
@@ -64,7 +66,7 @@ def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_00
   return functions
 
 # TODO: Check whether all cases for `nrows` work out.
-def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=None, schema=None, nrows=None, model_types: Optional[list[str]]=None, prefix=None):
+def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_path, functions=None, schema=None, nrows=None, model_types: Optional[list[str]]=None, prefix=None):
   """
     Converts `data` into a file of the specified format.
 
@@ -104,17 +106,18 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
         # Read the parquet file.
         # print(f'Reading parquet file..')
         # data = duckdb.read_parquet(data).fetchdf()
-        data = pathlib.Path(data)
+        data = utils.URLPath(data)
       else:
         assert 0, f'Reading this format from S3 is not yet supported.'
     else:
       data = pathlib.Path(data)
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
 
   # Check that we're dealing with a file.
   if isinstance(data, pathlib.Path):
-    if not str(data).startswith('s3:'):
-      assert data.is_file()
+    assert data.is_file()
+  if isinstance(data, utils.URLPath):
+    assert data.suffix in ['.parquet', '.csv']
 
   # No schema? Then generate it.
   if schema is None:

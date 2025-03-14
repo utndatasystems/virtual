@@ -15,7 +15,48 @@ import pyarrow.parquet as pq
 from typing import List
 import pathlib
 import hashlib
+import urllib
 import csv
+
+class URLPath(pathlib.PurePath):
+  def __new__(cls, url):
+    parsed = urllib.parse.urlparse(url)
+    if not parsed.scheme:
+      raise ValueError(f'Invalid URL: {url}')
+    self = super().__new__(cls, *parsed.path.split('/'))
+    self._parsed = parsed
+    return self
+
+  @property
+  def scheme(self):
+    return self._parsed.scheme
+
+  @property
+  def netloc(self):
+    return self._parsed.netloc
+
+  @property
+  def suffix(self):
+    # Returns the file extension, including the leading dot (e.g., '.html').
+    return super().suffix
+
+  @property
+  def suffixes(self):
+    # Returns a list of all suffixes (e.g., ['.tar', '.gz']).
+    return super().suffixes
+
+  @property
+  def name(self):
+    # Returns the final component of the path, like Path.name.
+    return os.path.basename(self._parsed.path)
+
+  @property
+  def stem(self):
+    # Returns the filename without its suffix, like Path.stem.
+    return os.path.splitext(self.name)[0]
+
+  def __str__(self):
+    return urllib.parse.urlunparse(self._parsed)
 
 def get_csv_header(csv_path):
   with open(csv_path, 'r', encoding='utf-8') as f:
@@ -59,21 +100,25 @@ def get_csv_null_options():
   return "['NULL', 'null', '', 'None']"
 
 # Get a hash for this data.
-def get_data_hash(data: pd.DataFrame | pathlib.Path):
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+def get_data_hash(data: pd.DataFrame | pathlib.Path | URLPath):
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, URLPath))
 
   # Take a fingerprint of the data.
+  base = None
   if isinstance(data, pd.DataFrame):
     # The column names.
-    column_string = ','.join(data.columns)
+    base = ','.join(data.columns)
   elif isinstance(data, pathlib.Path):
     # The path itself.
-    column_string = str(data.resolve())
+    base = str(data.resolve())
+  elif isinstance(data, URLPath):
+    base = str(data)
   else:
-    raise TypeError("Input must be a pandas `DataFrame` or a `pathlib.Path`.")
+    raise TypeError("Input must be a `pd.DataFrame`, `pathlib.Path` or URL.")
 
   # And return the hash.
-  return hashlib.md5(column_string.encode('utf-8')).hexdigest()
+  assert base is not None
+  return hashlib.md5(base.encode('utf-8')).hexdigest()
 
 def infer_dialect(file_path, num_lines=5):
   with open(file_path, 'r', encoding='utf-8') as file:
@@ -261,10 +306,10 @@ def _get_distinct_counts(con):
   assert curr_columns
   return con.execute(f'select ' + ','.join([f"(count(distinct \"{x}\") + count(distinct case when \"{x}\" is null then 1 end)) as \"{x}_count\"" for x in curr_columns]) + ' from base_table').fetchdf().to_dict()
 
-def dump_data(csv_filename, data, filename, prefix, key=None):
-  csv_basename = os.path.basename(csv_filename)
-  csv_basename_noext = os.path.splitext(csv_basename)[0]
-  json_filename = os.path.join(prefix, f'{filename}_{csv_basename_noext}.json')
+def dump_data(input_path: pathlib.Path | URLPath, data, filename_type, prefix, key=None):
+  basename = os.path.basename(input_path)
+  basename_noext = os.path.splitext(basename)[0]
+  json_filename = os.path.join(prefix, f'{filename_type}_{basename_noext}.json')
   
   with open(json_filename, 'w', encoding='utf-8') as f:
     if key is not None:
@@ -295,6 +340,8 @@ def dump_json_data(data, json_data, component_name, prefix=None):
   
   # And dump.
   if isinstance(data, pathlib.Path):
+    dump_data(data, json_data, component_name, prefix)
+  elif isinstance(data, URLPath):
     dump_data(data, json_data, component_name, prefix)
   elif isinstance(data, pd.DataFrame):
     dump_data_without_filename(json_data, component_name, prefix)
@@ -331,30 +378,29 @@ def select_models(model_types: List[str], functions):
   # Map to `ModelType`.
   return validated
 
-def sample_parquet_file_without_nulls(parquet_filepath: pathlib.Path, nrows, sample_size, valid_column_names):
-  assert isinstance(parquet_filepath, pathlib.Path)
+def sample_parquet_file_without_nulls(parquet_filepath: pathlib.Path | URLPath, nrows, sample_size, valid_column_names):
+  assert isinstance(parquet_filepath, (pathlib.Path, URLPath))
   # select_clause = ', '.join([f'"{col}"' for col in valid_column_names])
   select_clause = ', '.join([f'coalesce("{col}", 0) as "{col}"' for col in valid_column_names])
-
   # where_clause = ' and '.join([f'"{col}" is not null' for col in valid_column_names])
-
-  print(valid_column_names)
 
   # Specify the LIMIT-clause.
   limit_clause = ''
   if nrows is not None:
-    limit_clause = 'limit {nrows}'
+    limit_clause = f'limit {nrows}'
 
-  # And sample.
-  return duckdb.sql(f'''
-    select *
+  sql_query = f'''
+    select {select_clause}
     from (
-      select {select_clause}
-      from read_parquet(\'{str(parquet_filepath)}\')
+      select *
+      from read_parquet('{str(parquet_filepath)}')
       {limit_clause}
     )
-    using sample reservoir({sample_size} ROWS) REPEATABLE (0)
-  ''').fetchdf().reset_index(drop=True).to_numpy()
+    using sample reservoir({sample_size} ROWS) REPEATABLE (0);
+  '''
+
+  # And sample.
+  return duckdb.sql(sql_query).fetchdf().reset_index(drop=True).to_numpy()
 
 def natural_rounding(coeff):
   return round(coeff, 4)
