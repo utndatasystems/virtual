@@ -1,13 +1,12 @@
-from utils import ModelType
+import virtual.utils
 from typing import List
 import pandas as pd
 import pathlib
 import v_size
-import sys
 
-def compute_target_sizes(data: pd.DataFrame | pathlib.Path, functions, schema, model_types: List[ModelType], sample_size=10_000):
+def compute_target_sizes(data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath, functions, schema, model_types: List[virtual.utils.ModelType], sample_size=10_000):
   assert schema is not None
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, virtual.utils.URLPath))
 
   # Compute the gains for the target columns.
   target_sizes = v_size.compute_sizes_of_target_columns(functions, data, schema, model_types, sample_size)
@@ -19,7 +18,7 @@ def compute_target_sizes(data: pd.DataFrame | pathlib.Path, functions, schema, m
   # And return.
   return target_sizes
 
-def collect_refs(model, model_type: ModelType):
+def collect_refs(model, model_type: virtual.utils.ModelType):
   ref_idxs, ref_names = [], []
   if model_type.is_k_regression():
     for local_model in model['config']:
@@ -101,7 +100,7 @@ def run_greedy(hyperedges):
 def compute_space_gain(hyperedge, config, model_type):
   hyperedge['gain'] = config['sizes'][model_type.name]['base'] - config['sizes'][model_type.name]['virtual']
 
-def optimize(configs, model_types: List[ModelType]):
+def optimize(configs, model_types: List[virtual.utils.ModelType]):
   # Inspect the configs and represent them as hyperedges.
   # That is, the left side of the hyperedge is the set of reference columns.
   # The right side is the target column.

@@ -22,7 +22,7 @@ import time
 import re
 
 # TODO: We should add `nrows`. Maybe also the sample_size.
-def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_000, model_types: Optional[list[str]]=['sparse-lr'], prefix=None):
+def train(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, nrows=None, sample_size=10_000, model_types: Optional[list[str]]=['sparse-lr'], schema=None, prefix=None):
   """
     Computes the functions hidden in `data`.
 
@@ -43,13 +43,16 @@ def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_00
   if isinstance(data, str):
     if data.startswith('hf://'):
       data = pd.read_csv(data)
+    elif data.startswith('s3://'):
+      data = utils.URLPath(data)
     else:
       data = pathlib.Path(data)
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
 
   # Check that we're dealing with a file.
   if isinstance(data, pathlib.Path):
-    assert data.is_file()
+    if not str(data).startswith('s3:'):
+      assert data.is_file()
 
   print(f'Drilling functions..')
 
@@ -63,7 +66,7 @@ def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_00
   return functions
 
 # TODO: Check whether all cases for `nrows` work out.
-def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=None, schema=None, nrows=None, model_types: Optional[list[str]]=None, prefix=None):
+def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_path, functions=None, schema=None, nrows=None, model_types: Optional[list[str]]=None, prefix=None):
   """
     Converts `data` into a file of the specified format.
 
@@ -101,17 +104,20 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
     if data.startswith('s3://'):
       if format_type == 'parquet':
         # Read the parquet file.
-        print(f'Reading parquet file..')
-        data = duckdb.read_parquet(data).fetchdf()
+        # print(f'Reading parquet file..')
+        # data = duckdb.read_parquet(data).fetchdf()
+        data = utils.URLPath(data)
       else:
         assert 0, f'Reading this format from S3 is not yet supported.'
     else:
       data = pathlib.Path(data)
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
 
   # Check that we're dealing with a file.
   if isinstance(data, pathlib.Path):
     assert data.is_file()
+  if isinstance(data, utils.URLPath):
+    assert data.suffix in ['.parquet', '.csv']
 
   # No schema? Then generate it.
   if schema is None:
@@ -124,7 +130,7 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
 
   # If no functions provided, drill them.
   if functions is None:
-    functions = train(data, prefix=prefix, model_types=model_types)
+    functions = train(data, prefix=prefix, model_types=model_types, schema=schema)
 
   # Dump `functions`.
   utils.dump_json_data(data, functions, 'driller', prefix)

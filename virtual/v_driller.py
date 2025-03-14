@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import pathlib
+import utils
 from typing import Optional
 
 # Data wrapper
@@ -61,8 +62,8 @@ def run_model(model_type, X, y, col_name=None):
   mse = root_mean_squared_error(y_true=y, y_pred=y_pred)
   return mse, model.intercept_, model.coef_
 
-def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
   
   # Instantiate the data wrapper.
   data_wrapper = DataWrapper(data, nrows)
@@ -134,7 +135,8 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
         'models': {}
       }
     except Exception as e:
-      assert False, f"Please double check your CSV file. There is a type/format inconsistency error on column {parser.column_names[target_index]}."
+      print(e)
+      assert False, f"Please double check your file. There is a type/format inconsistency error on column {data_wrapper.column_names[target_index]}."
     assert local_results is not None
 
     # Try the standard models.

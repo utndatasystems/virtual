@@ -9,7 +9,7 @@ from v_size import \
   arrow_compress_parquet, \
   reoptimize_virtual_table_layout
 import duckdb
-import utils
+import virtual.utils
 import os
 import pandas as pd
 import schema_inference
@@ -21,13 +21,13 @@ def _apply_arrow(tmp_path, final_path):
   arrow_compress_parquet(tmp_path, final_path)
 
   # Delete the duckdb parquet file.
-  utils._delete_file(tmp_path)
+  virtual.utils._delete_file(tmp_path)
 
   # And return the final path.
   return final_path
 
-def _compress_impl(con, fn, data: pd.DataFrame | pathlib.Path, schema, target_columns, type, apply_arrow=True, data_hash=None):
-  assert isinstance(data, (pd.DataFrame, pathlib.Path))
+def _compress_impl(con, fn, data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath, schema, target_columns, type, apply_arrow=True, data_hash=None):
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, virtual.utils.URLPath))
   assert data_hash is not None
 
   # Fix the paths.
@@ -48,7 +48,7 @@ def _compress_impl(con, fn, data: pd.DataFrame | pathlib.Path, schema, target_co
   arrow_compress_parquet(tmp_path, final_path)
 
   # Delete the duckdb parquet file.
-  utils._delete_file(tmp_path)
+  virtual.utils._delete_file(tmp_path)
 
   # And return.
   return final_path
@@ -75,13 +75,13 @@ def compress(data: pd.DataFrame | pathlib.Path, schema, layout, optimize_layout=
   print(f'Creating the virtual file..')
   
   # Get the data hash.
-  data_hash = utils.get_data_hash(data)
+  data_hash = virtual.utils.get_data_hash(data)
   
   # Read the schema.
   if isinstance(schema, pathlib.Path):
-    schema = utils._read_json(schema)
+    schema = virtual.utils._read_json(schema)
   elif schema is None:
-    schema = schema_utils.generate_schema(data)
+    schema = schema_virtual.utils.generate_schema(data)
 
   # Load the data.
   con, target_columns = _load_data(data, schema, layout, nrows)
@@ -112,7 +112,7 @@ def compress(data: pd.DataFrame | pathlib.Path, schema, layout, optimize_layout=
 
 def _latency_impl(parquet_type, parquet_path, schema, all_target_columns, target_iter):
   assert 'model_type' in target_iter
-  model_type = utils.ModelType(target_iter['model_type'])
+  model_type = virtual.utils.ModelType(target_iter['model_type'])
 
   # Add the sizes into the dictionary.
   if 'latencies' not in target_iter:
@@ -133,11 +133,11 @@ def benchmark(bench_type, data: pd.DataFrame | pathlib.Path, schema, layout, opt
   assert bench_type in ['size', 'latency']
 
   # Get the data hash.
-  data_hash = utils.get_data_hash(data)
+  data_hash = virtual.utils.get_data_hash(data)
 
   # Read the schema.
   if isinstance(schema, pathlib.Path):
-    schema = utils._read_json(schema)
+    schema = virtual.utils._read_json(schema)
   elif schema is None:
     schema = schema_utils.generate_schema(data)
 
@@ -147,16 +147,16 @@ def benchmark(bench_type, data: pd.DataFrame | pathlib.Path, schema, layout, opt
   # If we want to measure the latency, duplicate the dataset until we have 1M rows.
   if bench_type == 'latency':
     # Double the size until you reach 1M.
-    curr_size = utils._get_size(con)
+    curr_size = virtual.utils._get_size(con)
     while 2 * curr_size <= 1_000_000:
       con.execute(f'insert into base_table select * from base_table;')
-      curr_size = utils._get_size(con)
+      curr_size = virtual.utils._get_size(con)
 
     # Insert until 1M rows if we didn't reach the limit yet.
     if curr_size < 1_000_000:
       con.execute(f'insert into base_table select * from base_table limit {1_000_000 - curr_size};')
 
-    print(f'Loaded with repetition: {utils._get_size(con)}')
+    print(f'Loaded with repetition: {virtual.utils._get_size(con)}')
 
   # Finalize the layout. This works for both simple and k-regression.
   # NOTE: The `model_type` is also `None` in this case.
@@ -197,7 +197,7 @@ def benchmark(bench_type, data: pd.DataFrame | pathlib.Path, schema, layout, opt
         
   # Delete the paths.
   for parquet_type in path_mapping:
-    utils._delete_file(path_mapping[parquet_type])
+    virtual.utils._delete_file(path_mapping[parquet_type])
  
   # Close the connection.
   # NOTE: Should have been already closed.
