@@ -77,7 +77,7 @@ class SparseLR:
     fixed_window_mse = original_mse
     lazy_counter = 0
 
-    vs = []
+    all_mses = []
     for feature_index in selected:
       # Fit
       new_selected = [index for index in selected if index != feature_index]
@@ -86,26 +86,35 @@ class SparseLR:
       curr_mse = root_mean_squared_error(y_true=y, y_pred=curr_y_pred)
 
       diff = curr_mse - temp_mse
-      vs.append({
+      all_mses.append({
         'feature' : feature_index,
         'diff' : diff,
       })
-    vs = sorted(vs, key=lambda elem: -elem['diff'])
+    all_mses = sorted(all_mses, key=lambda elem: -elem['diff'])
 
-    selected = [vs[0]['feature']]
+    # selected = [vs[0]['feature'], vs[1]['feature']]
 
-    # temp_selected = []
-    # for index in range(len(vs)):
-    #   temp_selected.append(vs[index]['feature'])
-    #   curr_model = LinearRegression().fit(x[:, temp_selected], y)
-    #   curr_y_pred = curr_model.predict(x[:, temp_selected])
-    #   curr_mse = root_mean_squared_error(y_true=y, y_pred=curr_y_pred)
+    temp_selected = []
+    for index in range(len(all_mses)):
+      temp_selected.append(all_mses[index]['feature'])
+      curr_model = LinearRegression().fit(x[:, temp_selected], y)
+      curr_y_pred = curr_model.predict(x[:, temp_selected])
+      curr_mse = root_mean_squared_error(y_true=y, y_pred=curr_y_pred)
+      all_mses[index]['mse'] = curr_mse
 
-    #   print(f'curr_mse={curr_mse}')
-      
+    selected = []
+    last = all_mses[-1]['mse']
+    for index in range(len(all_mses)):
+      selected.append(all_mses[index]['feature'])
+      mse = all_mses[index]['mse']
 
+      # Already perfect MSE.
+      if mse < 1e-4:
+        break
 
-    print(vs)
+      # Already dropped a sanity threshold.
+      if (mse < 1) or (mse < last + 0.5):
+        break
 
     # print(f'start: {selected}')
 

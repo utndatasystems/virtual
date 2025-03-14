@@ -123,7 +123,7 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
     input_columns = data_wrapper.valid_column_indices.copy()
     input_columns.remove(target_index)
 
-    print(f'BBBBBBBBB')
+    print(f'\nBBBBBBBBB >>>{data_wrapper.valid_column_names[data_wrapper.get_rank(target_index)]}')
     print(input_columns)
     print(data_wrapper.valid_column_names)
     print(data_wrapper.valid_column_indices)
