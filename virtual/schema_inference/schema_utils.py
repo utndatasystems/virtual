@@ -29,7 +29,7 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
   # TODO: Are we calling this twice?
   inferer = LWSchemaInferer(data)
 
-  # And infer
+  # And infer.
   has_header, col_types = inferer.infer(nrows=nrows)
 
   # Categorize the column types.

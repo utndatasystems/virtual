@@ -136,26 +136,12 @@ class HWSchemaInferer:
 
     # Check if `col_name` has NULLs.
     def check_for_null(col_name):
-      if df is not None:
-        tmp = df[col_name].isnull()
-        return {
-          'any' : bool(tmp.any()),
-          'all' : bool(tmp.all())
-        }
-      else:
-        assert isinstance(self.data, pathlib.Path)
-        if self.data.suffix == '.parquet':
-          table_size, null_count = duckdb.sql(f"""
-            select 
-            count(*) as total, 
-            sum(case when {col_name} is null then 1 else 0 end) AS null_count
-            from read_parquet('{str(self.data)}')
-          """).fetchone()
-          
-          return {
-            'any': null_count > 0,
-            'all': null_count == table_size
-          }
+      assert df is not None
+      tmp = df[col_name].isnull()
+      return {
+        'any' : bool(tmp.any()),
+        'all' : bool(tmp.all())
+      }
 
     # Calculate the precision and the scale of `col_name`.
     def calculate_precision_and_scale(col_name):
@@ -171,21 +157,98 @@ class HWSchemaInferer:
 
       return type_checker.left_precision + type_checker.right_precision, type_checker.right_precision
 
-    schema = []
-    for index in range(len(col_types)):
-      col_dict = {
-        # NOTE: We remove the trailing spaces so that the column name matching is more efficient in the actual code.
-        'name': col_types[index]['name'],
-        'type' : col_types[index]['type'],
-        'null': check_for_null(col_types[index]['name']),
-        'scale' : 0,
-        'precision' : 0
-      }
-      if col_types[index]['type'] == 'DOUBLE':
-        col_dict['precision'], col_dict['scale'] = calculate_precision_and_scale(col_types[index]['name'])
+    # TODO: There is a problem with Redset here.
+    # If we load directly into a dataframe, we get a different precision for `mbytes_spilled`.
 
-      # Add to the schema.
-      schema.append(col_dict)
+    # The schema to be collected.
+    schema = []
+    if df is not None:
+      for index in range(len(col_types)):
+        col_dict = {
+          'name': col_types[index]['name'],
+          'type' : col_types[index]['type'],
+          'null': check_for_null(col_types[index]['name']),
+          'scale' : 0,
+          'precision' : 0
+        }
+
+        # Double?
+        if col_types[index]['type'] == 'DOUBLE':
+          col_dict['precision'], col_dict['scale'] = calculate_precision_and_scale(col_types[index]['name'])
+
+        # Add to the schema.
+        schema.append(col_dict)
+    else:
+      assert isinstance(self.data, pathlib.Path)
+      assert self.data.suffix == '.parquet'
+      cns = list(map(lambda elem: elem['name'], col_types))
+      double_cns = list(map(lambda elem: elem['name'], filter(lambda elem: elem['type'] == 'DOUBLE', col_types)))
+
+      # Define the NULL counts.
+      null_counts = list(map(lambda cn: f"sum(case when \"{cn}\" is null then 1 else 0 end) as \"{cn}_null_count\"", cns))
+
+      # Define the left precisions.
+      left_precisions = list(map(lambda cn:f"""max(
+          case
+            when \"{cn}\" is null then 0
+            else length(split_part(cast("{cn}" as varchar), '.', 1)) - (case when \"{cn}\" < 0 then 1 else 0 end)
+          end
+        ) as \"{cn}_left_precision\"""",
+        double_cns
+      ))
+
+      # Define the right precisions.
+      right_precisions = list(map(lambda cn:f"""max(
+          case
+            when \"{cn}\" is null then 0
+            else length(nullif(split_part(cast(\"{cn}\" as varchar), '.', 2), ''))
+          end
+        ) as \"{cn}_right_precision\"""",
+        double_cns
+      ))
+
+      # Be careful here since we might have no double-typed columns.
+      sql_query = f"""
+        select
+          count(*),
+          {', '.join(null_counts)}
+          {(',' + ', '.join(left_precisions)) if double_cns else ''}
+          {(',' + ', '.join(right_precisions)) if double_cns else ''}
+        from read_parquet('{str(self.data)}')
+      """
+
+      ret = duckdb.sql(sql_query).fetchone()
+
+      # Complete the schema.
+      table_size = ret[0]
+      num_double_sofar = 0
+      for index in range(len(col_types)):
+        null_count = ret[index + 1]
+        scale, precision = 0, 0
+        if col_types[index]['type'] == 'DOUBLE':
+          # Take the precisions.
+          left_precision = ret[1 + len(col_types) + num_double_sofar]
+          right_precision = ret[1 + len(col_types) + len(double_cns) + num_double_sofar]
+
+          # Define the scale and the precision.
+          precision = left_precision + right_precision
+          scale = right_precision
+
+          # Increase the counter.
+          num_double_sofar += 1
+
+        # And set.
+        col_dict = {
+          'name': col_types[index]['name'],
+          'type' : col_types[index]['type'],
+          'null': {
+            'any' : null_count > 0,
+            'all' : null_count == table_size
+          },
+          'scale' : scale,
+          'precision' : precision
+        }
+        schema.append(col_dict)
 
     # And return it.
     return schema

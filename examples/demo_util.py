@@ -1,10 +1,13 @@
 import requests
+import os
 
-def get_public_s3_file_size(s3_filepath):
-  assert s3_filepath.startswith('s3://')
-  url = s3_filepath.replace('s3://', 'https://s3.amazonaws.com/')
-  response = requests.head(url)
-  if response.status_code == 200:
-    return int(response.headers.get('Content-Length', 0))
+def get_file_size(parquet_filepath):
+  if parquet_filepath.startswith('s3://'):
+    url = parquet_filepath.replace('s3://', 'https://s3.amazonaws.com/')
+    response = requests.head(url)
+    if response.status_code == 200:
+      return int(response.headers.get('Content-Length', 0))
+    else:
+      raise Exception(f'Error: {response.status_code} - {response.reason}')
   else:
-    raise Exception(f'Error: {response.status_code} - {response.reason}')
+    return os.path.getsize(parquet_filepath)

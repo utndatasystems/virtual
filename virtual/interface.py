@@ -22,7 +22,7 @@ import time
 import re
 
 # TODO: We should add `nrows`. Maybe also the sample_size.
-def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_000, model_types: Optional[list[str]]=['sparse-lr'], prefix=None):
+def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_000, model_types: Optional[list[str]]=['sparse-lr'], schema=None, prefix=None):
   """
     Computes the functions hidden in `data`.
 
@@ -49,12 +49,13 @@ def train(data: pd.DataFrame | pathlib.Path | str, nrows=None, sample_size=10_00
 
   # Check that we're dealing with a file.
   if isinstance(data, pathlib.Path):
-    assert data.is_file()
+    if not str(data).startswith('s3:'):
+      assert data.is_file()
 
   print(f'Drilling functions..')
 
   # Virtualize the table. Note that for this particular step we don't require a schema.
-  functions = v_driller.virtualize_table(data, nrows=nrows, sample_size=sample_size, allowed_model_types=model_types)
+  functions = v_driller.virtualize_table(data, nrows=nrows, sample_size=sample_size, allowed_model_types=model_types, schema=schema)
 
   # Dump `functions`.
   utils.dump_json_data(data, functions, 'driller', prefix)
@@ -103,7 +104,7 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
         # Read the parquet file.
         # print(f'Reading parquet file..')
         # data = duckdb.read_parquet(data).fetchdf()
-        pass
+        data = pathlib.Path(data)
       else:
         assert 0, f'Reading this format from S3 is not yet supported.'
     else:
@@ -112,7 +113,8 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
 
   # Check that we're dealing with a file.
   if isinstance(data, pathlib.Path):
-    assert data.is_file()
+    if not str(data).startswith('s3:'):
+      assert data.is_file()
 
   # No schema? Then generate it.
   if schema is None:
@@ -125,7 +127,7 @@ def to_format(data: pd.DataFrame | pathlib.Path | str, format_path, functions=No
 
   # If no functions provided, drill them.
   if functions is None:
-    functions = train(data, prefix=prefix, model_types=model_types)
+    functions = train(data, prefix=prefix, model_types=model_types, schema=schema)
 
   # Dump `functions`.
   utils.dump_json_data(data, functions, 'driller', prefix)

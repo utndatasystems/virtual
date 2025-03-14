@@ -4,14 +4,15 @@ import duckdb
 
 # Custom helper scripts.
 from virtual.schema_inference.schema_utils import handle_schema
-from virtual.utils import build_query, get_csv_null_options, sample_parquet_file_without_nulls
+from virtual.utils import build_query, get_csv_null_options, sample_parquet_file_without_nulls, _get_column
 
 USE_DUCKDB_PARSER = False
 
 class DataWrapper:
-  def __init__(self, data: pd.DataFrame | pathlib.Path, nrows=None):
+  def __init__(self, data: pd.DataFrame | pathlib.Path, nrows=None, schema=None):
     self.data = data
     self.nrows = nrows
+    self.schema = schema
 
   def inspect_columns(self):
     # Inspect the schema.
@@ -67,7 +68,9 @@ class DataWrapper:
       # We can extract the sample from the data itself.
       if isinstance(self.data, pathlib.Path):
         if self.data.suffix == '.parquet':
-          sample = sample_parquet_file_without_nulls(self.data, sample_size, self.valid_column_names)
+          sample = sample_parquet_file_without_nulls(self.data, self.nrows, sample_size, self.valid_column_names)
+
+    print(sample)
 
     # Return the sample.
     assert sample is not None
@@ -136,7 +139,15 @@ class DataWrapper:
   def get_valid_column_indices(self):
     valid_column_indices = []
     for i, cn in enumerate(self.column_names):
+      # Not supported yet?
       if cn in self.type_categories['date'] or cn in self.type_categories['string'] or cn in self.type_categories['boolean']:
         continue
+
+      # Do we have only NULLs? Then just skip.
+      # TODO: We can skip this check if we have a parquet file: We can directly lookup the column dict.
+      if self.schema is not None:
+        if _get_column(self.schema, cn)['null']['all']:
+          continue
+
       valid_column_indices.append(i)
     return valid_column_indices

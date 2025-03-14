@@ -61,11 +61,11 @@ def run_model(model_type, X, y, col_name=None):
   mse = root_mean_squared_error(y_true=y, y_pred=y_pred)
   return mse, model.intercept_, model.coef_
 
-def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
+def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None, schema=None):
   assert isinstance(data, (pd.DataFrame, pathlib.Path))
   
   # Instantiate the data wrapper.
-  data_wrapper = DataWrapper(data, nrows)
+  data_wrapper = DataWrapper(data, nrows, schema)
 
   # Inspect the columns that we support. This also sets the valid column names and indices.
   data_wrapper.inspect_columns()
@@ -120,6 +120,8 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
     X = sample[:, data_wrapper.get_rank(input_columns)]
     y = sample[:, data_wrapper.get_rank(target_index)]
 
+    print(y)
+
     # Init the local results.
     local_results = None
     try:
@@ -134,7 +136,8 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path, nrows=None, sample_size=
         'models': {}
       }
     except Exception as e:
-      assert False, f"Please double check your CSV file. There is a type/format inconsistency error on column {parser.column_names[target_index]}."
+      print(e)
+      assert False, f"Please double check your file. There is a type/format inconsistency error on column {data_wrapper.column_names[target_index]}."
     assert local_results is not None
 
     # Try the standard models.

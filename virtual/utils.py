@@ -331,10 +331,19 @@ def select_models(model_types: List[str], functions):
   # Map to `ModelType`.
   return validated
 
-def sample_parquet_file_without_nulls(parquet_filepath: pathlib.Path, sample_size, valid_column_names):
+def sample_parquet_file_without_nulls(parquet_filepath: pathlib.Path, nrows, sample_size, valid_column_names):
   assert isinstance(parquet_filepath, pathlib.Path)
-  select_clause = ', '.join([f'"{col}"' for col in valid_column_names])
-  where_clause = ' and '.join([f'"{col}" is not null' for col in valid_column_names])
+  # select_clause = ', '.join([f'"{col}"' for col in valid_column_names])
+  select_clause = ', '.join([f'coalesce("{col}", 0) as "{col}"' for col in valid_column_names])
+
+  # where_clause = ' and '.join([f'"{col}" is not null' for col in valid_column_names])
+
+  print(valid_column_names)
+
+  # Specify the LIMIT-clause.
+  limit_clause = ''
+  if nrows is not None:
+    limit_clause = 'limit {nrows}'
 
   # And sample.
   return duckdb.sql(f'''
@@ -342,7 +351,7 @@ def sample_parquet_file_without_nulls(parquet_filepath: pathlib.Path, sample_siz
     from (
       select {select_clause}
       from read_parquet(\'{str(parquet_filepath)}\')
-      where {where_clause}
+      {limit_clause}
     )
     using sample reservoir({sample_size} ROWS) REPEATABLE (0)
   ''').fetchdf().reset_index(drop=True).to_numpy()
