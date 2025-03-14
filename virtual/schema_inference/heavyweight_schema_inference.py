@@ -1,7 +1,7 @@
 import duckdb
 import pathlib
 import pandas as pd
-from virtual.utils import infer_dialect
+import virtual.utils
 from .lightweight_schema_inference import LWSchemaInferer
 
 class TypeChecker:
@@ -83,8 +83,8 @@ class TypeChecker:
     return value is None or pd.isna(value)
 
 class HWSchemaInferer:
-  def __init__(self, data: pd.DataFrame | pathlib.Path):
-    assert isinstance(data, (pd.DataFrame | pathlib.Path))
+  def __init__(self, data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath):
+    assert isinstance(data, (pd.DataFrame | pathlib.Path, virtual.utils.URLPath))
     self.data = data
 
   def infer(self, nrows=None):
@@ -101,7 +101,7 @@ class HWSchemaInferer:
       if self.data.suffix == '.csv':
         # TODO: Do this better.
         # Infer the csv dialect.
-        csv_dialect = infer_dialect(self.data)
+        csv_dialect = virtual.utils.infer_dialect(self.data)
 
         # Read dataframe. NOTE: If `nrows` is `None`, then the entire file is read.
         # TODO: Replace by DuckDB?
@@ -120,6 +120,9 @@ class HWSchemaInferer:
         # df = duckdb.read_parquet(str(self.data)).fetchdf()
       else:
         assert 0, 'File format not (yet) supported.'
+    elif isinstance(self.data, virtual.utils.URLPath):
+      assert self.data.suffix == '.parquet'
+      pass
     elif isinstance(self.data, pd.DataFrame):
       # Do we have a number of rows specified.
       if nrows is not None:
@@ -179,7 +182,7 @@ class HWSchemaInferer:
         # Add to the schema.
         schema.append(col_dict)
     else:
-      assert isinstance(self.data, pathlib.Path)
+      assert isinstance(self.data, (pathlib.Path, virtual.utils.URLPath))
       assert self.data.suffix == '.parquet'
       cns = list(map(lambda elem: elem['name'], col_types))
       double_cns = list(map(lambda elem: elem['name'], filter(lambda elem: elem['type'] == 'DOUBLE', col_types)))
@@ -208,6 +211,9 @@ class HWSchemaInferer:
       ))
 
       # Be careful here since we might have no double-typed columns.
+      limit_clause = ''
+      if nrows is not None:
+        limit_clause = f'limit {nrows}'
       sql_query = f"""
         select
           count(*),
@@ -215,6 +221,7 @@ class HWSchemaInferer:
           {(',' + ', '.join(left_precisions)) if double_cns else ''}
           {(',' + ', '.join(right_precisions)) if double_cns else ''}
         from read_parquet('{str(self.data)}')
+        {limit_clause}
       """
 
       ret = duckdb.sql(sql_query).fetchone()
