@@ -118,7 +118,7 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
   if isinstance(data, pathlib.Path):
     debug_path = str(data.name)
 
-  # Try each column.
+  # Try each numeric column.
   for target_index in data_wrapper.valid_column_indices:
     input_columns = data_wrapper.valid_column_indices.copy()
     input_columns.remove(target_index)

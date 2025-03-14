@@ -235,7 +235,7 @@ def is_integer(type):
 def is_fp(type):
   return any(x in type.lower() for x in ['double', 'float', 'decimal'])
 
-def is_virtualizable(type):
+def is_num_virtualizable(type):
   return is_integer(type) or is_fp(type)
 
 def is_attached_column_of(target_name, column_name):

@@ -82,8 +82,8 @@ class SparseLR:
         'mse w/o' : curr_mse,
       })
     
-    # Sort by the amplitude.
-    all_mses = sorted(all_mses, key=lambda elem: +elem['mse w/o'])
+    # Sort by the amplitude (in descending order!).
+    all_mses = sorted(all_mses, key=lambda elem: +elem['mse w/o'], reverse=True)
 
     # Now gradually insert.
     temp_selected = []
@@ -105,7 +105,7 @@ class SparseLR:
       if all_mses[index]['mse'] < 1e-4:
         break
 
-      # Already dropped below sanity threshold?
+      # Already dropped below a sanity threshold?
       if all_mses[index]['mse'] < last + 0.5:
         break
 
