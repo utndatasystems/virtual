@@ -23,30 +23,50 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
   # Inspect the columns that we support. This also sets the valid column names and indices.
   data_wrapper.inspect_columns()
 
-  # Check if there is anything to virtualize.
+  # The functions found.
   results = []
-  if len(data_wrapper.v_cols['num']['names']) <= 1 and len(data_wrapper.v_cols['date']['names']) <= 1:
-    print('Nothing to virtualize.')
-    return results
+
+  print(data_wrapper.v_cols)
+
+  print(len(data_wrapper.v_cols['num']['names']))
 
   # Solve the numerical case.
-  if len(data_wrapper.v_cols['num']['names']) <= 1:
+  if len(data_wrapper.v_cols['num']['names']) > 1:
     results.extend(solve_num_cols(data_wrapper, sample_size=sample_size, allowed_model_types=allowed_model_types))
 
   # Solve the date case.
-  if len(data_wrapper.v_cols['date']['names']) <= 1:
+  if len(data_wrapper.v_cols['date']['names']) > 1:
     results.extend(solve_date_cols(data_wrapper, sample_size=sample_size))
 
   print(f'We found {len(results)} function(s) in your table.')
   return results
 
 def solve_date_cols(data_wrapper, sample_size=None):
-  # TODO: We can try multiple samples.
-  sample = data_wrapper.sample('date', sample_size=sample_size)
+  # sample = data_wrapper.sample('date', sample_size=sample_size)
+  results = []
+  for idx1, target_index in enumerate(data_wrapper.v_cols['date']['indices']):
+    for idx2, ref_index in enumerate(data_wrapper.v_cols['date']['indices']):
+      if ref_index == target_index:
+        continue
 
-  print(sample)
-
-  return []
+      results.append({
+        'target_index' : target_index,
+        'target_name': data_wrapper.v_cols['date']['names'][idx1],
+        'models' : {
+          f'custom-{idx2}' : {
+            'mse' : 0,
+            'intercept' : 0,
+            'coeffs' : [
+              {
+                'col-index': ref_index,
+                'col-name': data_wrapper.v_cols['date']['names'][idx2],
+                'coeff' : 1.0
+              }
+            ]
+          }
+        }
+      })
+  return results
 
 def run_model(model_type, X, y, col_name=None):
   model, y_pred = None, None
@@ -125,10 +145,12 @@ def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
       })
     return ret
 
+  # print('here???')
+
   # TODO: We can try multiple samples.
   sample = data_wrapper.sample('num', sample_size=sample_size)
 
-  print(sample)
+  # print(sample)
 
   # sample.to_csv('sample.csv', index=False)
 
@@ -137,21 +159,21 @@ def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
 
   # Try each numeric column.
   results = []
-  for target_index in data_wrapper.valid_column_indices['num']:
-    input_columns = data_wrapper.valid_column_indices['num'].copy()
+  for target_index in data_wrapper.v_cols['num']['indices']:
+    input_columns = data_wrapper.v_cols['num']['indices'].copy()
     input_columns.remove(target_index)
 
-    print(f'\nBBBBBBBBB >>>{data_wrapper.valid_column_names['num'][data_wrapper.get_rank(target_index)]}')
-    print(input_columns)
-    print(data_wrapper.valid_column_names['num'])
-    print(data_wrapper.valid_column_indices['num'])
-    print([data_wrapper.valid_column_names[i] for i in data_wrapper.get_rank(input_columns)])
-    print(data_wrapper.valid_column_names[data_wrapper.get_rank(target_index)])
+    # print(f'\nBBBBBBBBB >>>{data_wrapper.valid_column_names['num'][data_wrapper.get_rank(target_index)]}')
+    # print(input_columns)
+    # print(data_wrapper.valid_column_names['num'])
+    # print(data_wrapper.valid_column_indices['num'])
+    # print([data_wrapper.valid_column_names[i] for i in data_wrapper.get_rank(input_columns)])
+    # print(data_wrapper.valid_column_names[data_wrapper.get_rank(target_index)])
 
     # TODO: Maybe try multiple samples.
     # TODO: This would also be helpful for k-regression.
-    X = sample[:, data_wrapper.get_rank(input_columns)]
-    y = sample[:, data_wrapper.get_rank(target_index)]
+    X = sample[:, data_wrapper.get_rank('num', input_columns)]
+    y = sample[:, data_wrapper.get_rank('num', target_index)]
 
     # Init the local results.
     local_results = None
@@ -184,6 +206,7 @@ def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
       err, intercept, coeffs = run_model(model_type, X, y, data_wrapper.column_names[target_index])
 
       # Do we exceed the max. allowed mse?
+      # TODO: We'll probably have problems with this one.
       if err > MAX_MSE_ALLOWED:
         continue
 

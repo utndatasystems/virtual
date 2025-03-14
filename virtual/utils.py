@@ -212,6 +212,9 @@ class ModelType:
   def is_k_regression(self):
     return bool(k_regression_pattern.match(self.name))
 
+  def is_custom(self):
+    return bool(self.name.startswith('custom-'))
+
   def extract_k(self):
     assert self.is_k_regression()
     assert len(self.name.split('-')) == 2
@@ -237,6 +240,9 @@ def is_fp(type):
 
 def is_num_virtualizable(type):
   return is_integer(type) or is_fp(type)
+
+def is_date_virtualizable(type):
+  return type.lower() == 'date'
 
 def is_attached_column_of(target_name, column_name):
   # TODO: This was a real hack.
@@ -350,9 +356,16 @@ def dump_json_data(data, json_data, component_name, prefix=None):
 def gather_all_models(functions):
   # Collect all model names present in the json file.
 
+  print(functions)
+
   all_keys = set()
-  for col in functions:
-    all_keys |= set(col['models'].keys())
+  for elem in functions:
+    print(elem)
+    print(elem['models'])
+    all_keys |= set(elem['models'].keys())
+
+  print(all_keys)
+
   return all_keys
 
 def select_models(model_types: List[str], functions):
@@ -373,30 +386,51 @@ def select_models(model_types: List[str], functions):
         # Is it a k-regression?
         if ModelType(possible_match).is_k_regression():
           validated.append(possible_match)
+    elif model_type == 'custom':
+      for possible_match in all_keys:
+        if ModelType(possible_match).is_custom():
+          validated.append(possible_match)
 
   # Map to `ModelType`.
   return validated
 
-def sample_parquet_file(parquet_filepath: pathlib.Path | URLPath, nrows, sample_size, valid_column_names):
+def sample_parquet_file(parquet_filepath: pathlib.Path | URLPath, nrows, sample_size, category, v_cns):
   assert isinstance(parquet_filepath, (pathlib.Path, URLPath))
-  # select_clause = ', '.join([f'"{col}"' for col in valid_column_names])
-  select_clause = ', '.join([f'coalesce("{col}", 0) as "{col}"' for col in valid_column_names])
-  # where_clause = ' and '.join([f'"{col}" is not null' for col in valid_column_names])
+  pure_select_clause = ', '.join([f'"{col}"' for col in v_cns])
+  coalesce_select_clause = ', '.join([f'coalesce("{col}", 0) as "{col}"' for col in v_cns])
+  where_clause = ' and '.join([f'"{col}" is not null' for col in v_cns])
 
   # Specify the LIMIT-clause.
   limit_clause = ''
   if nrows is not None:
     limit_clause = f'limit {nrows}'
 
-  sql_query = f'''
-    select {select_clause}
-    from (
-      select *
-      from read_parquet('{str(parquet_filepath)}')
-      {limit_clause}
-    )
-    using sample reservoir({sample_size} ROWS) REPEATABLE (0);
-  '''
+  if category == 'num':
+    sql_query = f'''
+      select {coalesce_select_clause}
+      from (
+        select *
+        from read_parquet('{str(parquet_filepath)}')
+        {limit_clause}
+      )
+      using sample reservoir({sample_size} ROWS) REPEATABLE (0);
+    '''
+  elif category == 'date':
+    sql_query = f'''
+      select {pure_select_clause}
+      from (
+        select *
+        from (
+          select *
+          from read_parquet('{str(parquet_filepath)}')
+          {limit_clause}
+        )
+        {where_clause}
+      )
+      using sample reservoir({sample_size} ROWS) REPEATABLE (0);
+    '''
+  else:
+    assert 0
 
   # And sample.
   return duckdb.sql(sql_query).fetchdf().reset_index(drop=True)

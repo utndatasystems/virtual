@@ -20,19 +20,19 @@ class DataWrapper:
     # Select the virtualizable column indices.
     self.v_cols = self.get_v_columns()
 
-  def get_rank(self, category_type, idxs):
+  def get_rank(self, category, idxs):
     if isinstance(idxs, list):
-      return [self.v_cols[category_type]['indices'].index(idx) for idx in idxs]
-    return self.v_cols[category_type]['indices'].index(idxs)
+      return [self.v_cols[category]['indices'].index(idx) for idx in idxs]
+    return self.v_cols[category]['indices'].index(idxs)
 
-  def sample(self, category_type, sample_size=None):
+  def sample(self, category, sample_size=None):
     df = None
     if isinstance(self.data, pathlib.Path):
       # TODO: Move this support later, since we can directly sample from the CSV file.
       if self.data.suffix == '.csv':
-        df = self.parse(category_type)
+        df = self.parse(category)
     elif isinstance(self.data, pd.DataFrame):
-      df = self.parse(category_type)
+      df = self.parse(category)
 
     # Have at least a sample size.
     if sample_size is None:
@@ -41,11 +41,11 @@ class DataWrapper:
     # Sample now.
     if df is not None:
       # Take care of NULLs.
-      df_without_null = df.dropna(subset=self.v_cols[category_type]['names'])
+      df_without_null = df.dropna(subset=self.v_cols[category]['names'])
 
       # Note: If this doesn't hold, then it's a bit problematic for linear regression.
       # This is because this is an indeterminate system.
-      if len(df_without_null) < len(self.self.v_cols[category_type]['names']):
+      if len(df_without_null) < len(self.self.v_cols[category]['names']):
         df_without_null = df.fillna(0)
 
       # Handle special cases.
@@ -64,16 +64,16 @@ class DataWrapper:
       # We can extract the sample from the data itself.
       if isinstance(self.data, pathlib.Path):
         if self.data.suffix == '.parquet':
-          sample = utils.sample_parquet_file(self.data, self.nrows, sample_size, self.v_cols[category_type]['names'])
+          sample = utils.sample_parquet_file(self.data, self.nrows, sample_size, category, self.v_cols[category]['names'])
       elif isinstance(self.data, utils.URLPath):
         if self.data.suffix == '.parquet':
-          sample = utils.sample_parquet_file(self.data, self.nrows, sample_size, self.v_cols[category_type]['names'])
+          sample = utils.sample_parquet_file(self.data, self.nrows, sample_size, category, self.v_cols[category]['names'])
 
     # Return the sample.
     assert sample is not None
     return sample
 
-  def parse(self, category_type):    
+  def parse(self, category):    
     # Read the CSV with the dtype mapping and date parsing, and without headers
     # TODO: Why does the other need a `dtype_mapping`?
     # TODO: I think this was because we always used SQL to infer the types.
@@ -84,7 +84,7 @@ class DataWrapper:
       if USE_DUCKDB_PARSER:
         # Construct the DuckDB query
         query = utils.build_query(
-          select_stmt=', '.join(self.v_cols[category_type]['indices']),
+          select_stmt=', '.join(self.v_cols[category]['indices']),
           input=self.data,
           header=self.has_header,
           delim=self.csv_dialect['delimiter'],
@@ -108,7 +108,7 @@ class DataWrapper:
           # dtype=dtype_mapping,
           # TODO: Removed this, since it's really slow and we don't need date columns anyway.
           # parse_dates=date_columns,
-          usecols=self.v_cols[category_type]['indices'],
+          usecols=self.v_cols[category]['indices'],
           header=self.has_header,
           delimiter=self.csv_dialect['delimiter'],
           quotechar=self.csv_dialect['quotechar'],
@@ -116,8 +116,8 @@ class DataWrapper:
         )
     elif isinstance(self.data, pd.DataFrame):
       df = self.data
-      if self.v_cols[category_type]['indices'] is not None:
-        df = df.iloc[:, self.v_cols[category_type]['indices']]
+      if self.v_cols[category]['indices'] is not None:
+        df = df.iloc[:, self.v_cols[category]['indices']]
       
       # Limit the number of rows.
       if self.nrows is not None:

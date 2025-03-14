@@ -18,7 +18,7 @@ def generate_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
 
 def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
   # The column categories.
-  type2cns = {
+  cat2cns = {
     'num' : [],
     'time' : [],
     'date' : [],
@@ -41,15 +41,15 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
     sql_type = col_types[index]['type']
 
     if virtual.utils.is_num_virtualizable(sql_type):
-      type2cns['num'].append(cn)
+      cat2cns['num'].append(cn)
     elif sql_type.lower() in ['date']:
-      type2cns['date'].append(cn) 
+      cat2cns['date'].append(cn) 
     elif sql_type.lower() in ['datetime', 'timestamp', 'time']:
-      type2cns['time'].append(cn)
+      cat2cns['time'].append(cn)
     elif sql_type.lower() in ['varchar', 'char']:
-      type2cns['string'].append(cn)
+      cat2cns['string'].append(cn)
     elif sql_type.lower() in ['boolean']:
-      type2cns['boolean'].append(cn)
+      cat2cns['boolean'].append(cn)
     else:
       assert 0
 
@@ -72,4 +72,4 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
     assert 0
 
   # And return.
-  return column_names, csv_dialect, has_header, type2cns
+  return column_names, csv_dialect, has_header, cat2cns

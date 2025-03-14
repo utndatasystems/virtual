@@ -144,7 +144,13 @@ def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_pa
     model_types = utils.gather_all_models(functions)
   else:
     model_types = utils.select_models(model_types, functions)
+
+  print(f'before:')
+  print(model_types)
+
   model_types = list(map(utils.ModelType, model_types))
+
+  print(model_types)
 
   # Estimate the column sizes.
   estimated_sizes = v_optimizer.compute_target_sizes(data, functions, schema, model_types)
