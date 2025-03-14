@@ -4,12 +4,12 @@ import pandas as pd
 import pathlib
 import v_size
 
-def compute_target_sizes(data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath, functions, schema, model_types: List[virtual.utils.ModelType], sample_size=10_000):
+def compute_target_sizes(data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath, functions, schema, model_types: List[virtual.utils.ModelType], sample_size=50_000):
   assert schema is not None
   assert isinstance(data, (pd.DataFrame, pathlib.Path, virtual.utils.URLPath))
 
   # Compute the gains for the target columns.
-  target_sizes = v_size.compute_sizes_of_target_columns(functions, data, schema, model_types, sample_size)
+  target_sizes = v_size.compute_sizes_of_target_columns(functions, data, schema, sample_size, model_types)
 
   # Error?
   if target_sizes is None:
@@ -125,6 +125,9 @@ def optimize(configs, model_types: List[virtual.utils.ModelType]):
       })
 
       compute_space_gain(hyperedges[-1], config, model_type)
+
+      print(f'{target_name} {model_type.name} {hyperedges[-1]['gain']}')
+
       if hyperedges[-1]['gain'] <= 0:
         hyperedges = hyperedges[:-1]
 

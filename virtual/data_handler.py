@@ -62,15 +62,15 @@ class DataWrapper:
       ratio = min(ratio, 1.0)
 
       # And sample.
-      sample = df_without_null.sample(frac=ratio, replace=False, random_state=0).to_numpy()
+      sample = df_without_null.sample(frac=ratio, replace=False, random_state=0)
     else:
       # We can extract the sample from the data itself.
       if isinstance(self.data, pathlib.Path):
         if self.data.suffix == '.parquet':
-          sample = utils.sample_parquet_file_without_nulls(self.data, self.nrows, sample_size, self.valid_column_names)
+          sample = utils.sample_parquet_file(self.data, self.nrows, sample_size, self.valid_column_names)
       elif isinstance(self.data, utils.URLPath):
         if self.data.suffix == '.parquet':
-          sample = utils.sample_parquet_file_without_nulls(self.data, self.nrows, sample_size, self.valid_column_names)
+          sample = utils.sample_parquet_file(self.data, self.nrows, sample_size, self.valid_column_names)
 
     # Return the sample.
     assert sample is not None

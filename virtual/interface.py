@@ -101,14 +101,18 @@ def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_pa
     if data.startswith('hf://'):
       # TODO: We need to check whether the data is actually `.csv` or `.parquet`.
       data = pd.read_csv(data)
-    if data.startswith('s3://'):
+    elif data.startswith('s3://'):
       if format_type == 'parquet':
-        # Read the parquet file.
-        # print(f'Reading parquet file..')
-        # data = duckdb.read_parquet(data).fetchdf()
+        # Set as URL.
         data = utils.URLPath(data)
       else:
         assert 0, f'Reading this format from S3 is not yet supported.'
+    elif data.startswith('https://'):
+      if format_type == 'parquet':
+        # Set as URL.
+        data = utils.URLPath(data)
+      else:
+        assert 0, f'Reading this format from HTTPS is not yet supported.'  
     else:
       data = pathlib.Path(data)
   assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
