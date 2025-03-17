@@ -34,38 +34,43 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
   if len(data_wrapper.v_cols['num']['names']) > 1:
     results.extend(solve_num_cols(data_wrapper, sample_size=sample_size, allowed_model_types=allowed_model_types))
 
-  # Solve the date case.
-  if len(data_wrapper.v_cols['date']['names']) > 1:
-    results.extend(solve_date_cols(data_wrapper, sample_size=sample_size))
+  # Solve the non-numerical cases.
+  for category in ['date', 'timestamp']:
+    if len(data_wrapper.v_cols[category]['names']) > 1:
+      results.extend(solve_custom_cols(data_wrapper, category, sample_size=sample_size))
 
   print(f'We found {len(results)} function(s) in your table.')
   return results
 
-def solve_date_cols(data_wrapper, sample_size=None):
-  # sample = data_wrapper.sample('date', sample_size=sample_size)
+def solve_custom_cols(data_wrapper, category, sample_size=None):
   results = []
-  for idx1, target_index in enumerate(data_wrapper.v_cols['date']['indices']):
-    for idx2, ref_index in enumerate(data_wrapper.v_cols['date']['indices']):
+  for idx1, target_index in enumerate(data_wrapper.v_cols[category]['indices']):
+    # Note: We use this index to reduce the number of custom models we evaluate.
+    custom_idx = 0
+    for idx2, ref_index in enumerate(data_wrapper.v_cols[category]['indices']):
       if ref_index == target_index:
         continue
 
       results.append({
         'target_index' : target_index,
-        'target_name': data_wrapper.v_cols['date']['names'][idx1],
+        'target_name': data_wrapper.v_cols[category]['names'][idx1],
         'models' : {
-          f'custom-{idx2}' : {
+          f'custom-{custom_idx}' : {
             'mse' : 0,
             'intercept' : 0,
             'coeffs' : [
               {
                 'col-index': ref_index,
-                'col-name': data_wrapper.v_cols['date']['names'][idx2],
+                'col-name': data_wrapper.v_cols[category]['names'][idx2],
                 'coeff' : 1.0
               }
             ]
           }
         }
       })
+
+      # Increase the custom index.
+      custom_idx += 1
   return results
 
 def run_model(model_type, X, y, col_name=None):

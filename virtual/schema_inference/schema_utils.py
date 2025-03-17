@@ -20,8 +20,9 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
   # The column categories.
   cat2cns = {
     'num' : [],
-    'time' : [],
     'date' : [],
+    'timestamp' : [],
+    'time' : [],
     'string' : [],
     # TODO: Fix this later. The issue is that DuckDB interprets as `BOOLEAN` any binary column.
     'boolean' : []
@@ -43,8 +44,10 @@ def handle_schema(data: pd.DataFrame | pathlib.Path, nrows=None):
     if virtual.utils.is_num_virtualizable(sql_type):
       cat2cns['num'].append(cn)
     elif sql_type.lower() in ['date']:
-      cat2cns['date'].append(cn) 
-    elif sql_type.lower() in ['datetime', 'timestamp', 'time']:
+      cat2cns['date'].append(cn)
+    elif sql_type.lower() in ['timestamp']:
+      cat2cns['timestamp'].append(cn)
+    elif sql_type.lower() in ['datetime', 'time']:
       cat2cns['time'].append(cn)
     elif sql_type.lower() in ['varchar', 'char']:
       cat2cns['string'].append(cn)

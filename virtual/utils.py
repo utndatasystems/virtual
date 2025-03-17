@@ -241,8 +241,8 @@ def is_fp(type):
 def is_num_virtualizable(type):
   return is_integer(type) or is_fp(type)
 
-def is_date_virtualizable(type):
-  return type.lower() == 'date'
+def is_custom_virtualizable(type):
+  return type.lower() in ['date', 'timestamp']
 
 def is_attached_column_of(target_name, column_name):
   # TODO: This was a real hack.
@@ -415,20 +415,20 @@ def sample_parquet_file(parquet_filepath: pathlib.Path | URLPath, nrows, sample_
       )
       using sample reservoir({sample_size} ROWS) REPEATABLE (0);
     '''
-  elif category == 'date':
-    sql_query = f'''
-      select {pure_select_clause}
-      from (
-        select *
-        from (
-          select *
-          from read_parquet('{str(parquet_filepath)}')
-          {limit_clause}
-        )
-        {where_clause}
-      )
-      using sample reservoir({sample_size} ROWS) REPEATABLE (0);
-    '''
+  # elif category == 'date':
+  #   sql_query = f'''
+  #     select {pure_select_clause}
+  #     from (
+  #       select *
+  #       from (
+  #         select *
+  #         from read_parquet('{str(parquet_filepath)}')
+  #         {limit_clause}
+  #       )
+  #       {where_clause}
+  #     )
+  #     using sample reservoir({sample_size} ROWS) REPEATABLE (0);
+  #   '''
   else:
     assert 0
 

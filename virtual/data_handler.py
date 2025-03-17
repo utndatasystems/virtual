@@ -45,7 +45,7 @@ class DataWrapper:
 
       # Note: If this doesn't hold, then it's a bit problematic for linear regression.
       # This is because this is an indeterminate system.
-      if len(df_without_null) < len(self.self.v_cols[category]['names']):
+      if len(df_without_null) < len(self.v_cols[category]['names']):
         df_without_null = df.fillna(0)
 
       # Handle special cases.
@@ -55,7 +55,7 @@ class DataWrapper:
       else:
         ratio = sample_size / len(df_without_null)
 
-      # (Trivially) upper-bound the ratio. This happens if the sample size was larger than the data itself.
+      # (Trivially) upper-bound the ratio. This happens if the sample size is larger than the data itself.
       ratio = min(ratio, 1.0)
 
       # And sample.

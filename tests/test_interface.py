@@ -15,15 +15,44 @@ def sum_data():
     'c': c
   })
 
+def get_wide_df():
+  a = np.random.randint(0, 10, size=1000)
+  b = np.random.randint(0, 10, size=1000)
+  c = np.random.randint(0, 10, size=1000)
+  z = np.random.randint(0, 10, size=1000)
+  x = np.random.randint(0, 10, size=1000)
+
+  d = a + b + c
+  e = d + x
+  return pd.DataFrame({
+    'a': a,
+    'b': b,
+    'c': c,
+    'd' : d,
+    'e' : e,
+    'x' : x,
+    'z' : z
+  })
+
 def get_model_types():
   return ['sparse-lr']
 
-def test_train_sum():
+def test_train_sum1():
+  # TODO: Fix this one.
   model_types = get_model_types()
   data = sum_data()
   ret = train(data, model_types=model_types)
   fns = extract_functions(ret, model_type='sparse-lr')
   gt = ['a = c + -b', 'c = b + a', 'b = -a + c']
+  assert compare_fns(fns, gt)
+
+def test_train_sum2():
+  # TODO: Fix this one.
+  model_types = get_model_types()
+  data = get_wide_df()
+  ret = train(data, model_types=model_types)
+  fns = extract_functions(ret, model_type='sparse-lr')
+  gt = ['d = a + b + c', 'e = d + x']
   assert compare_fns(fns, gt)
 
 def test_query_sum():

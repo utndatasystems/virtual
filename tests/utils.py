@@ -11,7 +11,7 @@ def get_function(fn):
     regression.append(str(intercept))
 
   for col_info in fn['coeffs']:
-    col_name = col_info['col_name']
+    col_name = col_info['col-name']
     col_coeff = col_info['coeff']
     if math.isclose(col_coeff, 0.0):
       continue

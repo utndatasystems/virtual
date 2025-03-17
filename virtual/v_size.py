@@ -74,10 +74,13 @@ def _create_base_table(target_columns, schema, model_type=None):
     if virtual.utils.is_num_virtualizable(type):
       return f"\"{name}\" {type} not null default 0"
     
-    # The offset for DATE columns is an integer!
-    if virtual.utils.is_date_virtualizable(type):
+    # The offset for DATE|TIMESTAMP columns is an integer!
+    if virtual.utils.is_custom_virtualizable(type):
       return f"\"{name}\" integer not null default 0"
-      
+
+    # Unreachable.
+    assert 0
+
   def create_outlier_column(target_name):
     name = f"{target_name}_outlier"
     type = _get_info(schema, target_name)['type']
