@@ -228,18 +228,39 @@
 
       /* Footer */
       footer {
-        position: relative;
+        position: relative; /* So we can absolutely position the button inside */
         width: 100%;
-        padding: 20px 20px;
+        padding: 20px;
+        display: flex;
+        justify-content: center; /* Center the footer text horizontally */
+        align-items: center; /* Center items vertically */
         text-align: center;
         background: rgba(255, 255, 255, 0.2);
         border-top: 2px solid rgba(255, 255, 255, 0.3);
         backdrop-filter: blur(10px);
         box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
         font-weight: bold;
-        display: flex;
-        align-items: center; /* Centers text vertically */
-        justify-content: center; /* Centers text horizontally */
+        box-sizing: border-box;
+      }
+
+      /* The “Back to Virtual” button on the right */
+      .back-button {
+        position: absolute; /* So it doesn't affect the centered text */
+        right: 20px; /* Move to right edge with some padding */
+        font-size: 1rem;
+        padding: 12px 20px;
+        cursor: pointer;
+        border: none;
+        border-radius: 25px;
+        background: linear-gradient(135deg, #00c6ff, #007bff);
+        color: white;
+        transition: all 0.3s ease;
+      }
+
+      /* Hover effect for the button */
+      .back-button:hover {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #007bff, #00c6ff);
       }
     </style>
   </head>
@@ -294,7 +315,10 @@
     </div>
 
     <!-- Footer -->
-    <footer>✨ Get ready to play! ✨</footer>
+    <footer>
+      <div class="footer-text">✨ Get ready to play! ✨</div>
+      <button class="back-button" onclick="goToVirtual()">Back to Virtual</button>
+    </footer>
 
     <script>
       localStorage.setItem("quizNum", 1);
@@ -302,7 +326,7 @@
       localStorage.setItem("globalQuizData", JSON.stringify({}));
       localStorage.setItem("playerName", "Player");
       document.getElementById("startButton").addEventListener("click", () => {
-        window.location.href = `game/quiz.html`;
+        window.location.href = `game/example.html`;
       });
 
       async function loadLeaderboard() {
@@ -354,6 +378,11 @@
         // if (tableBody.innerHTML === "") {
         //   tableBody.innerHTML = originalTableBody;
         // }
+      }
+
+      function goToVirtual() {
+        // Adjust this to your actual “Virtual” page or route
+        window.location.href = "index.html";
       }
 
       window.onload = loadLeaderboard;
