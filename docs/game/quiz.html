@@ -258,7 +258,7 @@
 
       async function loadCSV(quizNum) {
         try {
-          const response = await fetch(`quizzes/quiz${quizNum}.csv`);
+          const response = await fetch(`assets/quizzes/quiz${quizNum}.csv`);
           if (!response.ok) {
             throw new Error("Failed to load CSV file");
           }
@@ -325,7 +325,7 @@
         quizNum = parseInt(quizNum);
 
         try {
-          const response = await fetch(`quizzes/quiz${quizNum}.csv`);
+          const response = await fetch(`assets/quizzes/quiz${quizNum}.csv`);
           if (!response.ok) {
             console.error("CSV file not found:", response.status);
             return false;
@@ -363,6 +363,7 @@
               // Evaluate the equation for the current row
               let leftValue = Number(math.evaluate(equationLeft, row));
               let rightValue = Number(math.evaluate(equationRight, row));
+              console.log("Left:", leftValue, "Right:", rightValue);
               return leftValue === rightValue;
             } catch (error) {
               console.error("Equation Evaluation Error:", error);
@@ -410,13 +411,13 @@
 
           // Show result window based on verification
           const resultWindow = window.open(
-            "showResult.html",
+            `showResult.html?correct=${result.toString()}`,
             "Result",
             `width=${w},height=${h},left=${left},top=${top}`
           );
           return new Promise((resolve) => {
             let timeElapsed = 0;
-            const timeoutLimit = 5000; // 5 seconds timeout
+            const timeoutLimit = 50000; // 5 seconds timeout
 
             const checkClosed = setInterval(() => {
               timeElapsed += 500; // Increase check time by 500ms
