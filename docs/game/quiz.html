@@ -83,6 +83,20 @@
         justify-content: center;
       }
 
+      .timer-container {
+        /* Center the timer horizontally using Flexbox */
+        display: flex;
+        justify-content: center;
+        /* Add some spacing below so it doesn’t crowd the label */
+        margin-bottom: 20px;
+        font-size: 3rem;
+      }
+
+      #timer {
+        font-size: 3rem; /* Make timer bigger */
+        font-weight: bold;
+      }
+
       .right input[type="text"],
       .right button {
         width: 90%;
@@ -171,7 +185,7 @@
         >: Game 🎮
       </div>
       <div>Quiz <span id="quiz_id">1</span></div>
-      <div>⏰ <span id="timer">00:00:00</span></div>
+      <!-- <div>⏰ <span id="timer">00:00:00</span></div> -->
     </header>
 
     <div class="container">
@@ -182,6 +196,7 @@
         </table>
       </div>
       <div class="right">
+        <div class="timer-container">⏰ <span id="timer">00:00:00</span></div>
         <label for="functionInput">✏️ Write functions:</label>
         <input type="text" id="functionInput" placeholder="a = ..." />
         <button id="verifyButton">Verify</button>
@@ -215,6 +230,26 @@
           const seconds = (totalSeconds % 60).toFixed(2).padStart(5, "0"); // Keep one decimal place
 
           timerElement.textContent = `${minutes}:${seconds}`; // Display time
+          if (totalMilliseconds <= 0) {
+            timerPaused = true;
+            let globalQuizData = JSON.parse(localStorage.getItem("globalQuizData")) || {};
+            globalQuizData[quizNum] = {
+              input: "None",
+              status: "incorrect",
+              time: startTime - totalMilliseconds
+            };
+
+            for (let i = quizNum + 1; i <= 5; i++) {
+              globalQuizData[i] = {
+                input: "None",
+                status: "incorrect",
+                time: 0
+              };
+            }
+            localStorage.setItem("globalQuizData", JSON.stringify(globalQuizData));
+            console.log("Global Quiz Data:", globalQuizData);
+            window.location.href = "name.html";
+          }
         }
       }
 
@@ -366,12 +401,18 @@
           console.log("Global Quiz Data:", globalQuizData);
 
           console.log("Result:", result);
+          const w = 300; // width
+          const h = 300; // height
+
+          // Calculate left and top to center on the primary display
+          const left = screen.width / 2 - w / 2;
+          const top = screen.height / 2 - h / 2;
 
           // Show result window based on verification
           const resultWindow = window.open(
-            `showResult.html?correct=${result.toString()}`,
+            "showResult.html",
             "Result",
-            "width=300,height=300"
+            `width=${w},height=${h},left=${left},top=${top}`
           );
           return new Promise((resolve) => {
             let timeElapsed = 0;
