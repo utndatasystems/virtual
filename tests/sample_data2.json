@@ -1,7 +1,7 @@
 [
   {
-    "target_index": 0,
-    "target_name": "A",
+    "target-index": 0,
+    "target-name": "A",
     "models": {
       "sparse-lr": {
         "intercept": 0.0,
@@ -22,8 +22,8 @@
     }
   },
   {
-    "target_index": 0,
-    "target_name": "B",
+    "target-index": 0,
+    "target-name": "B",
     "models": {
       "sparse-lr": {
         "intercept": 0.0,
@@ -44,8 +44,8 @@
     }
   },
   {
-    "target_index": 0,
-    "target_name": "A",
+    "target-index": 0,
+    "target-name": "A",
     "models": {
       "sparse-lr": {
         "intercept": 0.0,

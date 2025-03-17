@@ -37,13 +37,13 @@ def _model_has_null_reference_columns(schema, model, model_type: ModelType):
   return False
 
 def _is_target_column_null(schema, target_column):
-  return _get_column(schema, target_column['target_name'])['null']['any']
+  return _get_column(schema, target_column['target-name'])['null']['any']
 
 def get_model(iter, model_type: ModelType):
   # Have we already assigned a model type to this column?
-  if 'model_type' in iter:
+  if 'model-type' in iter:
     # If so, just return the actual model.
-    return iter[iter['model_type']], ModelType(iter['model_type'])
+    return iter[iter['model-type']], ModelType(iter['model-type'])
   else:
     # Otherwise, we must have a custom `model_type`.
     # In that case, check if it is present as a model.
@@ -132,21 +132,21 @@ def _create_base_table(target_columns, schema, model_type=None):
     # Do we need an `offset` column?
     # NOTE: Currently, we always create one. We remove it afterwards in an optimization step.
     if _model_needs_offset(iter, model_type):
-      columns.append(create_offset_column(iter['target_name']))
+      columns.append(create_offset_column(iter['target-name']))
 
     # Do we need an `outlier` column? This happens if one of the reference columns has NULLs.
     if _model_has_null_reference_columns(schema, model, model_type):
-      columns.append(create_outlier_column(iter['target_name']))
+      columns.append(create_outlier_column(iter['target-name']))
 
     # Do we need an `null` column? This happens if the column has NULLs.
     if _is_target_column_null(schema, iter):
-      columns.append(create_is_null_column(iter['target_name']))
+      columns.append(create_is_null_column(iter['target-name']))
 
     # Add the switch column.
     if model_type.is_k_regression():
         # TODO: Maybe don't do this if we actually don't find anything.
         # TODO: But this can already be done in the explorer.
-        columns.append(create_switch_column(iter['target_name']))
+        columns.append(create_switch_column(iter['target-name']))
 
     # This part only concerns temporary columns.
     if model_type.is_k_regression():
@@ -154,14 +154,14 @@ def _create_base_table(target_columns, schema, model_type=None):
         k = model_type.extract_k()
 
         for index in range(k):
-          columns.append(create_formula_column(iter['target_name'], index))
+          columns.append(create_formula_column(iter['target-name'], index))
         
         # Add the `least` column.
-        columns.append(create_least_column(iter['target_name']))
+        columns.append(create_least_column(iter['target-name']))
 
     # Add a temporary offset column which can be null.
     # if virtual.utils.is_k_regression(model_type):
-    #    columns.append(create_temp_offset_column(iter['target_name']))
+    #    columns.append(create_temp_offset_column(iter['target-name']))
 
   columns = " , ".join(columns)
 
@@ -373,7 +373,7 @@ def create_dump_base(con, schema, target_columns, out_file):
   return f"copy (select {columns} from base_table) to '{out_file}' (FORMAT PARQUET, COMPRESSION '{PARQUET_COMPRESSION_TYPE}');"
 
 def create_dump_base_target_column(con, schema, target_column, out_file):
-  return f"copy (select \"{target_column['target_name']}\" from base_table) to '{out_file}' (FORMAT PARQUET, COMPRESSION '{PARQUET_COMPRESSION_TYPE}');"
+  return f"copy (select \"{target_column['target-name']}\" from base_table) to '{out_file}' (FORMAT PARQUET, COMPRESSION '{PARQUET_COMPRESSION_TYPE}');"
 
 # NOTE: You need to adapt this part if you want change the layout.
 def is_auxiliary_column(cn):
@@ -391,7 +391,7 @@ def clean_base_table(all_columns, target_columns):
       # TODO: We also need to take into account "...", right?
       # TODO: This is really a hack.
       # NOTE: Pay attention at this case: average_admissions_30_49_covid_confirmed_per_100k vs average_admissions_30_49_covid_confirmed.
-      if virtual.utils.is_attached_column_of(target_column['target_name'], cn) and is_auxiliary_column(cn):
+      if virtual.utils.is_attached_column_of(target_column['target-name'], cn) and is_auxiliary_column(cn):
         rest.remove(cn)
   return rest
 
@@ -420,13 +420,13 @@ def create_dump_virtual_target_column(con, schema, target_column, out_file):
   all_columns = clean_base_table(all_columns, [target_column]) 
 
   # Remove the target column.
-  all_columns.remove(target_column['target_name'])
+  all_columns.remove(target_column['target-name'])
 
   # Take the attached column.
   keep = []
   for cn in all_columns:
     # TODO: Do we need to use quotes?
-    if virtual.utils.is_attached_column_of(target_column['target_name'], cn):
+    if virtual.utils.is_attached_column_of(target_column['target-name'], cn):
         keep.append(cn)
   
   # If there is nothing to keep, just store a dummy parquet file.
@@ -444,20 +444,20 @@ def build_least_column(model, schema, target_iter):
   updates = []
   for index, local_model in enumerate(model['config']):
     # NOTE: This formula has already taken into consideration the type of the target column.
-    local_formula = _create_regression(local_model, schema, target_iter['target_name'])
+    local_formula = _create_regression(local_model, schema, target_iter['target-name'])
 
     # Build the `least` column.
     # TODO: The problem is that the difference could be negative.
     # TODO: Or maybe we do an if.
     # TODO: Done, but this could still lead to an overflow.
-    local_offset = _create_abs_offset(local_formula, target_iter['target_name'])
+    local_offset = _create_abs_offset(local_formula, target_iter['target-name'])
     least_builder.append(local_offset)
 
-    updates.append(f"\"{target_iter['target_name']}_f{index}\" = {local_formula}")
+    updates.append(f"\"{target_iter['target-name']}_f{index}\" = {local_formula}")
 
   # Build.
   least_builder_str = ', '.join(least_builder)
-  least_builder_str = f"\"{target_iter['target_name']}_least\" = least({least_builder_str})"
+  least_builder_str = f"\"{target_iter['target-name']}_least\" = least({least_builder_str})"
 
   updates.append(least_builder_str)
 
@@ -467,30 +467,30 @@ def build_least_column(model, schema, target_iter):
 def build_switch_column(model, schema, target_iter):
   switch_builder = []
   for index, local_model in enumerate(model['config']):
-    local_formula = _create_regression(local_model, schema, target_iter['target_name'])
-    local_offset = _create_abs_offset(local_formula, target_iter['target_name'])
-    switch_builder.append(f"when {local_offset} - \"{target_iter['target_name']}_least\" < 1e-6 then {index}")
+    local_formula = _create_regression(local_model, schema, target_iter['target-name'])
+    local_offset = _create_abs_offset(local_formula, target_iter['target-name'])
+    switch_builder.append(f"when {local_offset} - \"{target_iter['target-name']}_least\" < 1e-6 then {index}")
   
   # Build. Please keep the space before the first ` end`, otherwise we have problems.
-  switch_builder_str = f"case when \"{target_iter['target_name']}_least\" is null then 0 else (case " + '\n'.join(switch_builder) + " end) end"
+  switch_builder_str = f"case when \"{target_iter['target-name']}_least\" is null then 0 else (case " + '\n'.join(switch_builder) + " end) end"
   
   # And return.
-  return f"update base_table set \"{target_iter['target_name']}_switch\" = {switch_builder_str};"
+  return f"update base_table set \"{target_iter['target-name']}_switch\" = {switch_builder_str};"
 
 def build_offset_column(model, schema, target_iter):
   # TODO: Maybe we can put the switch to -1, and then update it to 0.
   offset_builder = []
   for index, local_model in enumerate(model['config']):
-    local_formula = _create_regression(local_model, schema, target_iter['target_name'])
+    local_formula = _create_regression(local_model, schema, target_iter['target-name'])
     
     # TODO: This offset can be signed, so it's pretty bad for the type.
-    offset_builder.append(f"when \"{target_iter['target_name']}_switch\" = {index} then \"{target_iter['target_name']}\" - {local_formula}")
+    offset_builder.append(f"when \"{target_iter['target-name']}_switch\" = {index} then \"{target_iter['target-name']}\" - {local_formula}")
   
   # Build.
-  offset_builder_str = f"case when \"{target_iter['target_name']}_least\" is null then 0 else (case " + '\n'.join(offset_builder) + " end) end"
+  offset_builder_str = f"case when \"{target_iter['target-name']}_least\" is null then 0 else (case " + '\n'.join(offset_builder) + " end) end"
   
   # And return.
-  return f"update base_table set \"{target_iter['target_name']}_offset\" = {offset_builder_str};"
+  return f"update base_table set \"{target_iter['target-name']}_offset\" = {offset_builder_str};"
 
 def debug_base_table(con, msg, verbose=False):
   if verbose:
@@ -516,7 +516,7 @@ def create_virtual_column_layout(con, target_iter, schema, model_type: Optional[
     return reference_columns
 
   # In case the column has _only_ NULLs, skip.
-  if _get_column(schema, target_iter['target_name'])['null']['all']:
+  if _get_column(schema, target_iter['target-name'])['null']['all']:
     return []
 
   # Fetch the model.
@@ -555,12 +555,12 @@ def create_virtual_column_layout(con, target_iter, schema, model_type: Optional[
     # TODO: There is a problem here, since the offset doesn't take into account the outlier.
     if _model_needs_offset(target_iter, model_type):
       # Create the regression.
-      formula = _create_regression(model, schema, target_iter['target_name'])
+      formula = _create_regression(model, schema, target_iter['target-name'])
 
       # NOTE | TODO: The offset should also take the scale of the original column?
-      update = f"round(\"{target_iter['target_name']}\" - ({formula}), {virtual.utils._get_info(schema, target_iter['target_name'])['scale']})"
+      update = f"round(\"{target_iter['target-name']}\" - ({formula}), {virtual.utils._get_info(schema, target_iter['target-name'])['scale']})"
       update = f"coalesce({update}, 0)"
-      update = f"\"{target_iter['target_name']}_offset\" = {update}"
+      update = f"\"{target_iter['target-name']}_offset\" = {update}"
       local_updates.append(update)
   
   # Check for null reference columns.
@@ -569,7 +569,7 @@ def create_virtual_column_layout(con, target_iter, schema, model_type: Optional[
     expr = None
     if not model_type.is_k_regression():
       ref_is_null = _create_sql_any_reference_column_is_null(model)
-      expr = f"case when {ref_is_null} then \"{target_iter['target_name']}\" else null end"
+      expr = f"case when {ref_is_null} then \"{target_iter['target-name']}\" else null end"
     else:
       # At this point, we need to only take _our_ reference columns, i.e., those corresponding to the switch.         
       # Build the expressions for the `is null` expressions.
@@ -580,7 +580,7 @@ def create_virtual_column_layout(con, target_iter, schema, model_type: Optional[
       # Build the outlier column.
       outlier_builder = []
       for index in range(len(model['config'])):
-        col = target_iter['target_name']
+        col = target_iter['target-name']
 
         # Inspect the switch.            
         outlier_builder.append(f"when \"{col}_switch\" = {index} then (case when {ref_is_null[index]} then null else \"{col}\" end)")
@@ -588,11 +588,11 @@ def create_virtual_column_layout(con, target_iter, schema, model_type: Optional[
 
     # Set the outlier column.
     assert expr is not None
-    local_updates.append(f"\"{target_iter['target_name']}_outlier\" = {expr}")
+    local_updates.append(f"\"{target_iter['target-name']}_outlier\" = {expr}")
 
   # Check if the column can be null.
   if _is_target_column_null(schema, target_iter):
-    update = f"\"{target_iter['target_name']}_null\" = \"{target_iter['target_name']}\" is null"
+    update = f"\"{target_iter['target-name']}_null\" = \"{target_iter['target-name']}\" is null"
     local_updates.append(update)
 
   # And return.
@@ -613,7 +613,7 @@ def create_virtual_table_layout(con, target_columns, schema, model_type=None):
       update_sql = f"update base_table set {','.join(curr_updates)};"
       con.execute(update_sql)
 
-      debug_base_table(con, f"{iter['target_name']} @@@@@ after the updates!!!!!!!!!!")
+      debug_base_table(con, f"{iter['target-name']} @after updates")
     except Exception as e:
       # Otherwise, skip it.
       continue
@@ -633,11 +633,11 @@ def reoptimize_virtual_table_layout(con, target_columns):
       cn = virtual.utils.rreplace(cn, '_count', '')
 
       # NOTE: This is really important!
-      if cn == target_column['target_name']:
+      if cn == target_column['target-name']:
         continue
 
       # Then remove it if it is an auxiliary column.
-      if virtual.utils.is_attached_column_of(target_column['target_name'], cn) and is_special_column(cn):
+      if virtual.utils.is_attached_column_of(target_column['target-name'], cn) and is_special_column(cn):
         to_remove.append(cn)
 
   if len(to_remove):

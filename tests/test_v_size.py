@@ -21,7 +21,7 @@ def test_create_regression(sample_data1, schema1, model_types):
     ret = _create_regression(
       iter['models']['sparse-lr'],
       schema=schema1,
-      target_name=iter['target_name']
+      target_name=iter['target-name']
     )
     other_cols = fns[index].split('=')[1].strip()
     assert ret == f'"{other_cols}"'
@@ -34,7 +34,7 @@ def test_create_virtual_column_layout(sample_data1, schema1, model_types):
       schema=schema1,
       model_type=model_types[0]
     )
-    col_name = iter['target_name']
+    col_name = iter['target-name']
 
     # Create the regression.
     tmp = _create_regression(

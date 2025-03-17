@@ -17,40 +17,40 @@ def collect_required_virtual_columns(target_iter, model_type, all_virtual_column
 
 def generate_formula(schema, parquet_header, target_iter, all_virtual_columns, enforce_replacement=False):
   # Fetch the model type.
-  assert 'model_type' in target_iter
-  model_type = ModelType(target_iter['model_type'])
+  assert 'model-type' in target_iter
+  model_type = ModelType(target_iter['model-type'])
 
   # Determine which virtual columns we require to build extra.
   required = collect_required_virtual_columns(target_iter, model_type, all_virtual_columns)
-  assert target_iter['target_name'] not in required
+  assert target_iter['target-name'] not in required
 
   # Create the mapping from the name to their expression.
   mapping = dict()
   for other_iter in all_virtual_columns:
-    if other_iter['target_name'] in required:
+    if other_iter['target-name'] in required:
       _, expr = generate_formula(schema, parquet_header, other_iter, all_virtual_columns, enforce_replacement=enforce_replacement)
-      mapping[other_iter['target_name']] = expr
+      mapping[other_iter['target-name']] = expr
 
   # Declare the columns we will be using.
   # TODO: Add switch.
-  is_null_col = f"{target_iter['target_name']}_null"
-  outlier_col = f"{target_iter['target_name']}_outlier"
-  offset_col = f"{target_iter['target_name']}_offset"
-  # switch_col = f"\"{target_iter['target_name']}_switch\""
+  is_null_col = f"{target_iter['target-name']}_null"
+  outlier_col = f"{target_iter['target-name']}_outlier"
+  offset_col = f"{target_iter['target-name']}_offset"
+  # switch_col = f"\"{target_iter['target-name']}_switch\""
 
   # Simple regression.
   if not model_type.is_k_regression():
-    formula = _create_regression(target_iter[model_type.name], schema, target_iter['target_name'])
+    formula = _create_regression(target_iter[model_type.name], schema, target_iter['target-name'])
   else:
     local_fs = []
     for index, local_model in enumerate(target_iter[model_type.name]['config']):
-      local_fs.append(_create_regression(local_model, schema, target_iter['target_name']))
+      local_fs.append(_create_regression(local_model, schema, target_iter['target-name']))
 
     builder = []
     for index, local_model in enumerate(target_iter[model_type.name]['config']):
       # TODO: This offset can be signed, so it's pretty bad for the type.
       if index != len(target_iter[model_type.name]['config']) - 1:
-        builder.append(f"when \"{target_iter['target_name']}_switch\" = {index} then {local_fs[index]}")
+        builder.append(f"when \"{target_iter['target-name']}_switch\" = {index} then {local_fs[index]}")
       else:
         # Optimize the last `when` since we can directly put `else`.
         builder.append(f"else {local_fs[index]}")
@@ -97,7 +97,7 @@ def generate_formula(schema, parquet_header, target_iter, all_virtual_columns, e
   formula = new_formula
 
   # And return it, also with a suffix with the actual column name.
-  return f"{formula} as \"{target_iter['target_name']}\"", formula
+  return f"{formula} as \"{target_iter['target-name']}\"", formula
 
 def _measure_impl(bench_col, parquet_path):
   # Open the connection.
@@ -133,7 +133,7 @@ def _measure_impl(bench_col, parquet_path):
 def measure_reconstruction_latency_per_column(parquet_type, parquet_path, schema, all_target_columns, target_iter):
   bench_col = None
   if parquet_type == 'base':
-    bench_col = f"\"{target_iter['target_name']}\""
+    bench_col = f"\"{target_iter['target-name']}\""
   elif parquet_type == 'virtual':
     # Open a temporary connection.
     # This is used to read the header of the parquet file.

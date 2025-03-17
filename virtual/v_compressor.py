@@ -111,8 +111,8 @@ def compress(data: pd.DataFrame | pathlib.Path, schema, layout, optimize_layout=
   return virtual_path
 
 def _latency_impl(parquet_type, parquet_path, schema, all_target_columns, target_iter):
-  assert 'model_type' in target_iter
-  model_type = virtual.utils.ModelType(target_iter['model_type'])
+  assert 'model-type' in target_iter
+  model_type = virtual.utils.ModelType(target_iter['model-type'])
 
   # Add the sizes into the dictionary.
   if 'latencies' not in target_iter:

@@ -1,7 +1,7 @@
 [
   {
-    "target_index": 0,
-    "target_name": "A",
+    "target-index": 0,
+    "target-name": "A",
     "models": {
       "sparse-lr": {
         "intercept": 0.0,
@@ -22,8 +22,8 @@
     }
   },
   {
-    "target_index": 1,
-    "target_name": "B",
+    "target-index": 1,
+    "target-name": "B",
     "models": {
       "sparse-lr": {
         "intercept": 0.0,
@@ -44,8 +44,8 @@
     }
   },
   {
-    "target_index": 1,
-    "target_name": "B",
+    "target-index": 1,
+    "target-name": "B",
     "models": {
       "sparse-lr": {
         "intercept": 0.0,
@@ -66,8 +66,8 @@
     }
   },
   {
-    "target_index": 2,
-    "target_name": "C",
+    "target-index": 2,
+    "target-name": "C",
     "models": {
       "sparse-lr": {
         "intercept": 0.0,
@@ -88,8 +88,8 @@
     }
   },
   {
-    "target_index": 2,
-    "target_name": "C",
+    "target-index": 2,
+    "target-name": "C",
     "models": {
       "sparse-lr": {
         "intercept": 0.0,
@@ -110,8 +110,8 @@
     }
   },
   {
-    "target_index": 0,
-    "target_name": "A",
+    "target-index": 0,
+    "target-name": "A",
     "models": {
       "sparse-lr": {
         "intercept": 0.0,
