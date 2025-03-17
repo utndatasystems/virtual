@@ -405,7 +405,7 @@ def create_dump_virtual(con, schema, target_columns, out_file):
   # Remove the original target column names.
   # TODO: We should take care of spaces in the column names, right?
   for iter in target_columns:
-    all_columns.remove(iter["target_name"])
+    all_columns.remove(iter["target-name"])
 
   # And flush to parquet.
   all_columns = [f"\"{iter}\"" for iter in all_columns]
