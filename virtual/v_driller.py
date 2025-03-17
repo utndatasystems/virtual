@@ -14,6 +14,65 @@ from models.sparse_model import SparseLR
 from models.k_regression import K_Regression, k_regression_settings, compute_error
 from sklearn.metrics import root_mean_squared_error
 
+def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
+  assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
+  
+  # Instantiate the data wrapper.
+  data_wrapper = DataWrapper(data, nrows)
+
+  # Inspect the columns that we support. This also sets the valid column names and indices.
+  data_wrapper.inspect_columns()
+
+  # The functions found.
+  results = []
+
+  print(data_wrapper.v_cols)
+
+  print(len(data_wrapper.v_cols['num']['names']))
+
+  # Solve the numerical case.
+  if len(data_wrapper.v_cols['num']['names']) > 1:
+    results.extend(solve_num_cols(data_wrapper, sample_size=sample_size, allowed_model_types=allowed_model_types))
+
+  # Solve the non-numerical cases.
+  for category in ['date', 'timestamp']:
+    if len(data_wrapper.v_cols[category]['names']) > 1:
+      results.extend(solve_custom_cols(data_wrapper, category, sample_size=sample_size))
+
+  print(f'We found {len(results)} function(s) in your table.')
+  return results
+
+def solve_custom_cols(data_wrapper, category, sample_size=None):
+  results = []
+  for idx1, target_index in enumerate(data_wrapper.v_cols[category]['indices']):
+    # Note: We use this index to reduce the number of custom models we evaluate.
+    custom_idx = 0
+    for idx2, ref_index in enumerate(data_wrapper.v_cols[category]['indices']):
+      if ref_index == target_index:
+        continue
+
+      results.append({
+        'target_index' : target_index,
+        'target_name': data_wrapper.v_cols[category]['names'][idx1],
+        'models' : {
+          f'custom-{custom_idx}' : {
+            'mse' : 0,
+            'intercept' : 0,
+            'coeffs' : [
+              {
+                'col-index': ref_index,
+                'col-name': data_wrapper.v_cols[category]['names'][idx2],
+                'coeff' : 1.0
+              }
+            ]
+          }
+        }
+      })
+
+      # Increase the custom index.
+      custom_idx += 1
+  return results
+
 def run_model(model_type, X, y, col_name=None):
   model, y_pred = None, None
   if model_type == 'lr':
@@ -62,15 +121,7 @@ def run_model(model_type, X, y, col_name=None):
   mse = root_mean_squared_error(y_true=y, y_pred=y_pred)
   return mse, model.intercept_, model.coef_
 
-def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
-  assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
-  
-  # Instantiate the data wrapper.
-  data_wrapper = DataWrapper(data, nrows)
-
-  # Inspect the columns that we support. This also sets the valid column names and indices.
-  data_wrapper.inspect_columns()
-
+def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
   # Analyze the coefficients of the regression.
   def reduce_coeffs(coeffs, input_columns):
     selected = []
@@ -99,41 +150,35 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
       })
     return ret
 
-  results = []
-  if len(data_wrapper.valid_column_indices) <= 1:
-    print('Only one numerical column.')
-    return {}
-  
-  # TODO: We can try multiple samples.
-  sample = data_wrapper.sample(sample_size=sample_size)
+  # print('here???')
 
-  print(sample)
+  # TODO: We can try multiple samples.
+  sample = data_wrapper.sample('num', sample_size=sample_size)
+
+  # print(sample)
 
   # sample.to_csv('sample.csv', index=False)
 
   # Convert to numpy.
   sample = sample.to_numpy()
 
-  debug_path = ''
-  if isinstance(data, pathlib.Path):
-    debug_path = str(data.name)
-
-  # Try each column.
-  for target_index in data_wrapper.valid_column_indices:
-    input_columns = data_wrapper.valid_column_indices.copy()
+  # Try each numeric column.
+  results = []
+  for target_index in data_wrapper.v_cols['num']['indices']:
+    input_columns = data_wrapper.v_cols['num']['indices'].copy()
     input_columns.remove(target_index)
 
-    print(f'\nBBBBBBBBB >>>{data_wrapper.valid_column_names[data_wrapper.get_rank(target_index)]}')
-    print(input_columns)
-    print(data_wrapper.valid_column_names)
-    print(data_wrapper.valid_column_indices)
-    print([data_wrapper.valid_column_names[i] for i in data_wrapper.get_rank(input_columns)])
-    print(data_wrapper.valid_column_names[data_wrapper.get_rank(target_index)])
+    # print(f'\nBBBBBBBBB >>>{data_wrapper.valid_column_names['num'][data_wrapper.get_rank(target_index)]}')
+    # print(input_columns)
+    # print(data_wrapper.valid_column_names['num'])
+    # print(data_wrapper.valid_column_indices['num'])
+    # print([data_wrapper.valid_column_names[i] for i in data_wrapper.get_rank(input_columns)])
+    # print(data_wrapper.valid_column_names[data_wrapper.get_rank(target_index)])
 
     # TODO: Maybe try multiple samples.
     # TODO: This would also be helpful for k-regression.
-    X = sample[:, data_wrapper.get_rank(input_columns)]
-    y = sample[:, data_wrapper.get_rank(target_index)]
+    X = sample[:, data_wrapper.get_rank('num', input_columns)]
+    y = sample[:, data_wrapper.get_rank('num', target_index)]
 
     # Init the local results.
     local_results = None
@@ -166,6 +211,7 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
       err, intercept, coeffs = run_model(model_type, X, y, data_wrapper.column_names[target_index])
 
       # Do we exceed the max. allowed mse?
+      # TODO: We'll probably have problems with this one.
       if err > MAX_MSE_ALLOWED:
         continue
 
@@ -213,5 +259,5 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
     if local_results['models']:
       results.append(local_results)
 
-  print(f'We found {len(results)} function(s) in your table.')
+  # And return.
   return results

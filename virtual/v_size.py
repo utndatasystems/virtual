@@ -69,7 +69,17 @@ def _create_base_table(target_columns, schema, model_type=None):
   def create_offset_column(target_name):
     name = f"{target_name}_offset"
     type = _get_info(schema, target_name)['type']
-    return f"\"{name}\" {type} not null default 0"
+
+    # Default case.
+    if virtual.utils.is_num_virtualizable(type):
+      return f"\"{name}\" {type} not null default 0"
+    
+    # The offset for DATE|TIMESTAMP columns is an integer!
+    if virtual.utils.is_custom_virtualizable(type):
+      return f"\"{name}\" integer not null default 0"
+
+    # Unreachable.
+    assert 0
 
   def create_outlier_column(target_name):
     name = f"{target_name}_outlier"
@@ -114,7 +124,7 @@ def _create_base_table(target_columns, schema, model_type=None):
     # Fetch the model.
     model, model_type = get_model(iter, model_type)
 
-    # No model? This can only happen if the `model_type` was specified before hand. 
+    # No model? This can only happen if the `model_type` was specified beforehand. 
     if model is None:
       assert model_type is not None
       continue

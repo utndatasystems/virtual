@@ -15,27 +15,24 @@ class DataWrapper:
 
   def inspect_columns(self):
     # Inspect the schema.
-    self.column_names, self.csv_dialect, self.has_header, self.type_categories = handle_schema(self.data)
+    self.column_names, self.csv_dialect, self.has_header, self.type2cns = handle_schema(self.data)
 
-    # Select the valid column indices.
-    self.valid_column_indices = self.get_valid_column_indices()
+    # Select the virtualizable column indices.
+    self.v_cols = self.get_v_columns()
 
-    # And also store the corresponding column names.
-    self.valid_column_names = [self.column_names[i] for i in self.valid_column_indices]
-
-  def get_rank(self, idxs):
+  def get_rank(self, category, idxs):
     if isinstance(idxs, list):
-      return [self.valid_column_indices.index(idx) for idx in idxs]
-    return self.valid_column_indices.index(idxs)
+      return [self.v_cols[category]['indices'].index(idx) for idx in idxs]
+    return self.v_cols[category]['indices'].index(idxs)
 
-  def sample(self, sample_size=None):
+  def sample(self, category, sample_size=None):
     df = None
     if isinstance(self.data, pathlib.Path):
       # TODO: Move this support later, since we can directly sample from the CSV file.
       if self.data.suffix == '.csv':
-        df = self.parse()
+        df = self.parse(category)
     elif isinstance(self.data, pd.DataFrame):
-      df = self.parse()
+      df = self.parse(category)
 
     # Have at least a sample size.
     if sample_size is None:
@@ -44,11 +41,11 @@ class DataWrapper:
     # Sample now.
     if df is not None:
       # Take care of NULLs.
-      df_without_null = df.dropna(subset=self.valid_column_names)
+      df_without_null = df.dropna(subset=self.v_cols[category]['names'])
 
       # Note: If this doesn't hold, then it's a bit problematic for linear regression.
       # This is because this is an indeterminate system.
-      if len(df_without_null) < len(self.valid_column_names):
+      if len(df_without_null) < len(self.v_cols[category]['names']):
         df_without_null = df.fillna(0)
 
       # Handle special cases.
@@ -58,7 +55,7 @@ class DataWrapper:
       else:
         ratio = sample_size / len(df_without_null)
 
-      # (Trivially) upper-bound the ratio. This happens if the sample size was larger than the data itself.
+      # (Trivially) upper-bound the ratio. This happens if the sample size is larger than the data itself.
       ratio = min(ratio, 1.0)
 
       # And sample.
@@ -67,16 +64,16 @@ class DataWrapper:
       # We can extract the sample from the data itself.
       if isinstance(self.data, pathlib.Path):
         if self.data.suffix == '.parquet':
-          sample = utils.sample_parquet_file(self.data, self.nrows, sample_size, self.valid_column_names)
+          sample = utils.sample_parquet_file(self.data, self.nrows, sample_size, category, self.v_cols[category]['names'])
       elif isinstance(self.data, utils.URLPath):
         if self.data.suffix == '.parquet':
-          sample = utils.sample_parquet_file(self.data, self.nrows, sample_size, self.valid_column_names)
+          sample = utils.sample_parquet_file(self.data, self.nrows, sample_size, category, self.v_cols[category]['names'])
 
     # Return the sample.
     assert sample is not None
     return sample
 
-  def parse(self):    
+  def parse(self, category):    
     # Read the CSV with the dtype mapping and date parsing, and without headers
     # TODO: Why does the other need a `dtype_mapping`?
     # TODO: I think this was because we always used SQL to infer the types.
@@ -87,7 +84,7 @@ class DataWrapper:
       if USE_DUCKDB_PARSER:
         # Construct the DuckDB query
         query = utils.build_query(
-          select_stmt=', '.join(self.valid_column_indices),
+          select_stmt=', '.join(self.v_cols[category]['indices']),
           input=self.data,
           header=self.has_header,
           delim=self.csv_dialect['delimiter'],
@@ -111,7 +108,7 @@ class DataWrapper:
           # dtype=dtype_mapping,
           # TODO: Removed this, since it's really slow and we don't need date columns anyway.
           # parse_dates=date_columns,
-          usecols=self.valid_column_indices,
+          usecols=self.v_cols[category]['indices'],
           header=self.has_header,
           delimiter=self.csv_dialect['delimiter'],
           quotechar=self.csv_dialect['quotechar'],
@@ -119,8 +116,8 @@ class DataWrapper:
         )
     elif isinstance(self.data, pd.DataFrame):
       df = self.data
-      if self.valid_column_indices is not None:
-        df = df.iloc[:, self.valid_column_indices]
+      if self.v_cols[category]['indices'] is not None:
+        df = df.iloc[:, self.v_cols[category]['indices']]
       
       # Limit the number of rows.
       if self.nrows is not None:
@@ -136,18 +133,11 @@ class DataWrapper:
     # And return the dataframe.
     return df
     
-  def get_valid_column_indices(self):
-    valid_column_indices = []
-    for i, cn in enumerate(self.column_names):
-      # Not supported yet?
-      if cn in self.type_categories['date'] or cn in self.type_categories['string'] or cn in self.type_categories['boolean']:
-        continue
-
-      # Do we have only NULLs? Then just skip.
-      # # TODO: We can skip this check if we have a parquet file: We can directly lookup the column dict.
-      # if self.schema is not None:
-      #   if _get_column(self.schema, cn)['null']['all']:
-      #     continue
-
-      valid_column_indices.append(i)
-    return valid_column_indices
+  def get_v_columns(self):
+    v_cols = dict()
+    for key in self.type2cns:
+      v_cols[key] = {
+        'indices' : [self.column_names.index(cn) for cn in self.type2cns[key]],
+        'names' : self.type2cns[key]
+      }
+    return v_cols

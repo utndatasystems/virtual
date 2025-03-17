@@ -7,8 +7,8 @@
         "intercept": 0.0,
         "coeffs": [
           {
-            "col_index": 1,
-            "col_name": "B",
+            "col-index": 1,
+            "col-name": "B",
             "coeff": 1.0
           }
         ]
@@ -29,8 +29,8 @@
         "intercept": 0.0,
         "coeffs": [
           {
-            "col_index": 0,
-            "col_name": "A",
+            "col-index": 0,
+            "col-name": "A",
             "coeff": 1.0
           }
         ]
@@ -51,8 +51,8 @@
         "intercept": 0.0,
         "coeffs": [
           {
-            "col_index": 2,
-            "col_name": "C",
+            "col-index": 2,
+            "col-name": "C",
             "coeff": 1.0
           }
         ]
@@ -73,8 +73,8 @@
         "intercept": 0.0,
         "coeffs": [
           {
-            "col_index": 1,
-            "col_name": "B",
+            "col-index": 1,
+            "col-name": "B",
             "coeff": 1.0
           }
         ]
@@ -95,8 +95,8 @@
         "intercept": 0.0,
         "coeffs": [
           {
-            "col_index": 0,
-            "col_name": "A",
+            "col-index": 0,
+            "col-name": "A",
             "coeff": 1.0
           }
         ]
@@ -117,8 +117,8 @@
         "intercept": 0.0,
         "coeffs": [
           {
-            "col_index": 2,
-            "col_name": "C",
+            "col-index": 2,
+            "col-name": "C",
             "coeff": 1.0
           }
         ]
