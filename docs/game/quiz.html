@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Virtual Game</title>
+    <link rel="icon" href="assets/images/icons8-video-game-96.png" />
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
       rel="stylesheet" />
@@ -244,8 +245,8 @@
   <body>
     <header>
       <div>
-        <font size="+2"><code>Virtual</code></font
-        >: Game 🎮
+        <font size="+2">🎮 <code>Virtual</code></font
+        >: Game
       </div>
       <div>Quiz <span id="quiz_id">1</span></div>
       <!-- <div>⏰ <span id="timer">00:00:00</span></div> -->
@@ -285,6 +286,7 @@
       const quizNum = parseInt(localStorage.getItem("quizNum"), 10) || 0;
       let totalMilliseconds = parseInt(localStorage.getItem("timeStart"), 10) || 0;
       const startTime = totalMilliseconds;
+      let csvData = [];
       document.getElementById("quiz_id").textContent = `${quizNum}`;
       console.log("quizNum", quizNum);
 
@@ -326,6 +328,36 @@
       // Update every 100ms to show 1 decimal place
       setInterval(updateTimer, 10);
 
+      function shuffleHeaders(data) {
+        if (!data || !data.length) return data;
+
+        const originalKeys = Object.keys(data[0]);
+
+        const shuffledKeys = shuffleArray(originalKeys.slice());
+
+        const renameMap = {};
+        for (let i = 0; i < originalKeys.length; i++) {
+          renameMap[originalKeys[i]] = shuffledKeys[i];
+        }
+
+        return data.map((row) => {
+          let newRow = {};
+          for (let oldKey in row) {
+            const newKey = renameMap[oldKey];
+            newRow[newKey] = row[oldKey];
+          }
+          return newRow;
+        });
+      }
+
+      function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const rand = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[rand]] = [arr[rand], arr[i]];
+        }
+        return arr;
+      }
+
       async function loadCSV(quizNum) {
         try {
           const response = await fetch(`assets/quizzes/quiz${quizNum}.csv`);
@@ -334,8 +366,11 @@
           }
 
           const csvText = await response.text();
-          const rows = csvToArray(csvText);
-          displayCSV(rows);
+          csvData = csvToArray(csvText);
+          console.log("CSV Data:", csvData);
+          csvData = shuffleHeaders(csvData);
+          console.log("Shuffled CSV Data:", csvData);
+          displayCSV(csvData);
         } catch (error) {
           console.error("Error loading CSV:", error);
         }
@@ -368,7 +403,8 @@
         }
 
         // Extract headers dynamically from the first object
-        const headers = Object.keys(data[0]);
+        const headers = ["a", "b", "c"];
+        console.log("Headers:", headers);
 
         // Create the table header
         const headerRow = document.createElement("tr");
@@ -395,19 +431,10 @@
         quizNum = parseInt(quizNum);
 
         try {
-          const response = await fetch(`assets/quizzes/quiz${quizNum}.csv`);
-          if (!response.ok) {
-            console.error("CSV file not found:", response.status);
-            return false;
-          }
-
-          const csvText = await response.text();
-          const rows = csvToArray(csvText);
-
           if (functionInput === "None") return false;
 
           console.log("Checking equation:", functionInput);
-          return checkEquation(rows, functionInput);
+          return checkEquation(csvData, functionInput);
         } catch (error) {
           console.error("Error loading CSV:", error);
           return false;

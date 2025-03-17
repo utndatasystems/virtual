@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Virtual Game</title>
+    <link rel="icon" href="assets/images/icons8-video-game-96.png" />
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
       rel="stylesheet" />
@@ -35,10 +36,6 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       }
 
-      .quiz-title {
-        border: 4px solid red;
-      }
-
       .container {
         display: flex;
         flex: 1;
@@ -56,15 +53,13 @@
         overflow: auto;
       }
 
-      /* .quiz-table {
-        border: 4px solid red;
-      } */
-
       table {
-        border: 4px solid red;
+        /* border: 4px solid red; */
         /* border-collapse: collapse; */
         width: 90%;
-        margin: auto;
+        /* margin: auto; */
+        margin-top: 28vh;
+        margin-bottom: 3%;
         background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
         border-radius: 10px;
@@ -85,11 +80,11 @@
       }
 
       .rules-board {
-        position: absolute;
-        bottom: 20%;
-        width: 90%;
-        max-width: 50%;
-        margin-top: 20px; /* spacing above the board */
+        /* position: absolute;
+        bottom: 20%; */
+        width: 87%;
+        max-width: 87%;
+        margin-top: 0px; /* spacing above the board */
         padding: 1rem;
         background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
@@ -123,7 +118,7 @@
         /* Add some spacing below so it doesn’t crowd the label */
         margin-bottom: 20px;
         font-size: 3rem;
-        border: 4px solid red;
+        /* border: 4px solid red; */
       }
 
       #timer {
@@ -137,7 +132,7 @@
         margin: 10px 0;
         padding: 12px;
         font-size: 1rem;
-        border: 4px solid red;
+        /* border: 4px solid red; */
         border-radius: 25px;
         outline: none;
         /* text-align: center; */
@@ -165,7 +160,7 @@
         box-shadow: 0px 4px 10px rgba(255, 0, 150, 0.3);
         opacity: 0.9;
         cursor: pointer;
-        border: 4px solid red;
+        /* border: 4px solid red; */
       }
 
       .right button:hover {
@@ -201,10 +196,6 @@
         background: linear-gradient(135deg, #00c6ff, #007bff);
       }
 
-      .next-button {
-        border: 4px solid red;
-      }
-
       @keyframes float {
         0% {
           transform: translateY(0px);
@@ -219,9 +210,14 @@
 
       /* A generic container to hold both arrow & text bubble */
       .callout-container {
+        display: none;
         position: absolute; /* so we can place it anywhere on the screen */
         z-index: 9999; /* ensure it’s on top */
         pointer-events: none; /* so clicks pass through to underlying elements */
+      }
+
+      .callout-container.active {
+        display: block; /* override 'display: none' */
       }
 
       .swirl-arrow {
@@ -270,10 +266,24 @@
         /* Possibly another rotation if you want it angled differently */
       }
       .arrow-table {
-        transform: rotate(-12deg); /* Rotate if you want it angled differently */
+        transform: rotate(-65deg); /* Rotate if you want it angled differently */
       }
       .text-table {
+        top: 65px;
         left: -340px; /* Shift left/right as desired */
+      }
+
+      .callout-rules {
+        bottom: 28%; /* Tweak to line up with your table’s position */
+        left: 28%;
+        /* Possibly another rotation if you want it angled differently */
+      }
+      .arrow-rules {
+        transform: scaleY(-1) rotate(-12deg); /* Rotate if you want it angled differently */
+      }
+      .text-rules {
+        top: 110px; /* Position the bubble */
+        left: -370px; /* Shift left/right as desired */
       }
 
       .callout-next {
@@ -328,13 +338,81 @@
         top: 64px; /* Position the bubble */
         left: 87px; /* Shift left/right as desired */
       }
+
+      /* Full-screen overlay above page content */
+      .tour-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* Dim the background slightly */
+        background: rgba(0, 0, 0, 0);
+
+        z-index: 9998;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+
+        pointer-events: none; /* So user can "click through" if you want. 
+                          If you want to catch the click, see note below. */
+      }
+
+      /* Hide overlay when .hidden is present */
+      .hidden {
+        display: none;
+      }
+
+      /* The text in the center of the overlay */
+      #overlayText {
+        color: #000000;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        pointer-events: none;
+        font-weight: bold;
+        /* pointer-events: none so it doesn't capture click if you're using "click anywhere" across the entire page */
+      }
+
+      #OverlayContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 9%;
+      }
+
+      /* Step indicator row */
+      #stepIndicator {
+        display: flex;
+        gap: 8px;
+        pointer-events: none;
+      }
+
+      .dot {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background-color: #aaa; /* gray by default */
+      }
+
+      .dot.completed {
+        background-color: limegreen; /* turn green when completed */
+      }
+
+      body.tour-active .container,
+      body.tour-active header,
+      body.tour-active footer {
+        /* filter: blur(1px); */
+        pointer-events: none; /* So user can't interact with blurred items */
+      }
     </style>
   </head>
   <body>
     <header>
       <div>
-        <font size="+2"><code>Virtual</code></font
-        >: Game 🎮
+        <font size="+2">🎮 <code>Virtual</code></font
+        >: Game
       </div>
       <div class="quiz-title">Quiz <span id="quiz_id">0</span></div>
     </header>
@@ -373,14 +451,10 @@
           </tbody>
         </table>
         <div class="rules-board">
-          <h3>Quiz Rules</h3>
+          <h3>Quiz rules</h3>
           <ul>
-            <li>
-              Rule #1: Only use lower case "a", "b" or "c" in the function, and every columns will
-              be used.
-            </li>
-            <li>Rule #2: Complete 5 quizzes within the 3 minutes.</li>
-            <li>Rule #3: Operational characters are "+", "-", "*" and "/".</li>
+            <li>Rule #1: A function uses all columns.</li>
+            <li>Rule #2: Operators allowed: '+', '-', '*', '/'.</li>
           </ul>
         </div>
       </div>
@@ -395,60 +469,197 @@
     <!-- Arrow callout pointing to the table -->
     <div class="callout-container callout-table">
       <img src="assets/images/arrow.png" class="swirl-arrow arrow-table" />
-      <div class="callout-text text-table">This is quiz data table!</div>
+      <div class="callout-text text-table">This is the quiz table.</div>
+    </div>
+
+    <div class="callout-container callout-rules">
+      <!-- The swirl arrow image -->
+      <img src="assets/images/arrow.png" alt="Arrow" class="swirl-arrow arrow-rules" />
+      <!-- The text bubble box -->
+      <div class="callout-text text-rules">The rules need to follow.</div>
     </div>
 
     <div class="callout-container callout-input">
       <!-- The swirl arrow image -->
       <img src="assets/images/arrow.png" alt="Arrow" class="swirl-arrow arrow-input" />
       <!-- The text bubble box -->
-      <div class="callout-text text-input">Type your function here!</div>
+      <div class="callout-text text-input">Type your function here.</div>
     </div>
 
     <div class="callout-container callout-next">
       <!-- The swirl arrow image -->
       <img src="assets/images/arrow.png" alt="Arrow" class="swirl-arrow arrow-next" />
       <!-- The text bubble box -->
-      <div class="callout-text text-next">Go to the next quiz!</div>
+      <div class="callout-text text-next">Go to the next quiz.</div>
     </div>
 
     <div class="callout-container callout-time">
       <!-- The swirl arrow image -->
       <img src="assets/images/arrow.png" alt="Arrow" class="swirl-arrow arrow-time" />
       <!-- The text bubble box -->
-      <div class="callout-text text-time">The time left!</div>
+      <div class="callout-text text-time">The time left.</div>
     </div>
 
     <div class="callout-container callout-num">
       <!-- The swirl arrow image -->
       <img src="assets/images/arrow.png" alt="Arrow" class="swirl-arrow arrow-num" />
       <!-- The text bubble box -->
-      <div class="callout-text text-num">The quiz number!</div>
+      <div class="callout-text text-num">The quiz number.</div>
     </div>
 
     <div class="callout-container callout-verify">
       <!-- The swirl arrow image -->
       <img src="assets/images/arrow.png" alt="Arrow" class="swirl-arrow arrow-verify" />
       <!-- The text bubble box -->
-      <div class="callout-text text-verify">To verify your answer!</div>
+      <div class="callout-text text-verify">To verify your answer.</div>
+    </div>
+
+    <div id="tourOverlay" class="tour-overlay hidden">
+      <!-- Overlay text for step info and instructions -->
+      <div id="OverlayContainer">
+        <div id="overlayText">Click anywhere to proceed.</div>
+
+        <!-- Step indicator (7 dots as an example) -->
+        <div id="stepIndicator">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
     </div>
 
     <footer>
       <!-- <button id="prevButton">←</button> -->
       <button class="home-button" onclick="goHome()">🏠 Back to Home</button>
-      <button class="next-button" id="nextButton">→</button>
+      <button class="next-button" id="nextButton" disabled>→</button>
     </footer>
 
     <script>
-      document.getElementById("nextButton").addEventListener("click", async () => {
-        window.location.href = `quiz.html`;
-      });
-      document.getElementById("verifyButton").addEventListener("click", async () => {
-        window.location.href = `quiz.html`;
-      });
+      // document.getElementById("nextButton").addEventListener("click", async () => {
+      //   window.location.href = `quiz.html`;
+      // });
+      // document.getElementById("verifyButton").addEventListener("click", async () => {
+      //   window.location.href = `quiz.html`;
+      // });
       function goHome() {
         window.location.href = "../game.html";
       }
+      const steps = [
+        {
+          callout: document.querySelector(".callout-table"),
+          highlight: document.querySelector("#quizTable")
+        },
+        {
+          callout: document.querySelector(".callout-rules"),
+          highlight: document.querySelector(".rules-board")
+        },
+        {
+          callout: document.querySelector(".callout-num"),
+          highlight: document.querySelector("#quiz_id")
+        },
+        {
+          callout: document.querySelector(".callout-time"),
+          highlight: document.querySelector(".timer-container")
+        },
+        {
+          callout: document.querySelector(".callout-input"),
+          highlight: document.querySelector("#functionInput")
+        },
+        {
+          callout: document.querySelector(".callout-verify"),
+          highlight: document.querySelector("#verifyButton")
+        },
+        {
+          callout: document.querySelector(".callout-next"),
+          highlight: document.querySelector("#nextButton")
+        }
+      ];
+
+      let currentStep = 0;
+
+      function startTour() {
+        // Add blur overlay
+        document.body.classList.add("tour-active");
+        document.getElementById("tourOverlay").classList.remove("hidden");
+
+        // Show the first step
+        showStep(currentStep);
+      }
+
+      // Show a specific step
+      function showStep(index) {
+        // Hide all callouts
+        steps.forEach((s) => {
+          s.callout.classList.remove("active");
+          s.highlight.classList.remove("no-blur");
+        });
+
+        // Show the active one
+        const step = steps[index];
+        if (!step) {
+          // No more steps => end tour
+          endTour();
+          return;
+        }
+        step.callout.classList.add("active");
+        step.highlight.classList.add("no-blur");
+
+        updateDots(index);
+
+        // Listen for user click anywhere to proceed
+        // (Alternatively, you can add a "Next" button in each callout.)
+        document.addEventListener("click", nextStep, { once: true });
+      }
+
+      function nextStep() {
+        document.removeEventListener("click", nextStep, { once: true });
+        currentStep++;
+        showStep(currentStep);
+      }
+
+      function endTour() {
+        // Remove blur + hide overlay
+        document.body.classList.remove("tour-active");
+        document.getElementById("stepIndicator").classList.add("hidden");
+
+        // Hide any remaining callouts
+        steps.forEach((s) => {
+          s.callout.classList.remove("active");
+        });
+        const dots = document.querySelectorAll("#stepIndicator .dot");
+        dots.forEach((dot, i) => {
+          // Turn all dots up to current stepIndex green
+          dot.classList.add("hidden");
+        });
+        document.getElementById("overlayText").textContent = "Click anywhere to start the quiz.";
+        document.addEventListener("click", startQuiz, { once: true });
+      }
+
+      function startQuiz() {
+        document.removeEventListener("click", startQuiz, { once: true });
+        window.location.href = `quiz.html`;
+      }
+
+      function updateDots(stepIndex) {
+        const dots = document.querySelectorAll("#stepIndicator .dot");
+        dots.forEach((dot, i) => {
+          // Turn all dots up to current stepIndex green
+          if (i <= stepIndex) {
+            dot.classList.add("completed");
+          } else {
+            dot.classList.remove("completed");
+          }
+        });
+      }
+
+      // Start the tour immediately on page load (or call from a button)
+      window.onload = () => {
+        startTour();
+      };
     </script>
   </body>
 </html>

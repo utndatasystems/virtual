@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Virtual Game & Leaderboard</title>
+    <link rel="icon" href="game/assets/images/icons8-video-game-96.png" />
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
       rel="stylesheet" />
@@ -354,11 +355,32 @@
         }
       }
 
+      function parseTimeString(timeStr) {
+        // timeStr looks like "02:31.80" => minutes: "02", seconds: "31.80"
+        const [minutesStr, secondsStr] = timeStr.split(":");
+        const minutes = parseInt(minutesStr, 10) || 0;
+        const seconds = parseFloat(secondsStr) || 0;
+
+        // Convert entire time to total seconds
+        return minutes * 60 + seconds;
+      }
+
       function displayLeaderboard(players) {
         const tableBody = document.getElementById("leaderboardTableBody");
         tableBody.innerHTML = "";
+        console.log("Players:", players);
 
-        players.sort((a, b) => b.correctAnswers - a.correctAnswers || a.totalTime - b.totalTime);
+        players.sort((a, b) => {
+          const answerDiff = b.correctAnswers - a.correctAnswers;
+          if (answerDiff !== 0) return answerDiff;
+
+          // Parse "mm:ss.xxx" into a numeric
+          const aTime = parseTimeString(a.totalTime);
+          const bTime = parseTimeString(b.totalTime);
+          return aTime - bTime; // ascending
+        });
+
+        console.log("Sorted Players:", players);
 
         players.forEach((player, index) => {
           const tr = document.createElement("tr");
