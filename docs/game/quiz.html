@@ -176,6 +176,69 @@
           transform: translateY(0px);
         }
       }
+
+      .hidden {
+        display: none;
+      }
+
+      /* Full-screen overlay that sits on top of the page */
+      .result-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(
+          0,
+          0,
+          0,
+          0
+        ); /* semi-transparent black, or remove if you prefer no dimming */
+        /* display: flex; */
+        align-items: center;
+        justify-content: center;
+        align-content: center;
+        z-index: 9999; /* make sure it's above everything */
+      }
+
+      /* The content in the center of the overlay */
+      .result-content {
+        background: #ffffff00;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        /* Optionally, add a subtle box-shadow */
+        /* box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); */
+      }
+
+      /* The large check or cross symbol */
+      .result-symbol {
+        font-size: 20rem;
+        margin-bottom: 1rem;
+
+        /* Instead of 'pop' once, do a continuous zoom in/out cycle */
+        animation: zoomInOut 1s ease-in-out infinite;
+      }
+
+      /* The short message below the symbol */
+      .result-message {
+        font-size: 10rem;
+        font-weight: bold;
+        color: #333;
+      }
+
+      /* A simple pop animation */
+      @keyframes zoomInOut {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.5); /* Zoom in at halfway */
+        }
+        100% {
+          transform: scale(1); /* Back to normal size */
+        }
+      }
     </style>
   </head>
   <body>
@@ -200,6 +263,13 @@
         <label for="functionInput">✏️ Write functions:</label>
         <input type="text" id="functionInput" placeholder="a = ..." />
         <button id="verifyButton">Verify</button>
+      </div>
+    </div>
+
+    <div id="resultOverlay" class="result-overlay hidden">
+      <div class="result-content">
+        <div id="resultSymbol" class="result-symbol">?</div>
+        <div id="resultMessage" class="result-message"></div>
       </div>
     </div>
 
@@ -402,40 +472,31 @@
           console.log("Global Quiz Data:", globalQuizData);
 
           console.log("Result:", result);
-          const w = 300; // width
-          const h = 300; // height
+          const overlay = document.getElementById("resultOverlay");
+          const symbolEl = document.getElementById("resultSymbol");
+          const messageEl = document.getElementById("resultMessage");
 
-          // Calculate left and top to center on the primary display
-          const left = screen.width / 2 - w / 2;
-          const top = screen.height / 2 - h / 2;
+          // Remove "hidden" so overlay is displayed
+          overlay.classList.remove("hidden");
 
-          // Show result window based on verification
-          const resultWindow = window.open(
-            `showResult.html?correct=${result.toString()}`,
-            "Result",
-            `width=${w},height=${h},left=${left},top=${top}`
-          );
+          // Set symbol and color
+          if (result) {
+            symbolEl.textContent = "✓";
+            symbolEl.style.color = "green";
+            messageEl.textContent = "Correct!";
+          } else {
+            symbolEl.textContent = "✕";
+            symbolEl.style.color = "red";
+            messageEl.textContent = "Incorrect!";
+          }
           return new Promise((resolve) => {
-            let timeElapsed = 0;
-            const timeoutLimit = 50000; // 5 seconds timeout
-
-            const checkClosed = setInterval(() => {
-              timeElapsed += 500; // Increase check time by 500ms
-
-              if (resultWindow.closed) {
-                timerPaused = false;
-                resolve(true);
-                return true;
-              } else if (timeElapsed >= timeoutLimit) {
-                resultWindow.close(); // Close the window after timeout
-                timerPaused = false;
-                resolve(true);
-              }
-            }, 500);
+            setTimeout(() => {
+              overlay.classList.add("hidden");
+              resolve(true);
+            }, 2000);
           });
         } catch (error) {
           console.error("Verification error:", error);
-          waitingWindow.close();
           alert("An error occurred during verification.");
           return true;
         }
