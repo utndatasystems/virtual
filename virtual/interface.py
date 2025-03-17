@@ -350,7 +350,7 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
     # Generate the formula.
     _, raw_formula = v_reconstructor.generate_formula(schema, header, iter, functions['greedy']['chosen'], enforce_replacement=True)
 
-    pattern = re.compile(rf"\"?\b{re.escape(iter['target_name'])}\b\"?")
+    pattern = re.compile(rf"\"?\b{re.escape(iter['target-name'])}\b\"?")
 
     # NOTE: If we have double quotes, then we *must* enforce case sensitiveness.
     for m in pattern.finditer(sql_query, re.IGNORECASE):
@@ -358,7 +358,7 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
       if m.group()[0].startswith('"'):
         # Should be the same, but without the double quotes (if any).
         # TODO: Do we also replace with the double-quoted column names?
-        if m.group().strip('"') == iter['target_name'].strip('"'):
+        if m.group().strip('"') == iter['target-name'].strip('"'):
           add_match(m, raw_formula)
       else:
         add_match(m, raw_formula)

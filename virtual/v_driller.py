@@ -52,8 +52,8 @@ def solve_custom_cols(data_wrapper, category, sample_size=None):
         continue
 
       results.append({
-        'target_index' : target_index,
-        'target_name': data_wrapper.v_cols[category]['names'][idx1],
+        'target-index' : target_index,
+        'target-name': data_wrapper.v_cols[category]['names'][idx1],
         'models' : {
           f'custom-{custom_idx}' : {
             'mse' : 0,
@@ -184,9 +184,9 @@ def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
     local_results = None
     try:
       local_results = {
-        'target_index': target_index,
-        'target_name': data_wrapper.column_names[target_index],
-        'target_stats': {
+        'target-index': target_index,
+        'target-name': data_wrapper.column_names[target_index],
+        'target-stats': {
           'mean': y.mean(),
           'max': float(y.max()),
           'min': float(y.min())

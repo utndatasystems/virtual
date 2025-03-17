@@ -32,7 +32,7 @@ def extract_functions(fns, model_type):
   ret = []
   for fn in fns:
     ret.append(
-      f"{fn['target_name']} = {get_function(fn['models'][this_model])}"
+      f"{fn['target-name']} = {get_function(fn['models'][this_model])}"
     )
   return ret
 

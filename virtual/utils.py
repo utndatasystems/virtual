@@ -509,16 +509,16 @@ def compute_metrics(table, combs):
         y_est = estimate_y(comb['models'][model_type])
 
         # Get the metrics.
-        local_metrics = get_metrics(y_est, table[:, comb['target_index']])
+        local_metrics = get_metrics(y_est, table[:, comb['target-index']])
         comb['metrics'][model_type] = local_metrics
       elif ModelType(model_type).is_k_regression():
         local_ests = []
         for local_model in comb['models'][model_type]['config']:
           local_ests.append(estimate_y(local_model))
 
-        # Get the estimate closest to table[:, comb['target_index']].
-        closest_est = find_closest_estimate(local_ests, table[:, comb['target_index']])
-        local_metrics = get_metrics(closest_est, table[:, comb['target_index']])
+        # Get the estimate closest to table[:, comb['target-index']].
+        closest_est = find_closest_estimate(local_ests, table[:, comb['target-index']])
+        local_metrics = get_metrics(closest_est, table[:, comb['target-index']])
         comb['metrics'][model_type] = local_metrics
       else:
         assert 0
@@ -534,8 +534,8 @@ def compute_avg_stats(parquet_file, config_path, model_type='sparse-lr'):
 
   avgs = {}
   for col_config in config['greedy']['chosen']:
-    compare_value = list(con.execute(f"select avg(\"{col_config['target_name']}\") as res from read_parquet('{parquet_file}');").fetchdf()["res"])[0]
-    avgs[col_config['target_name']] = compare_value
+    compare_value = list(con.execute(f"select avg(\"{col_config['target-name']}\") as res from read_parquet('{parquet_file}');").fetchdf()["res"])[0]
+    avgs[col_config['target-name']] = compare_value
   return avgs
 
 class TimeTracker:
