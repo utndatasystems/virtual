@@ -1,4 +1,5 @@
 import pathlib
+import typing
 import sys
 import os
 
@@ -200,8 +201,6 @@ def from_format(format_path, functions=None, schema=None):
 
   # Get the data from the format and also check the metadata (functions and schema).
   if format_type[1:] == 'parquet':
-    if functions is None:
-      functions = utils.get_metadata_pq(format_path, ['functions'])['functions']
     if schema is None:
       schema = utils.get_metadata_pq(format_path, ['schema'])['schema']
     # df = pd.read_parquet(format_path)
@@ -211,38 +210,32 @@ def from_format(format_path, functions=None, schema=None):
   elif format_type[1:] == 'csv':
     folder_path = os.path.dirname(os.path.abspath(format_path))
     base_name = os.path.splitext(os.path.basename(format_path))[0]
-    if functions is None:
-      functions = utils._read_json(os.path.join(folder_path, f'{base_name}-functions.json'))
     if schema is None:
       schema = utils._read_json(os.path.join(folder_path, f'{base_name}-schema.json'))
     # df = pd.read_csv(format_path)
     pass
   elif format_type[1:] == 'btrblocks':
-    if functions is None:
-      functions = utils._read_json(os.path.join(format_path, 'functions.json'))
     if schema is None:
       schema = utils._read_json(os.path.join(format_path, 'schema.json'))
     pass
   else:
-    pass
+    assert 0, f'Format {format_type[1:]} not (yet) supported.'
 
-  ori_col_name = ''
-  for row in schema:
-    if ori_col_name == '':
-      ori_col_name = f'"{row['name']}"'
-    else:
-      ori_col_name += ', ' + f'"{row['name']}"'
+  # Create the SELECT cluase.
+  select_clause = ','.join([f'"{row['name']}"' for row in schema])
 
   if format_type[1:] == 'parquet':
-    sql_query = 'SELECT ' + ori_col_name + f' FROM read_parquet("{format_path}")'
+    sql_query = f'select {select_clause} from read_parquet("{format_path}");'
   elif format_type[1:] == 'csv':
-    sql_query = 'SELECT ' + ori_col_name + f' FROM read_csv("{format_path}")'
-  # con.close()
-  ori_df = query(sql_query, functions, schema, engine='duckdb')
-  
-  return ori_df
+    sql_query = f'select {select_clause} from read_csv("{format_path}");'
 
-def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, return_execution_time=False):
+  # Query.
+  df = query(sql_query, functions=functions, schema=schema, engine='duckdb')
+  
+  # And return.
+  return df
+
+def query(sql_query, functions=None, schema=None, engine='duckdb', run=True, fancy=True, return_execution_time=False):
   """
     Query the Parquet file via SQL.
 
@@ -251,7 +244,9 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
       functions (dict): The functions to be used during query. If `None`, then `virtual` recovers them from the Parquet's metadata.
       schema (dict): The schema of the data. If `None`, then `virtual` recovers it from Parquet's metadata.
       engine (str): The query engine to use. Options: ['duckdb', 'pandas'].
+      run (bool): If we should really run the query. Otherwise, we simply return the rewritten query as result.
       fancy (bool): If we should also keep the original column names of the result.
+      return_execution_time (float): Also returns the execution time of the query (if `run` is set).
 
     Example (1):
       virtual.query(
@@ -265,6 +260,10 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
 
   # Fallback for queries where there is no read from a file.
   if match is None:
+    # No need to run?
+    if not run:
+      return sql_query
+
     start_time = time.time_ns()
     ans = duckdb.sql(sql_query).fetchdf()
     stop_time = time.time_ns()
@@ -283,7 +282,7 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
     assert False, f'Format {format_type} not yet supported!'
 
   # Get the metadata, along with the header.
-  # NOTE: We rely on the fact the variable names remain `schema` and `functions`.
+  # Note: We rely on the fact the variable names remain `schema` and `functions`.
   if format_type == 'parquet':
     format_metadata = get_metadata_from_file(format_type, file_path, ['header'] + [key for key in ['schema', 'functions'] if locals().get(key) is None])
 
@@ -305,7 +304,7 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
   # Read the functions.
   if functions is None:
     if format_type == 'parquet':
-      assert format_metadata is not None and format_metadata['schema'], 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
+      assert format_metadata is not None and format_metadata['functions'], 'Your virtualized Parquet file doesn\'t have the necessary metadata.'
       functions = format_metadata['functions']
     elif format_type == 'csv':
       folder_path = os.path.dirname(os.path.abspath(file_path))
@@ -372,9 +371,16 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', fancy=True, r
   for start, end, before, after in sorted_matches:
     sql_query = sql_query[:start] + after + sql_query[end:]
 
+  # Set the rewritten query.
+  rewritten_sql_query: typing.Final[str] = sql_query
+
+  # No need to run? Then simply return the query.
+  if not run:
+    return rewritten_sql_query
+
   # Execute.
   start_time = time.time_ns()
-  ans = duckdb.sql(sql_query).fetchdf()
+  ans = duckdb.sql(rewritten_sql_query).fetchdf()
   stop_time = time.time_ns()
 
   # Rename the columns to maintain consistency with the default output by pandas.

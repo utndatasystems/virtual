@@ -35,7 +35,7 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
     results.extend(solve_num_cols(data_wrapper, sample_size=sample_size, allowed_model_types=allowed_model_types))
 
   # Solve the non-numerical cases.
-  for category in ['date', 'timestamp']:
+  for category in ['date', 'timestamp', 'time']:
     if len(data_wrapper.v_cols[category]['names']) > 1:
       results.extend(solve_custom_cols(data_wrapper, category, sample_size=sample_size))
 

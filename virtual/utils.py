@@ -242,7 +242,7 @@ def is_num_virtualizable(type):
   return is_integer(type) or is_fp(type)
 
 def is_custom_virtualizable(type):
-  return type.lower() in ['date', 'timestamp']
+  return type.lower() in ['date', 'timestamp', 'time']
 
 def is_attached_column_of(target_name, column_name):
   # TODO: This was a real hack.
