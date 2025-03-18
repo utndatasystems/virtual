@@ -263,6 +263,22 @@
         transform: scale(1.1);
         background: linear-gradient(135deg, #007bff, #00c6ff);
       }
+      .leaderboard-button {
+        position: absolute;
+        left: 20px; /* pinned to the left edge with some padding */
+        font-size: 1rem;
+        padding: 12px 20px;
+        cursor: pointer;
+        border: none;
+        border-radius: 25px;
+        background: linear-gradient(135deg, #007bff, #00c6ff);
+        color: white;
+        transition: all 0.3s ease;
+      }
+      .leaderboard-button:hover {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #00c6ff, #007bff);
+      }
     </style>
   </head>
   <body>
@@ -317,6 +333,7 @@
 
     <!-- Footer -->
     <footer>
+      <button class="leaderboard-button" onclick="goToLeaderboard()">Leaderboard</button>
       <div class="footer-text">✨ Get ready to play! ✨</div>
       <button class="back-button" onclick="goToVirtual()">Back to Virtual</button>
     </footer>
@@ -335,18 +352,11 @@
           // Try to get leaderboard data from localStorage
           let leaderboardData = JSON.parse(localStorage.getItem("leaderboard"));
 
-          // If no parameter is provided (leaderboardData is null or missing), load from JSON file
-          if (!leaderboardData) {
-            const response = await fetch("game/leaderboard.json");
-            if (!response.ok) {
-              throw new Error("Failed to load leaderboard data");
-            }
+          const response = await fetch("http://18.194.141.136:5000/leaderboard");
+          if (!response.ok) throw new Error("Network response was not OK");
 
-            leaderboardData = await response.json();
-
-            // Save to localStorage for future use
-            localStorage.setItem("leaderboard", JSON.stringify(leaderboardData));
-          }
+          leaderboardData = await response.json();
+          localStorage.setItem("leaderboard", JSON.stringify(leaderboardData));
 
           // Display leaderboard
           displayLeaderboard(leaderboardData);
@@ -405,6 +415,10 @@
       function goToVirtual() {
         // Adjust this to your actual “Virtual” page or route
         window.location.href = "index.html";
+      }
+      function goToLeaderboard() {
+        // Adjust this to your actual leaderboard page or route
+        window.location.href = "game/leaderboard.html";
       }
 
       window.onload = loadLeaderboard;

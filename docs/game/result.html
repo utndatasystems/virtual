@@ -180,12 +180,12 @@
     <script>
       const playerName = localStorage.getItem("playerName") || "Player";
 
-      function updateLeaderboard(playerName, correctAnswers, totalTime) {
+      async function updateLeaderboard(playerName, correctAnswers, totalTime) {
+        // 1) Update localStorage
         let leaderboardData = JSON.parse(localStorage.getItem("leaderboard")) || [];
 
         // Check if player already exists in the leaderboard
         let player = leaderboardData.find((p) => p.name === playerName);
-
         if (player) {
           // Update existing player data
           player.correctAnswers = correctAnswers;
@@ -197,6 +197,29 @@
 
         // Save updated data back to localStorage
         localStorage.setItem("leaderboard", JSON.stringify(leaderboardData));
+
+        // 2) Send a POST request to your Flask endpoint
+        try {
+          const response = await fetch("http://18.194.141.136:5000/leaderboard", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: playerName,
+              correctAnswers: correctAnswers,
+              totalTime: totalTime
+            })
+          });
+
+          // Handle response
+          if (!response.ok) {
+            console.error("Server responded with an error:", response.status);
+            // Optionally show an alert or handle error
+          } else {
+            console.log("Successfully updated server leaderboard");
+          }
+        } catch (error) {
+          console.error("Error sending POST to server:", error);
+        }
       }
 
       function formatTime(ms) {

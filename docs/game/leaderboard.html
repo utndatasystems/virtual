@@ -268,8 +268,16 @@
     <script>
       async function loadLeaderboard() {
         try {
-          let leaderboardData = JSON.parse(localStorage.getItem("leaderboard")) || [];
-          console.log("Leaderboard Data:", leaderboardData);
+          // Try to get leaderboard data from localStorage
+          let leaderboardData = JSON.parse(localStorage.getItem("leaderboard"));
+
+          const response = await fetch("http://18.194.141.136:5000/leaderboard");
+          if (!response.ok) throw new Error("Network response was not OK");
+
+          leaderboardData = await response.json();
+          localStorage.setItem("leaderboard", JSON.stringify(leaderboardData));
+
+          // Display leaderboard
           displayLeaderboard(leaderboardData);
         } catch (error) {
           console.error("Error fetching leaderboard:", error);
