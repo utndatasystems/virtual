@@ -266,64 +266,12 @@
     </footer>
 
     <script>
-      async function loadLeaderboard2() {
-        try {
-          // Try to get leaderboard data from localStorage
-          let leaderboardData = JSON.parse(localStorage.getItem("leaderboard"));
-
-          // Check if leaderboardData is already in localStorage and use it
-          // if (leaderboardData) {
-          //   displayLeaderboard(leaderboardData);
-          //   return;
-          // }
-
-          // Open WebSocket connection
-          const socket = new WebSocket("ws://18.194.141.136:5000");
-
-          // When the WebSocket connection opens, request leaderboard data
-          socket.onopen = function () {
-            console.log("WebSocket connected!");
-
-            // Send a message requesting the leaderboard data
-            socket.send(JSON.stringify({ action: "get_leaderboard" }));
-          };
-
-          // Handle the incoming messages (in this case, the leaderboard data)
-          socket.onmessage = function (event) {
-            console.log("Received message:", event.data);
-            const data = JSON.parse(event.data);
-            console.log("Received data:", data);
-
-            // Handle the response (assuming it's the leaderboard data)
-            if (data.leaderboard) {
-              leaderboardData = data.leaderboard;
-              localStorage.setItem("leaderboard", JSON.stringify(leaderboardData));
-
-              // Display leaderboard
-              displayLeaderboard(leaderboardData);
-            } else {
-              console.error("Error: No leaderboard data received");
-            }
-          };
-
-          socket.onerror = function (error) {
-            console.error("WebSocket error:", error);
-          };
-
-          socket.onclose = function () {
-            console.log("WebSocket connection closed");
-          };
-        } catch (error) {
-          console.error("Error fetching leaderboard:", error);
-        }
-      }
-
       async function loadLeaderboard() {
         try {
           // Try to get leaderboard data from localStorage
           let leaderboardData = JSON.parse(localStorage.getItem("leaderboard"));
 
-          const response = await fetch("https://18.194.141.136:5000/leaderboard");
+          const response = await fetch("https://virtual-parquet.ddns.net:5000/leaderboard");
           if (!response.ok) throw new Error("Network response was not OK");
 
           leaderboardData = await response.json();
@@ -388,7 +336,7 @@
       }
 
       // Load leaderboard on page load
-      window.onload = loadLeaderboard2;
+      window.onload = loadLeaderboard;
     </script>
   </body>
 </html>
