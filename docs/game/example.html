@@ -536,19 +536,24 @@
     <footer>
       <!-- <button id="prevButton">←</button> -->
       <button class="home-button" onclick="goHome()">🏠 Back to Home</button>
-      <button class="next-button" id="nextButton" disabled>→</button>
+      <button class="next-button" id="nextButton" onclick="goQuiz()">→</button>
     </footer>
 
     <script>
-      // document.getElementById("nextButton").addEventListener("click", async () => {
-      //   window.location.href = `quiz.html`;
-      // });
+      document.getElementById("nextButton").addEventListener("click", async () => {
+        window.location.href = `quiz.html`;
+      });
       // document.getElementById("verifyButton").addEventListener("click", async () => {
       //   window.location.href = `quiz.html`;
       // });
       function goHome() {
         window.location.href = "../game.html";
       }
+
+      function goQuiz() {
+        window.location.href = "quiz.html";
+      }
+
       const steps = [
         {
           callout: document.querySelector(".callout-table"),
