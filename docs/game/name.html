@@ -20,7 +20,7 @@
         background: linear-gradient(135deg, #6e8efb, #a777e3);
         color: white;
         text-align: center;
-        overflow: hidden;
+        /* overflow: hidden; */
       }
 
       /* Header Styling */
@@ -117,6 +117,10 @@
 
       /* Footer Styling */
       footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        z-index: 1000;
         display: flex;
         justify-content: center;
         padding: 15px 20px;
@@ -184,12 +188,26 @@
         }
 
         const playerName = playerNameInput.value.trim();
+        const leaderboardData = JSON.parse(localStorage.getItem("leaderboard")) || [];
+
+        // Check if the name already exists in the leaderboard
+        const existingPlayer = leaderboardData.find(
+          (player) => player.name.toLowerCase() === playerName.toLowerCase()
+        );
+
+        if (existingPlayer) {
+          const confirmOverwrite = confirm(
+            `The name "${playerName}" already exists in the leaderboard. Do you want to overwrite your previous result?`
+          );
+
+          if (!confirmOverwrite) {
+            return; // Stop if the player cancels
+          }
+        }
+
         alert(`Welcome, ${playerName}! Let's see your result! 🎮`);
         localStorage.setItem("playerName", playerName);
         window.location.href = `result.html`;
-
-        // You can also send the name to Electron backend if needed
-        // window.electronAPI.openQuiz(1, playerName);
       });
     </script>
   </body>

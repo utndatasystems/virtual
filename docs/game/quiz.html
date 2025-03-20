@@ -2,7 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=0.5, user-scalable=no" />
     <title>Virtual Game</title>
     <link rel="icon" href="assets/images/icons8-video-game-96.png" />
     <link
@@ -20,7 +22,7 @@
         background: linear-gradient(135deg, #6e8efb, #a777e3);
         color: white;
         text-align: center;
-        overflow: hidden;
+        /* overflow: hidden; */
       }
 
       header {
@@ -140,6 +142,10 @@
       }
 
       footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        z-index: 1000;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -164,6 +170,10 @@
       footer button:hover {
         transform: scale(1.1);
         background: linear-gradient(135deg, #00c6ff, #007bff);
+      }
+
+      .next-button {
+        margin-right: 4%;
       }
 
       @keyframes float {
@@ -262,7 +272,7 @@
       <div class="right">
         <div class="timer-container">⏰ <span id="timer">00:00:00</span></div>
         <label for="functionInput">✏️ Write functions:</label>
-        <input type="text" id="functionInput" placeholder="a = ..." />
+        <input type="text" id="functionInput" placeholder="" />
         <button id="verifyButton">Verify</button>
       </div>
     </div>
@@ -277,7 +287,7 @@
     <footer>
       <!-- <button id="prevButton">←</button> -->
       <button class="home-button" onclick="goHome()">🏠 Back to Home</button>
-      <button id="nextButton">→</button>
+      <button class="next-button" id="nextButton">→</button>
     </footer>
 
     <script>
@@ -287,7 +297,7 @@
       let totalMilliseconds = parseInt(localStorage.getItem("timeStart"), 10) || 0;
       const startTime = totalMilliseconds;
       let csvData = [];
-      document.getElementById("quiz_id").textContent = `${quizNum}`;
+      document.getElementById("quiz_id").textContent = `${quizNum}/5`;
       console.log("quizNum", quizNum);
 
       // Timer function
@@ -432,6 +442,11 @@
 
         try {
           if (functionInput === "None") return false;
+
+          if (!/a/.test(functionInput) || !/b/.test(functionInput) || !/c/.test(functionInput)) {
+            console.log("Equation must include 'a', 'b', and 'c'.");
+            return false;
+          }
 
           console.log("Checking equation:", functionInput);
           return checkEquation(csvData, functionInput);

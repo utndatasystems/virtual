@@ -2,7 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=0.5, user-scalable=no" />
+
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
     <title>Virtual Game</title>
     <link rel="icon" href="assets/images/icons8-video-game-96.png" />
     <link
@@ -20,7 +24,7 @@
         background: linear-gradient(135deg, #6e8efb, #a777e3);
         color: white;
         text-align: center;
-        overflow: hidden;
+        /* overflow: hidden; */
       }
 
       header {
@@ -44,7 +48,7 @@
 
       .left {
         flex: 2;
-        padding: 20px;
+        /* padding: 20px; */
         display: flex;
         flex-direction: column; /* Stack items vertically */
         justify-content: flex-start; /* or center if you want to center them vertically in the panel */
@@ -104,7 +108,7 @@
 
       .right {
         flex: 1;
-        padding: 20px;
+        /* padding: 20px; */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -170,6 +174,10 @@
       }
 
       footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        z-index: 1000;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -189,6 +197,10 @@
         color: white;
         border-radius: 25px;
         transition: all 0.3s ease;
+      }
+
+      .next-button {
+        margin-right: 4%;
       }
 
       footer button:hover {
@@ -249,8 +261,8 @@
 
       /* Example: position the callout near the input */
       .callout-input {
-        top: 34%;
-        right: 7%;
+        top: 36%;
+        right: 9%;
       }
       .arrow-input {
         transform: rotate(-10deg); /* Rotate if you want it angled differently */
@@ -261,7 +273,7 @@
       }
 
       .callout-table {
-        top: 22%; /* Tweak to line up with your table’s position */
+        top: 20%; /* Tweak to line up with your table’s position */
         left: 50%;
         /* Possibly another rotation if you want it angled differently */
       }
@@ -275,7 +287,7 @@
 
       .callout-rules {
         bottom: 39%; /* Tweak to line up with your table’s position */
-        left: 35%;
+        left: 30%;
         /* Possibly another rotation if you want it angled differently */
       }
       .arrow-rules {
@@ -301,7 +313,7 @@
       }
 
       .callout-time {
-        top: 27%;
+        top: 26%;
         right: 35%;
         /* Possibly another rotation if you want it angled differently */
       }
@@ -315,7 +327,7 @@
 
       .callout-num {
         top: 2%;
-        right: 9%;
+        right: 11%;
         /* Possibly another rotation if you want it angled differently */
       }
       .arrow-num {
@@ -327,7 +339,7 @@
       }
 
       .callout-verify {
-        top: 57%;
+        bottom: 38%;
         right: 32%;
         /* Possibly another rotation if you want it angled differently */
       }
@@ -414,7 +426,7 @@
         <font size="+2">🎮 <code>Virtual</code></font
         >: Game
       </div>
-      <div class="quiz-title">Quiz <span id="quiz_id">0</span></div>
+      <div class="quiz-title">Quiz <span id="quiz_id">0/5</span></div>
     </header>
 
     <div class="container">
@@ -456,6 +468,7 @@
             <li>Rule #1: A function uses all columns.</li>
             <li>Rule #2: Operators allowed: '+', '-', '*', '/'.</li>
             <li>Rule #3: You have 3 minutes to complete 5 quizzes.</li>
+            <li>Rule #4: Use only linear functions like c = 2 * a + 3 * b + 100.</li>
           </ul>
         </div>
       </div>
@@ -540,12 +553,10 @@
     </footer>
 
     <script>
-      document.getElementById("nextButton").addEventListener("click", async () => {
-        window.location.href = `quiz.html`;
+      document.getElementById("nextButton").addEventListener("click", () => {
+        window.location.href = "quiz.html";
       });
-      // document.getElementById("verifyButton").addEventListener("click", async () => {
-      //   window.location.href = `quiz.html`;
-      // });
+
       function goHome() {
         window.location.href = "../game.html";
       }
@@ -587,49 +598,66 @@
 
       let currentStep = 0;
 
+      // Start the tour
       function startTour() {
-        // Add blur overlay
         document.body.classList.add("tour-active");
         document.getElementById("tourOverlay").classList.remove("hidden");
 
-        // Show the first step
+        // Add event listeners for both clicking and keyboard navigation
+        document.addEventListener("click", nextStep);
+        document.addEventListener("keydown", keyPressHandler);
+
         showStep(currentStep);
       }
 
       // Show a specific step
       function showStep(index) {
-        // Hide all callouts
         steps.forEach((s) => {
           s.callout.classList.remove("active");
           s.highlight.classList.remove("no-blur");
         });
 
-        // Show the active one
         const step = steps[index];
         if (!step) {
-          // No more steps => end tour
           endTour();
           return;
         }
+
         step.callout.classList.add("active");
         step.highlight.classList.add("no-blur");
-
         updateDots(index);
-
-        // Listen for user click anywhere to proceed
-        // (Alternatively, you can add a "Next" button in each callout.)
-        document.addEventListener("click", nextStep, { once: true });
       }
 
-      function nextStep() {
-        document.removeEventListener("click", nextStep, { once: true });
+      // Move to the next step
+      function nextStep(event) {
+        if (event) {
+          event.preventDefault(); // Prevent any unintended scrolling
+        }
+
         currentStep++;
-        showStep(currentStep);
+        if (currentStep < steps.length) {
+          showStep(currentStep);
+        } else {
+          endTour();
+        }
       }
 
+      // Keyboard handler for "Enter" and "Space"
+      function keyPressHandler(event) {
+        if (event.key === " " || event.key === "Enter") {
+          event.preventDefault(); // Prevent scrolling
+          nextStep();
+        }
+      }
+
+      // End the tour
       function endTour() {
-        // Remove blur + hide overlay
         document.body.classList.remove("tour-active");
+        // document.getElementById("tourOverlay").classList.add("hidden");
+
+        // Remove event listeners to prevent duplicate bindings
+        document.removeEventListener("click", nextStep);
+        document.removeEventListener("keydown", keyPressHandler);
         document.getElementById("stepIndicator").classList.add("hidden");
 
         // Hide any remaining callouts
@@ -643,26 +671,32 @@
         });
         document.getElementById("overlayText").textContent = "Click anywhere to start the quiz.";
         document.addEventListener("click", startQuiz, { once: true });
+        document.addEventListener(
+          "keydown",
+          (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              startQuiz();
+            }
+          },
+          { once: true }
+        );
       }
 
+      // Start the quiz
       function startQuiz() {
-        document.removeEventListener("click", startQuiz, { once: true });
-        window.location.href = `quiz.html`;
+        window.location.href = "quiz.html";
       }
 
+      // Update step indicator dots
       function updateDots(stepIndex) {
         const dots = document.querySelectorAll("#stepIndicator .dot");
         dots.forEach((dot, i) => {
-          // Turn all dots up to current stepIndex green
-          if (i <= stepIndex) {
-            dot.classList.add("completed");
-          } else {
-            dot.classList.remove("completed");
-          }
+          dot.classList.toggle("completed", i <= stepIndex);
         });
       }
 
-      // Start the tour immediately on page load (or call from a button)
+      // Start the tour when the page loads
       window.onload = () => {
         startTour();
       };
