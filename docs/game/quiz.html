@@ -572,7 +572,7 @@
 
         if (isVerified) {
           localStorage.setItem("quizNum", quizNum + 1);
-          localStorage.setItem("timeStart", Math.max(totalMilliseconds - elapsedTime, 0));
+          localStorage.setItem("timeStart", remainingTime);
           window.location.href = `quiz.html`;
         } else {
           // Show confirmation dialog before skipping
@@ -593,7 +593,7 @@
             localStorage.setItem("globalQuizData", JSON.stringify(globalQuizData));
             timerPaused = false;
             localStorage.setItem("quizNum", quizNum + 1);
-            localStorage.setItem("timeStart", Math.max(totalMilliseconds - elapsedTime, 0));
+            localStorage.setItem("timeStart", remainingTime);
             window.location.href = `quiz.html`;
           }
         }
@@ -603,7 +603,7 @@
 
         if (isVerified) {
           localStorage.setItem("quizNum", quizNum + 1);
-          localStorage.setItem("timeStart", totalMilliseconds);
+          localStorage.setItem("timeStart", remainingTime);
           window.location.href = `quiz.html`;
         }
       });
