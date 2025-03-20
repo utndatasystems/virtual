@@ -80,7 +80,7 @@ functions = virtual.train(df)
 Please do cite our (very) cool work if you use `virtual` in your work.
 
 ```
-@inproceedings{virtual,
+@inproceedings{virtual_trl,
   title = {{Lightweight Correlation-Aware Table Compression}},
   author = {Mihail Stoian and Alexander van Renen and Jan Kobiolka and Ping-Lin Kuo and Josif Grabocka and Andreas Kipf},
   booktitle = {NeurIPS 2024 Third Table Representation Learning Workshop},
