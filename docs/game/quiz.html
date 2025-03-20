@@ -37,6 +37,9 @@
         backdrop-filter: blur(10px);
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       }
+      .header-text .quiz-id .function-label .function-input .verify-button {
+        font-size: 1.5rem;
+      }
 
       .container {
         display: flex;
@@ -259,9 +262,7 @@
         <font size="+2">🎮 <code>Virtual</code></font
         >: Game
       </div>
-      <div style="font-size: 1.5rem">
-        Quiz <span id="quiz_id" style="font-size: 1.5rem">1</span>
-      </div>
+      <div class="header-text">Quiz <span class="quiz-id" id="quiz_id">1</span></div>
       <!-- <div>⏰ <span id="timer">00:00:00</span></div> -->
     </header>
 
@@ -274,9 +275,9 @@
       </div>
       <div class="right">
         <div class="timer-container">⏰ <span id="timer">00:00:00</span></div>
-        <label for="functionInput" style="font-size: 1.5rem">✏️ Write functions:</label>
-        <input type="text" id="functionInput" placeholder="" style="font-size: 1.5rem" />
-        <button id="verifyButton" style="font-size: 1.5rem">Verify</button>
+        <label class="function-label" for="functionInput">✏️ Write functions:</label>
+        <input class="function-input" type="text" id="functionInput" placeholder="" />
+        <button class="verify-button" id="verifyButton">Verify</button>
       </div>
     </div>
 
