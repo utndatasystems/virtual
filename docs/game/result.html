@@ -115,7 +115,6 @@
         border-top: 2px solid rgba(255, 255, 255, 0.3);
         backdrop-filter: blur(10px);
         box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
-        position: relative;
       }
 
       /* Center the footer text */
@@ -164,6 +163,11 @@
 
       .result-box {
         animation: float 2s infinite ease-in-out;
+      }
+      @media (max-width: 768px) and (orientation: portrait) {
+        .footer-text {
+          display: none;
+        }
       }
     </style>
   </head>

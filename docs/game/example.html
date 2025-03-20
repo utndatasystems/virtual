@@ -68,6 +68,7 @@
         backdrop-filter: blur(10px);
         border-radius: 10px;
         overflow: hidden;
+        font-size: 1.5rem
       }
 
       table th,
@@ -426,7 +427,9 @@
         <font size="+2">🎮 <code>Virtual</code></font
         >: Game
       </div>
-      <div class="quiz-title">Quiz <span id="quiz_id">0/5</span></div>
+      <div class="quiz-title" style="font-size: 1.5rem">
+        Quiz <span id="quiz_id" style="font-size: 1.5rem">0/5</span>
+      </div>
     </header>
 
     <div class="container">
@@ -474,9 +477,14 @@
       </div>
       <div class="right">
         <div class="timer-container">⏰ <span id="timer">02:31.80</span></div>
-        <label for="functionInput">✏️ Write functions:</label>
-        <input type="text" id="functionInput" placeholder="c = a + b" disabled />
-        <button id="verifyButton" disabled>Verify</button>
+        <label for="functionInput" style="font-size: 1.5rem">✏️ Write functions:</label>
+        <input
+          type="text"
+          style="font-size: 1.5rem"
+          id="functionInput"
+          placeholder="c = a + b"
+          disabled />
+        <button id="verifyButton" style="font-size: 1.5rem" disabled>Verify</button>
       </div>
     </div>
 

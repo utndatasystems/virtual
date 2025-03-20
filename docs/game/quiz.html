@@ -62,6 +62,7 @@
         backdrop-filter: blur(10px);
         border-radius: 10px;
         overflow: hidden;
+        font-size: 1.5rem;
       }
 
       table th,
@@ -233,7 +234,7 @@
 
       /* The short message below the symbol */
       .result-message {
-        font-size: 10rem;
+        font-size: 8rem;
         font-weight: bold;
         color: #333;
       }
@@ -258,7 +259,9 @@
         <font size="+2">🎮 <code>Virtual</code></font
         >: Game
       </div>
-      <div>Quiz <span id="quiz_id">1</span></div>
+      <div style="font-size: 1.5rem">
+        Quiz <span id="quiz_id" style="font-size: 1.5rem">1</span>
+      </div>
       <!-- <div>⏰ <span id="timer">00:00:00</span></div> -->
     </header>
 
@@ -271,9 +274,9 @@
       </div>
       <div class="right">
         <div class="timer-container">⏰ <span id="timer">00:00:00</span></div>
-        <label for="functionInput">✏️ Write functions:</label>
-        <input type="text" id="functionInput" placeholder="" />
-        <button id="verifyButton">Verify</button>
+        <label for="functionInput" style="font-size: 1.5rem">✏️ Write functions:</label>
+        <input type="text" id="functionInput" placeholder="" style="font-size: 1.5rem" />
+        <button id="verifyButton" style="font-size: 1.5rem">Verify</button>
       </div>
     </div>
 
@@ -295,48 +298,66 @@
       const timerElement = document.getElementById("timer");
       const quizNum = parseInt(localStorage.getItem("quizNum"), 10) || 0;
       let totalMilliseconds = parseInt(localStorage.getItem("timeStart"), 10) || 0;
-      const startTime = totalMilliseconds;
+      const startTime = performance.now();
+      let elapsedTime = performance.now() - startTime;
+      let remainingTime = Math.max(totalMilliseconds - elapsedTime, 0);
       let csvData = [];
       document.getElementById("quiz_id").textContent = `${quizNum}/5`;
       console.log("quizNum", quizNum);
 
       // Timer function
       function updateTimer() {
-        if (!timerPaused) {
-          totalMilliseconds -= 10; // Increase by 100 milliseconds
+        if (timerPaused) return;
 
-          const totalSeconds = totalMilliseconds / 1000;
-          const minutes = Math.floor(totalSeconds / 60)
-            .toString()
-            .padStart(2, "0");
-          const seconds = (totalSeconds % 60).toFixed(2).padStart(5, "0"); // Keep one decimal place
+        // Calculate elapsed time
+        elapsedTime = performance.now() - startTime;
+        remainingTime = Math.max(totalMilliseconds - elapsedTime, 0);
 
-          timerElement.textContent = `${minutes}:${seconds}`; // Display time
-          if (totalMilliseconds <= 0) {
-            timerPaused = true;
-            let globalQuizData = JSON.parse(localStorage.getItem("globalQuizData")) || {};
-            globalQuizData[quizNum] = {
-              input: "None",
-              status: "incorrect",
-              time: startTime - totalMilliseconds
-            };
+        // Format time
+        const minutes = Math.floor(remainingTime / 60000)
+          .toString()
+          .padStart(2, "0");
+        const seconds = Math.floor((remainingTime % 60000) / 1000)
+          .toString()
+          .padStart(2, "0");
+        const centiseconds = Math.floor((remainingTime % 1000) / 10)
+          .toString()
+          .padStart(2, "0");
 
-            for (let i = quizNum + 1; i <= 5; i++) {
-              globalQuizData[i] = {
-                input: "None",
-                status: "incorrect",
-                time: 0
-              };
-            }
-            localStorage.setItem("globalQuizData", JSON.stringify(globalQuizData));
-            console.log("Global Quiz Data:", globalQuizData);
-            window.location.href = "name.html";
-          }
+        const newTime = `${minutes}:${seconds}.${centiseconds}`;
+
+        // Update only if necessary (reduces DOM manipulations)
+        if (timerElement.textContent !== newTime) {
+          timerElement.textContent = newTime;
+        }
+        if (remainingTime <= 0) {
+          timeEnd();
         }
       }
 
       // Update every 100ms to show 1 decimal place
       setInterval(updateTimer, 10);
+
+      function timeEnd() {
+        timerPaused = true;
+        let globalQuizData = JSON.parse(localStorage.getItem("globalQuizData")) || {};
+        globalQuizData[quizNum] = {
+          input: "None",
+          status: "incorrect",
+          time: performance.now() - startTime
+        };
+
+        for (let i = quizNum + 1; i <= 5; i++) {
+          globalQuizData[i] = {
+            input: "None",
+            status: "incorrect",
+            time: 0
+          };
+        }
+        localStorage.setItem("globalQuizData", JSON.stringify(globalQuizData));
+        console.log("Global Quiz Data:", globalQuizData);
+        window.location.href = "name.html";
+      }
 
       function shuffleHeaders(data) {
         if (!data || !data.length) return data;
@@ -508,7 +529,7 @@
           globalQuizData[quizNum] = {
             input: functionInput,
             status: result ? "correct" : "incorrect",
-            time: startTime - totalMilliseconds
+            time: performance.now() - startTime
           };
           localStorage.setItem("globalQuizData", JSON.stringify(globalQuizData));
           console.log("Global Quiz Data:", globalQuizData);
@@ -550,7 +571,7 @@
 
         if (isVerified) {
           localStorage.setItem("quizNum", quizNum + 1);
-          localStorage.setItem("timeStart", totalMilliseconds);
+          localStorage.setItem("timeStart", Math.max(totalMilliseconds - elapsedTime, 0));
           window.location.href = `quiz.html`;
         } else {
           // Show confirmation dialog before skipping
@@ -559,18 +580,19 @@
           );
 
           if (confirmSkip) {
+            console.log("Skipping quiz...");
             timerPaused = true;
             let globalQuizData = JSON.parse(localStorage.getItem("globalQuizData")) || {};
 
             globalQuizData[quizNum] = {
               input: "None",
               status: "incorrect",
-              time: startTime - totalMilliseconds
+              time: performance.now() - startTime
             };
             localStorage.setItem("globalQuizData", JSON.stringify(globalQuizData));
             timerPaused = false;
             localStorage.setItem("quizNum", quizNum + 1);
-            localStorage.setItem("timeStart", totalMilliseconds);
+            localStorage.setItem("timeStart", Math.max(totalMilliseconds - elapsedTime, 0));
             window.location.href = `quiz.html`;
           }
         }
