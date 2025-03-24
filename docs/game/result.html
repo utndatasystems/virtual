@@ -209,8 +209,9 @@
 
     <script>
       const playerName = localStorage.getItem("playerName") || "Player";
+      const contactInfo = localStorage.getItem("contactInfo") || "None";
 
-      async function updateLeaderboard(playerName, correctAnswers, totalTime) {
+      async function updateLeaderboard(playerName, correctAnswers, totalTime, contactInfo) {
         // 1) Update localStorage
         let leaderboardData = JSON.parse(localStorage.getItem("leaderboard")) || [];
 
@@ -236,7 +237,8 @@
             body: JSON.stringify({
               name: playerName,
               correctAnswers: correctAnswers,
-              totalTime: totalTime
+              totalTime: totalTime,
+              contactInfo: contactInfo
             })
           });
 
@@ -313,7 +315,7 @@
           totalTime += quiz.timeSpent;
           if (quiz.correct) totalCorrect++;
         });
-        updateLeaderboard(playerName, totalCorrect, formatTime(totalTime));
+        updateLeaderboard(playerName, totalCorrect, formatTime(totalTime), contactInfo);
         document.getElementById("totalCorrect").textContent = `${totalCorrect}`;
       }
 

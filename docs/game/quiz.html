@@ -345,7 +345,7 @@
         globalQuizData[quizNum] = {
           input: "None",
           status: "incorrect",
-          time: performance.now() - startTime
+          time: elapsedTime
         };
 
         for (let i = quizNum + 1; i <= 5; i++) {
@@ -530,7 +530,7 @@
           globalQuizData[quizNum] = {
             input: functionInput,
             status: result ? "correct" : "incorrect",
-            time: performance.now() - startTime
+            time: elapsedTime
           };
           localStorage.setItem("globalQuizData", JSON.stringify(globalQuizData));
           console.log("Global Quiz Data:", globalQuizData);
@@ -588,7 +588,7 @@
             globalQuizData[quizNum] = {
               input: "None",
               status: "incorrect",
-              time: performance.now() - startTime
+              time: elapsedTime
             };
             localStorage.setItem("globalQuizData", JSON.stringify(globalQuizData));
             timerPaused = false;

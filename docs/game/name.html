@@ -63,6 +63,9 @@
         position: relative;
         width: 300px;
         display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
       }
 
       .input-container input {
@@ -161,6 +164,7 @@
       <!-- Name Input Field -->
       <div class="input-container">
         <input type="text" id="playerName" placeholder="Enter your name" />
+        <input type="text" id="contactInfo" placeholder="Contact information (Optional)" />
       </div>
 
       <!-- Start Game Button -->
@@ -173,6 +177,7 @@
 
     <script>
       const playerNameInput = document.getElementById("playerName");
+      const contactInfoInput = document.getElementById("contactInfo");
       const enterButton = document.getElementById("enterButton");
 
       // Enable button only if user inputs a name
@@ -192,6 +197,7 @@
         }
 
         const playerName = playerNameInput.value.trim();
+        const contactInfo = contactInfoInput.value.trim() || "None";
         const leaderboardData = JSON.parse(localStorage.getItem("leaderboard")) || [];
 
         // Check if the name already exists in the leaderboard
@@ -200,17 +206,13 @@
         );
 
         if (existingPlayer) {
-          const confirmOverwrite = confirm(
-            `The name "${playerName}" already exists in the leaderboard. Do you want to overwrite your previous result?`
-          );
-
-          if (!confirmOverwrite) {
-            return; // Stop if the player cancels
-          }
+          alert(`The name "${playerName}" is already taken. Please choose a different name.`);
+          return; // Stop if the name is already in use
         }
 
         alert(`Welcome, ${playerName}! Let's see your result! 🎮`);
         localStorage.setItem("playerName", playerName);
+        localStorage.setItem("contactInfo", contactInfo);
         window.location.href = `result.html`;
       });
     </script>
