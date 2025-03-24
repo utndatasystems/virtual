@@ -267,22 +267,24 @@
         padding-left: 1.5rem;
       }
       .right .hint-toggle-button {
-        background-color: rgba(0, 174, 239, 0.2); /* soft sky-blue */
-        border: 1px solid rgba(0, 174, 239, 0.4);
+        /* override the background and box-shadow from .right button */
+        background: rgba(255, 255, 255, 0.45) !important;
+        box-shadow: none !important;
+
+        border: 1px solid rgba(255, 255, 255, 0.3);
         color: white;
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 500;
         padding: 10px 18px;
         border-radius: 20px;
         cursor: pointer;
-        box-shadow: none;
-        transition: background-color 0.3s ease, transform 0.2s ease;
+        transition: background-color 0.2s ease, transform 0.2s ease;
         margin-top: 10px;
       }
 
       .right .hint-toggle-button:hover {
-        background-color: rgba(0, 174, 239, 0.35); /* slightly brighter on hover */
-        transform: scale(1.03);
+        background: rgba(255, 255, 255, 0.25) !important;
+        transform: scale(1.02);
       }
     </style>
   </head>
@@ -330,7 +332,7 @@
         <label class="function-label" for="functionInput">✏️ Write functions:</label>
         <input class="function-input" type="text" id="functionInput" placeholder="" />
         <button class="verify-button" id="verifyButton">Verify</button>
-        <div id="hintContainer" style="width: 100%; text-align: middle; margin-top: 10px">
+        <div id="hintContainer" style="width: 100%; text-align: middle; margin-top: 30px">
           <button id="toggleHintBtn" class="hint-toggle-button">💡 Show Hint (3 left)</button>
           <div id="hintBox" class="rules-board hidden">
             <h3>Hint</h3>
@@ -369,8 +371,11 @@
       const hintBox = document.getElementById("hintBox");
       let remaining = maxHintUsage - hintUsage;
       document.getElementById("quiz_id").textContent = `${quizNum}/5`;
-      toggleHintBtn.innerHTML = `💡 Show Hint (${remaining} left)`;
       document.getElementById("hintBox").querySelector("p").textContent = getHintForQuiz(quizNum);
+      toggleHintBtn.innerHTML = `💡 Show Hint (${remaining} left)`;
+      if (remaining === 0) {
+        toggleHintBtn.innerHTML = `Sorry, no hints left.`;
+      }
 
       console.log("quizNum", quizNum);
 
@@ -659,6 +664,7 @@
 
         return hints[quizNum] || "No hint available for this quiz.";
       }
+
       toggleHintBtn.addEventListener("click", () => {
         if (useHints === false && hintUsage < maxHintUsage) {
           useHints = true;
@@ -671,6 +677,7 @@
           // Only allow if limit not reached
           if (useHints) {
             hintBox.classList.remove("hidden");
+            toggleHintBtn.classList.add("hidden");
             localStorage.setItem("hintUsage", hintUsage);
             toggleHintBtn.innerHTML = `💡 Hide Hint (${remaining} left)`;
           }
