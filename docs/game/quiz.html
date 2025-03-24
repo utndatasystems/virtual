@@ -560,6 +560,7 @@
 
       async function verifyEquation(quizNum, functionInput) {
         quizNum = parseInt(quizNum);
+        functionInput = functionInput.toLowerCase();
 
         try {
           if (functionInput === "None") return false;
