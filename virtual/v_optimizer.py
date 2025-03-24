@@ -126,8 +126,6 @@ def optimize(configs, model_types: List[virtual.utils.ModelType]):
 
       compute_space_gain(hyperedges[-1], config, model_type)
 
-      print(f'{target_name} {model_type.name} {hyperedges[-1]['gain']}')
-
       if hyperedges[-1]['gain'] <= 0:
         hyperedges = hyperedges[:-1]
 

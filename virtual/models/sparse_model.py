@@ -1,8 +1,6 @@
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import root_mean_squared_error
 import numpy as np
-# from celer import Lasso
-import scipy
 
 # from sklearnex import patch_sklearn
 # patch_sklearn()
@@ -15,15 +13,6 @@ class SparseLRInference:
 
   def predict(self, x):
     return np.dot(x, self.coef_) + self.intercept_
-
-def apply_lasso(x, y, selected):
-  new_model = Lasso().fit(x[:, selected], y)
-  new_y_pred = new_model.predict(x[:, selected])
-  new_mse = root_mean_squared_error(y_true=y, y_pred=new_y_pred)
-
-  # if new_mse > 1e-6:
-    # return None
-  return new_model.intercept_, new_model.coef_
 
 class SparseLR:
   def __init__(self, max_mse_allowed):

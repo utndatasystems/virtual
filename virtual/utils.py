@@ -356,16 +356,9 @@ def dump_json_data(data, json_data, component_name, prefix=None):
 def gather_all_models(functions):
   # Collect all model names present in the json file.
 
-  print(functions)
-
   all_keys = set()
   for elem in functions:
-    print(elem)
-    print(elem['models'])
     all_keys |= set(elem['models'].keys())
-
-  print(all_keys)
-
   return all_keys
 
 def select_models(model_types: List[str], functions):

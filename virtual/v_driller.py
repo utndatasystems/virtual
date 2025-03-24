@@ -14,7 +14,7 @@ from models.sparse_model import SparseLR
 from models.k_regression import K_Regression, k_regression_settings, compute_error
 from sklearn.metrics import root_mean_squared_error
 
-def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=None, sample_size=None, allowed_model_types: Optional[list[str]]=None):
+def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=None, sample_size=None, model_types: Optional[list[str]]=None):
   assert isinstance(data, (pd.DataFrame, pathlib.Path, utils.URLPath))
   
   # Instantiate the data wrapper.
@@ -26,20 +26,16 @@ def virtualize_table(data: pd.DataFrame | pathlib.Path | utils.URLPath, nrows=No
   # The functions found.
   results = []
 
-  print(data_wrapper.v_cols)
-
-  print(len(data_wrapper.v_cols['num']['names']))
-
   # Solve the numerical case.
   if len(data_wrapper.v_cols['num']['names']) > 1:
-    results.extend(solve_num_cols(data_wrapper, sample_size=sample_size, allowed_model_types=allowed_model_types))
+    results.extend(solve_num_cols(data_wrapper, sample_size=sample_size, model_types=model_types))
 
   # Solve the non-numerical cases.
   for category in ['date', 'timestamp', 'time']:
     if len(data_wrapper.v_cols[category]['names']) > 1:
       results.extend(solve_custom_cols(data_wrapper, category, sample_size=sample_size))
 
-  print(f'We found {len(results)} function(s) in your table.')
+  print(f'We found {len(results)} function candidate(s) in your table.')
   return results
 
 def solve_custom_cols(data_wrapper, category, sample_size=None):
@@ -121,7 +117,7 @@ def run_model(model_type, X, y, col_name=None):
   mse = root_mean_squared_error(y_true=y, y_pred=y_pred)
   return mse, model.intercept_, model.coef_
 
-def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
+def solve_num_cols(data_wrapper, sample_size=None, model_types=None):
   # Analyze the coefficients of the regression.
   def reduce_coeffs(coeffs, input_columns):
     selected = []
@@ -150,14 +146,8 @@ def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
       })
     return ret
 
-  # print('here???')
-
-  # TODO: We can try multiple samples.
+  # TODO: We can try multiple samples. This would also be helpful for k-regression.
   sample = data_wrapper.sample('num', sample_size=sample_size)
-
-  # print(sample)
-
-  # sample.to_csv('sample.csv', index=False)
 
   # Convert to numpy.
   sample = sample.to_numpy()
@@ -168,15 +158,7 @@ def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
     input_columns = data_wrapper.v_cols['num']['indices'].copy()
     input_columns.remove(target_index)
 
-    # print(f'\nBBBBBBBBB >>>{data_wrapper.valid_column_names['num'][data_wrapper.get_rank(target_index)]}')
-    # print(input_columns)
-    # print(data_wrapper.valid_column_names['num'])
-    # print(data_wrapper.valid_column_indices['num'])
-    # print([data_wrapper.valid_column_names[i] for i in data_wrapper.get_rank(input_columns)])
-    # print(data_wrapper.valid_column_names[data_wrapper.get_rank(target_index)])
-
-    # TODO: Maybe try multiple samples.
-    # TODO: This would also be helpful for k-regression.
+    # Define the regression data.
     X = sample[:, data_wrapper.get_rank('num', input_columns)]
     y = sample[:, data_wrapper.get_rank('num', target_index)]
 
@@ -202,9 +184,9 @@ def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
     # NOTE: We later try `k-regression` as well.
     for model_type in ['sparse-lr']:
       # Check if this model is allowed.
-      # NOTE: If `allowed_model_types` is not None, we actually want to run this model!
-      if allowed_model_types is not None:
-        if model_type not in allowed_model_types:
+      # NOTE: If `model_types` is not None, we actually want to run this model!
+      if model_types is not None:
+        if model_type not in model_types:
           continue
 
       # Run the model.
@@ -227,7 +209,7 @@ def solve_num_cols(data_wrapper, sample_size=None, allowed_model_types=None):
       }
 
     # Try k-regression, only if it's actually allowed.
-    if allowed_model_types is None or 'k-regression' in allowed_model_types:
+    if model_types is None or 'k-regression' in model_types:
       # Run the model.
       k_config = run_model('k-regression', X, y, data_wrapper.column_names[target_index])
 

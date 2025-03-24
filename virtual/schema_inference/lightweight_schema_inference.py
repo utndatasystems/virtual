@@ -18,6 +18,7 @@ class LWSchemaInferer:
     query = None
     if isinstance(self.data, pathlib.Path):
       if self.data.suffix == '.csv':
+        # TODO: We should use the schema if possible. Since this is really slow for large CSV files.
         # Infer the dialect.
         dialect = virtual.utils.infer_dialect(self.data)
 
@@ -62,8 +63,16 @@ class LWSchemaInferer:
 
     col_types = []
     for index in range(len(columns)):
+      column_name = columns[index]
+
+      # Strip the name of double-quotes, since pd.DataFrame puts them by default.
+      if isinstance(self.data, pd.DataFrame):
+        if column_name.startswith('"') and column_name.endswith('"'):
+          column_name = column_name[1:-1]
+
+      # And add.
       col_types.append({
-        'name' : columns[index],
+        'name' : column_name,
         'type' : str(column_types[index])
       })
     return has_header, col_types

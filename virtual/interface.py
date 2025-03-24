@@ -23,7 +23,7 @@ import time
 import re
 
 # TODO: We should add `nrows`. Maybe also the sample_size.
-def train(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, nrows=None, sample_size=10_000, model_types: Optional[list[str]]=['sparse-lr'], schema=None, prefix=None):
+def train(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, nrows=None, sample_size=10_000, model_types: Optional[list[str]]=['sparse-lr', 'custom'], schema=None, prefix=None):
   """
     Computes the functions hidden in `data`.
 
@@ -58,7 +58,7 @@ def train(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, nrows=None, s
   print(f'Drilling functions..')
 
   # Virtualize the table. Note that for this particular step we don't require a schema.
-  functions = v_driller.virtualize_table(data, nrows=nrows, sample_size=sample_size, allowed_model_types=model_types)
+  functions = v_driller.virtualize_table(data, nrows=nrows, sample_size=sample_size, model_types=model_types)
 
   # Dump `functions`.
   utils.dump_json_data(data, functions, 'driller', prefix)
@@ -67,7 +67,7 @@ def train(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, nrows=None, s
   return functions
 
 # TODO: Check whether all cases for `nrows` work out.
-def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_path, functions=None, schema=None, nrows=None, model_types: Optional[list[str]]=None, prefix=None):
+def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_path, functions=None, schema=None, nrows=None, model_types: Optional[list[str]]=['sparse-lr', 'custom'], prefix=None):
   """
     Converts `data` into a file of the specified format.
 
@@ -128,6 +128,7 @@ def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_pa
   if schema is None:
     schema = schema_inference.schema_utils.generate_schema(data, nrows)
   elif isinstance(schema, str):
+    assert os.path.isfile(schema), f'The schema path you provided is unfortunately not valid.'
     schema = utils._read_json(schema)
 
   # Dump `schema`.
@@ -145,13 +146,9 @@ def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_pa
     model_types = utils.gather_all_models(functions)
   else:
     model_types = utils.select_models(model_types, functions)
-
-  print(f'before:')
-  print(model_types)
-
   model_types = list(map(utils.ModelType, model_types))
 
-  print(model_types)
+  print(f'Let\'s see how many benefit virtualization..')
 
   # Estimate the column sizes.
   estimated_sizes = v_optimizer.compute_target_sizes(data, functions, schema, model_types)
@@ -164,6 +161,8 @@ def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_pa
 
   # Dump `layout`.
   utils.dump_json_data(data, functions, 'layout', prefix)
+
+  print(f"It seems that {len(functions['greedy']['chosen'])} function(s) can indeed be used for virtualization.")
 
   # Compress the file via the optimized layout.
   virtual_path = v_compressor.compress(data, schema, functions, optimize_layout=True, nrows=nrows)
@@ -188,7 +187,10 @@ def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_pa
     # TODO: @Ping: `btrblocks`.
     utils.to_btrblocks(virtual_path, format_path)
     utils._write_json(os.path.join(format_path, 'functions.json'), functions)
-    utils._write_json(os.path.join(format_path, 'schema.json'), schema)  
+    utils._write_json(os.path.join(format_path, 'schema.json'), schema)
+
+  print(f'Done.')
+
   return
 
 def from_format(format_path, functions=None, schema=None):

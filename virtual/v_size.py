@@ -159,13 +159,11 @@ def _create_base_table(target_columns, schema, model_type=None):
         # Add the `least` column.
         columns.append(create_least_column(iter['target-name']))
 
-    # Add a temporary offset column which can be null.
-    # if virtual.utils.is_k_regression(model_type):
-    #    columns.append(create_temp_offset_column(iter['target-name']))
+  # Create the column-list.
+  columns = ', '.join(columns)
 
-  columns = " , ".join(columns)
-
-  return f"CREATE TABLE base_table ({columns});"
+  # And return.
+  return f'CREATE TABLE base_table ({columns});'
 
 def _create_sample(data: pd.DataFrame | pathlib.Path | virtual.utils.URLPath, sample_path, sample_size):
   # If there is only a path, first read it.
