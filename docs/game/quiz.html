@@ -51,16 +51,16 @@
         flex: 2;
         padding: 20px;
         display: flex;
-        justify-content: center;
         align-items: center;
         border-right: 2px solid rgba(255, 255, 255, 0.3);
         overflow: auto;
+        flex-direction: column;
       }
 
       table {
         border-collapse: collapse;
         width: 90%;
-        margin: auto;
+        margin-top: 10%;
         background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
         border-radius: 10px;
@@ -254,6 +254,35 @@
           transform: scale(1); /* Back to normal size */
         }
       }
+      .rules-board {
+        margin-top: 10px;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 10px;
+        color: white;
+      }
+      .rules-board ul {
+        padding-left: 1.5rem;
+      }
+      .right .hint-toggle-button {
+        background-color: rgba(0, 174, 239, 0.2); /* soft sky-blue */
+        border: 1px solid rgba(0, 174, 239, 0.4);
+        color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        padding: 10px 18px;
+        border-radius: 20px;
+        cursor: pointer;
+        box-shadow: none;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        margin-top: 10px;
+      }
+
+      .right .hint-toggle-button:hover {
+        background-color: rgba(0, 174, 239, 0.35); /* slightly brighter on hover */
+        transform: scale(1.03);
+      }
     </style>
   </head>
   <body>
@@ -272,12 +301,41 @@
           <thead id="quizTableHead"></thead>
           <tbody id="quizTableBody"></tbody>
         </table>
+        <div style="width: 90%; margin-top: 20px; text-align: left">
+          <button
+            id="toggleRulesBtn"
+            style="
+              background: none;
+              border: none;
+              color: white;
+              font-size: 1.5rem;
+              cursor: pointer;
+            ">
+            ▶ Show rules
+          </button>
+          <div id="rulesBoard" class="rules-board hidden">
+            <h3>Quiz rules</h3>
+            <ul>
+              <li>Rule #1: A function uses all columns.</li>
+              <li>Rule #2: Operators allowed: '+', '-', '*', '/'.</li>
+              <li>Rule #3: You have 3 minutes to complete 5 quizzes.</li>
+              <li>Rule #4: Use only linear functions like <code>c = 2 * a + 3 * b + 100</code>.</li>
+            </ul>
+          </div>
+        </div>
       </div>
       <div class="right">
         <div class="timer-container">⏰ <span id="timer">00:00:00</span></div>
         <label class="function-label" for="functionInput">✏️ Write functions:</label>
         <input class="function-input" type="text" id="functionInput" placeholder="" />
         <button class="verify-button" id="verifyButton">Verify</button>
+        <div id="hintContainer" style="width: 100%; text-align: middle; margin-top: 10px">
+          <button id="toggleHintBtn" class="hint-toggle-button">💡 Show Hint (3 left)</button>
+          <div id="hintBox" class="rules-board hidden">
+            <h3>Hint</h3>
+            <p></p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -297,13 +355,22 @@
     <script>
       let timerPaused = false;
       const timerElement = document.getElementById("timer");
+      let hintUsage = parseInt(localStorage.getItem("hintUsage") || "0", 10);
+      const maxHintUsage = 3;
+      let useHints = false;
       const quizNum = parseInt(localStorage.getItem("quizNum"), 10) || 0;
       let totalMilliseconds = parseInt(localStorage.getItem("timeStart"), 10) || 0;
       const startTime = performance.now();
       let elapsedTime = performance.now() - startTime;
       let remainingTime = Math.max(totalMilliseconds - elapsedTime, 0);
       let csvData = [];
+      const toggleHintBtn = document.getElementById("toggleHintBtn");
+      const hintBox = document.getElementById("hintBox");
+      let remaining = maxHintUsage - hintUsage;
       document.getElementById("quiz_id").textContent = `${quizNum}/5`;
+      toggleHintBtn.innerHTML = `💡 Show Hint (${remaining} left)`;
+      document.getElementById("hintBox").querySelector("p").textContent = getHintForQuiz(quizNum);
+
       console.log("quizNum", quizNum);
 
       // Timer function
@@ -566,6 +633,52 @@
         }
       }
 
+      document.getElementById("toggleRulesBtn").addEventListener("click", () => {
+        const rules = document.getElementById("rulesBoard");
+        const button = document.getElementById("toggleRulesBtn");
+        const isHidden = rules.classList.contains("hidden");
+
+        if (isHidden) {
+          rules.classList.remove("hidden");
+          button.innerHTML = "▼ Hide rules";
+        } else {
+          rules.classList.add("hidden");
+          button.innerHTML = "▶ Show rules";
+        }
+      });
+
+      function getHintForQuiz(quizNum) {
+        const hints = {
+          1: "Try with the operator + or -.",
+          2: "Try with the operator * or /.",
+          3: "Think of adding a offset.",
+          4: "Think of coefficients.",
+          5: "Think of coefficients and offset."
+        };
+
+        return hints[quizNum] || "No hint available for this quiz.";
+      }
+      toggleHintBtn.addEventListener("click", () => {
+        if (useHints === false && hintUsage < maxHintUsage) {
+          useHints = true;
+          hintUsage++;
+          remaining = maxHintUsage - hintUsage;
+          localStorage.setItem("hintUsage", hintUsage);
+        }
+        console.log("useHints:", useHints, "hintUsage:", hintUsage);
+        if (hintBox.classList.contains("hidden")) {
+          // Only allow if limit not reached
+          if (useHints) {
+            hintBox.classList.remove("hidden");
+            localStorage.setItem("hintUsage", hintUsage);
+            toggleHintBtn.innerHTML = `💡 Hide Hint (${remaining} left)`;
+          }
+        } else {
+          hintBox.classList.add("hidden");
+          const remaining = maxHintUsage - hintUsage;
+          toggleHintBtn.innerHTML = `💡 Show Hint (${remaining} left)`;
+        }
+      });
       document.getElementById("nextButton").addEventListener("click", async () => {
         const isVerified = await Verify((isSkip = true)); // Wait for verification
         console.log("isVerified", isVerified);
