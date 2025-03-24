@@ -37,7 +37,19 @@
         backdrop-filter: blur(10px);
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       }
-      .header-text .quiz-id .function-label .function-input .verify-button {
+      .header-text {
+        font-size: 1.5rem;
+      }
+      .quiz-id {
+        font-size: 1.5rem;
+      }
+      .function-label {
+        font-size: 1.5rem;
+      }
+      .function-input {
+        font-size: 1.5rem;
+      }
+      .verify-button {
         font-size: 1.5rem;
       }
 
@@ -109,7 +121,7 @@
         width: 90%;
         margin: 10px 0;
         padding: 12px;
-        font-size: 1rem;
+        font-size: 1.5rem;
         border: none;
         border-radius: 25px;
         outline: none;
@@ -117,6 +129,14 @@
         background: rgba(255, 255, 255, 0.2);
         color: white;
         transition: all 0.3s ease-in-out;
+      }
+
+      .right input[type="text"]:focus {
+        background: rgba(255, 255, 255, 0.3);
+        font-size: 2rem;
+        padding: 16px 18px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
       }
 
       .right input::placeholder {
@@ -329,7 +349,7 @@
       </div>
       <div class="right">
         <div class="timer-container">⏰ <span id="timer">00:00:00</span></div>
-        <label class="function-label" for="functionInput">✏️ Write functions:</label>
+        <label class="function-label" for="functionInput">✏️ Write function:</label>
         <input class="function-input" type="text" id="functionInput" placeholder="" />
         <button class="verify-button" id="verifyButton">Verify</button>
         <div id="hintContainer" style="width: 100%; text-align: middle; margin-top: 30px">
