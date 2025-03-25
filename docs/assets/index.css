@@ -1,21 +1,24 @@
+/* General styles */
 body {
-  font-family: 'Inter';
+  font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
   background-color: #f8f9fa;
   color: #212529;
   display: flex;
   flex-direction: column;
-  align-items: center; /* This will center the content again */
+  align-items: center;
   height: 100vh;
   width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
+/* Navigation Bar */
 nav {
   width: 100%;
   background: #f8f9fa;
   padding: 10px 0;
-  position: relative; /* Ensures it's at the top */
+  position: relative;
 }
 
 nav ul {
@@ -44,17 +47,21 @@ nav ul li a:hover {
   background: #ddd;
 }
 
+/* Title */
 h1 {
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 p {
   font-size: 1.2rem;
   margin: 0;
+  text-align: center;
 }
 
+/* Main container */
 #main-container {
   display: flex;
   justify-content: space-between;
@@ -64,14 +71,12 @@ p {
   height: 50%;
   margin-top: -50px;
   gap: 20px;
-
-  /* Make it invisible but functional */
   border: none;
   background: none;
   box-shadow: none;
 }
 
-
+/* Drag and Drop Area */
 #drag-drop-area {
   flex: 1;
   height: 50%;
@@ -82,29 +87,32 @@ p {
   align-items: center;
   justify-content: center;
   text-align: center;
-  /* padding: 20px; */
   background: #f8f9fa;
+  padding: 10px;
 }
 
 #drag-drop-area:hover {
   background-color: #e9ecef;
 }
 
+/* Vertical line for larger screens */
 #vertical-line {
   width: 4px;
   background-color: #007bff;
   height: 100%;
-  align-self: stretch; /* Ensures the line spans the entire height */
+  align-self: stretch;
+  display: block;
 }
 
+/* Editor container */
 #editor-container {
   flex: 1;
   height: 50%;
   display: flex;
   flex-direction: column;
-  /* margin-top: 185px; */
 }
 
+/* Textarea editor */
 textarea {
   width: 100%;
   height: 100%;
@@ -113,9 +121,10 @@ textarea {
   border: 1px solid #ddd;
   border-radius: 5px;
   padding: 10px;
-  resize: none; /* Prevent resizing */
+  resize: none;
 }
 
+/* Loader */
 .loader {
   position: fixed;
   top: 0;
@@ -129,4 +138,70 @@ textarea {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+
+/* Media Queries */
+@media (max-width: 1024px) {
+  #main-container {
+    width: 80%;
+  }
+}
+
+@media (max-width: 768px) {
+  nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  nav ul li {
+    width: 100%;
+    text-align: center;
+    padding: 5px 0;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+
+  #main-container {
+    flex-direction: column;
+    width: 90%;
+    gap: 10px;
+  }
+
+  #drag-drop-area,
+  #editor-container {
+    width: 100%;
+    height: auto;
+  }
+
+  #vertical-line {
+    display: none; /* Hide vertical line on mobile */
+  }
+
+  textarea {
+    height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+  }
+
+  #main-container {
+    width: 95%;
+  }
+
+  textarea {
+    height: 150px;
+  }
 }
