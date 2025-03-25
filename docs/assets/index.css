@@ -51,13 +51,19 @@ nav ul li a:hover {
 h1 {
   font-size: 2.5rem;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 1em;
   text-align: center;
 }
 
 p {
   font-size: 1.2rem;
-  margin: 0;
+  margin-top: 0;
+  text-align: center;
+}
+
+#recom {
+  font-size: 1.2rem;
+  margin-top: 2em;
   text-align: center;
 }
 
@@ -69,7 +75,7 @@ p {
   width: 50%;
   max-width: 1200px;
   height: 50%;
-  margin-top: -50px;
+  margin-top: 1em;
   gap: 20px;
   border: none;
   background: none;
