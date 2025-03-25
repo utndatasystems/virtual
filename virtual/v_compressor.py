@@ -13,7 +13,6 @@ import virtual.utils
 import os
 import pandas as pd
 import schema_inference
-from schema_inference import schema_utils
 from v_reconstructor import measure_reconstruction_latency_per_column
 import pathlib
 
@@ -81,13 +80,15 @@ def compress(data: pd.DataFrame | pathlib.Path, schema, layout, optimize_layout=
   if isinstance(schema, pathlib.Path):
     schema = virtual.utils._read_json(schema)
   elif schema is None:
-    schema = schema_virtual.utils.generate_schema(data)
+    schema = schema_inference.schema_utils.generate_schema(data, nrows)
 
   # Load the data.
   con, target_columns = _load_data(data, schema, layout, nrows)
 
   # Create the offset and outlier columns.
-  create_virtual_table_layout(con, target_columns, schema)
+  # Note: We also reset `target_columns`, in case some function evaluations _might_ fail in duckdb.
+  # TODO: Fix this behavior in the future.
+  target_columns = create_virtual_table_layout(con, target_columns, schema)
 
   # Re-optimize the constant auxiliary columns.
   if optimize_layout:
@@ -139,7 +140,7 @@ def benchmark(bench_type, data: pd.DataFrame | pathlib.Path, schema, layout, opt
   if isinstance(schema, pathlib.Path):
     schema = virtual.utils._read_json(schema)
   elif schema is None:
-    schema = schema_utils.generate_schema(data)
+    schema = schema_inference.schema_utils.generate_schema(data, nrows)
 
   # Load the data.
   con, target_columns = _load_data(data, schema, layout, nrows)
@@ -159,8 +160,10 @@ def benchmark(bench_type, data: pd.DataFrame | pathlib.Path, schema, layout, opt
     print(f'Loaded with repetition: {virtual.utils._get_size(con)}')
 
   # Finalize the layout. This works for both simple and k-regression.
-  # NOTE: The `model_type` is also `None` in this case.
-  create_virtual_table_layout(con, target_columns, schema)
+  # Note: The `model_type` is also `None` in this case. (TODO: Is this still relevant?)
+  # Note: We also reset `target_columns`, in case some function evaluations _might_ fail in duckdb.
+  # TODO: Fix this behavior in the future.
+  target_columns = create_virtual_table_layout(con, target_columns, schema)
 
   # Re-optimize the constant auxiliary columns.
   if optimize_layout:

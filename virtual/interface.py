@@ -190,7 +190,6 @@ def to_format(data: pd.DataFrame | pathlib.Path | utils.URLPath | str, format_pa
     utils._write_json(os.path.join(format_path, 'schema.json'), schema)
 
   print(f'Done.')
-
   return
 
 def from_format(format_path, functions=None, schema=None):
@@ -223,7 +222,7 @@ def from_format(format_path, functions=None, schema=None):
   else:
     assert 0, f'Format {format_type[1:]} not (yet) supported.'
 
-  # Create the SELECT cluase.
+  # Create the SELECT clause.
   select_clause = ','.join([f'"{row['name']}"' for row in schema])
 
   if format_type[1:] == 'parquet':

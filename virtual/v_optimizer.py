@@ -109,13 +109,18 @@ def optimize(configs, model_types: List[virtual.utils.ModelType]):
     for model_type in model_types:
       if model_type.name not in config['models']:
         continue
+      category = config['category']
       target_index = config['target-index']
       target_name = config['target-name']
+
+      # Take the model.
       model = config['models'][model_type.name]
 
       curr_col_idxs, _ = collect_refs(model, model_type)
 
+      # And add the hyperedge.
       hyperedges.append({
+        'category' : category,
         'target-index' : target_index,
         'target-name' : target_name,
         'model-type' : model_type.name,

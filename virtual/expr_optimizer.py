@@ -23,6 +23,10 @@ def optimize(tree):
     tree['expr'] = optimize(tree['expr'])
     return tree
 
+  if tree['type'] == 'make_interval':
+    tree['expr'] = optimize(tree['expr'])
+    return tree
+
   if tree['type'] == 'sum':
     # First optimize the terms.
     tree['terms'] = list(map(optimize, tree['terms']))
