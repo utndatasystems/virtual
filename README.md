@@ -1,6 +1,6 @@
 # `virtual`
 
-A booster 💪 for your Parquet file sizes.
+🗜️Compressing Parquet files using functions.
 
 `virtual` is a lightweight framework that transparently compresses Parquet files by using functions between columns, all while giving you the same familiar interface you are used to. How `virtual` works is magic, and is described in our recent research papers (see below).
 

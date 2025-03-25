@@ -1,7 +1,7 @@
 [project]
 name = "virtual-parquet"
-version = "0.1.4"
-description = "A booster 💪 for your Parquet files"
+version = "0.2.0"
+description = "🗜️Compressing Parquet files using functions"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{name = "UTN Data Systems Lab", email = "data-systems@utn.de"}]
@@ -25,7 +25,6 @@ Issues = "https://github.com/utndatasystems/virtual/issues"
 
 [tool.setuptools]
 packages = ["virtual", "virtual.schema_inference", "virtual.models"]
-
  
 [build-system]
 requires = ["setuptools", "wheel"]
