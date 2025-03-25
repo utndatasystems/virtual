@@ -259,8 +259,6 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', run=True, fan
   # Extract the parquet path. Supports both type of quotes.
   match = re.search(r'(read_parquet|read_csv)\((["\'])(.*?)\2\)', sql_query)
 
-  print('what??')
-
   # Fallback for queries where there is no read from a file.
   if match is None:
     # No need to run?
@@ -288,8 +286,6 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', run=True, fan
   # Note: We rely on the fact the variable names remain `schema` and `functions`.
   if format_type == 'parquet':
     format_metadata = get_metadata_from_file(format_type, file_path, ['header'] + [key for key in ['schema', 'functions'] if locals().get(key) is None])
-
-  print(format_metadata)
 
   # Read the schema.
   if schema is None:
@@ -342,8 +338,6 @@ def query(sql_query, functions=None, schema=None, engine='duckdb', run=True, fan
     header = format_metadata['header']
   if format_type == 'csv':
     header = utils.get_csv_header(file_path)
-
-  print(f'header={header}')
 
   # TODO: Update the naming convention in the layout file to avoid this `greedy` and `chosen`.
   matches = []

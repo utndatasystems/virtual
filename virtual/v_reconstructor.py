@@ -65,6 +65,7 @@ def generate_formula(schema, parquet_header, target_iter, all_virtual_columns, e
 
     # Corner case for TIMESTAMP columns.
     if target_iter['category'] == 'timestamp':
+      # Note: This will be replaced with something meaninful by the expression optimizer.
       formula = f"{formula} + make_interval(\"{offset_col}\")"
     else:
       # Default case.
@@ -84,16 +85,13 @@ def generate_formula(schema, parquet_header, target_iter, all_virtual_columns, e
       formula = formula.replace(f"\"{elem}\"", f"({mapping[elem]})")
 
   # Optimize the formula.
+  # Note: If you disable this part, you should fix the `make_interval` part (the corner case for TIMESTAMP columns).
   new_formula = None
   if not model_type.is_k_regression():
-    print(f'formula={formula}')
     parser = expr_parser.ExprParser(formula)
     formula_tree = parser.parse()
     optimized_tree = expr_optimizer.optimize(formula_tree)
     new_formula = expr_parser.print_expr(optimized_tree)
-
-    print(f'new_formula={new_formula}')
-
   else:
     # TODO: Implement the optimization for k-regression.
     new_formula = formula

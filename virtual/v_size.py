@@ -364,7 +364,6 @@ def _create_regression(model, schema, target_name):
   return formula
 
 def _create_abs_offset(formula, col):
-  print(f'[_create_abs_offset] formula={formula}, col={col}')
   return f"abs(\"{col}\" - {formula})"
 
 def create_dump_base(con, schema, target_columns, out_file):
@@ -491,7 +490,7 @@ def build_offset_column(model, schema, target_iter):
   # And return.
   return f"update base_table set \"{target_iter['target-name']}_offset\" = {offset_builder_str};"
 
-def debug_base_table(con, msg, verbose=True):
+def debug_base_table(con, msg, verbose=False):
   if verbose:
     print(f'\n ---- @@@ {msg} @@@ ---- \n')
     tmp = con.execute(f'select * from base_table;').fetchdf()
@@ -618,8 +617,6 @@ def create_virtual_table_layout(con, target_columns, schema, model_type=None):
     if not curr_updates:
       continue
 
-    print(curr_updates)
-
     # Try to update it.
     try:
       update_sql = f"update base_table set {','.join(curr_updates)};"
@@ -628,11 +625,8 @@ def create_virtual_table_layout(con, target_columns, schema, model_type=None):
       debug_base_table(con, f"{iter['target-name']} @after updates")
     except Exception as e:
       # Otherwise, mark it as invalid.
-      print(e)
       iter['is-valid'] = False
       continue
-
-  print(target_columns)
 
   # Filter out the invalid functions.
   target_columns = list(filter(lambda iter: iter['is-valid'], target_columns))
@@ -642,8 +636,6 @@ def create_virtual_table_layout(con, target_columns, schema, model_type=None):
 
 def reoptimize_virtual_table_layout(con, target_columns):
   freqs = virtual.utils._get_distinct_counts(con)
-
-  print(freqs)
 
   to_remove = []
   for target_column in target_columns:
@@ -663,8 +655,7 @@ def reoptimize_virtual_table_layout(con, target_columns):
       if virtual.utils.is_attached_column_of(target_column['target-name'], cn) and is_special_column(cn):
         to_remove.append(cn)
 
-  print(f'to_remove={to_remove}')
-
+  # Anything to remove?
   if len(to_remove):
     for cn in to_remove:
       con.execute(f"alter table base_table drop column \"{cn}\";")

@@ -148,8 +148,6 @@ class ExprParser:
     self.advance_char()
     expr = self.E()
 
-    print(f'expr={expr}')
-
     assert self.curr_char() == ')'
     self.advance_char()
 
