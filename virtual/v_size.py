@@ -364,6 +364,7 @@ def _create_regression(model, schema, target_name):
   return formula
 
 def _create_abs_offset(formula, col):
+  print(f'[_create_abs_offset] formula={formula}, col={col}')
   return f"abs(\"{col}\" - {formula})"
 
 def create_dump_base(con, schema, target_columns, out_file):
@@ -490,7 +491,7 @@ def build_offset_column(model, schema, target_iter):
   # And return.
   return f"update base_table set \"{target_iter['target-name']}_offset\" = {offset_builder_str};"
 
-def debug_base_table(con, msg, verbose=False):
+def debug_base_table(con, msg, verbose=True):
   if verbose:
     print(f'\n ---- @@@ {msg} @@@ ---- \n')
     tmp = con.execute(f'select * from base_table;').fetchdf()
@@ -555,8 +556,15 @@ def create_virtual_column_layout(con, target_iter, schema, model_type: Optional[
       # Create the regression.
       formula = _create_regression(model, schema, target_iter['target-name'])
 
+      # Define the vanilla offset.
+      vanilla_diff = f"\"{target_iter['target-name']}\" - ({formula})"
+
+      # Corner case for TIMESTAMPs.
+      if target_iter['category'] == 'timestamp':
+        vanilla_diff = f"epoch({vanilla_diff})"
+
       # NOTE | TODO: The offset should also take the scale of the original column?
-      update = f"round(\"{target_iter['target-name']}\" - ({formula}), {virtual.utils._get_info(schema, target_iter['target-name'])['scale']})"
+      update = f"round({vanilla_diff}, {virtual.utils._get_info(schema, target_iter['target-name'])['scale']})"
       update = f"coalesce({update}, 0)"
       update = f"\"{target_iter['target-name']}_offset\" = {update}"
       local_updates.append(update)
@@ -600,11 +608,17 @@ def create_virtual_column_layout(con, target_iter, schema, model_type: Optional[
 def create_virtual_table_layout(con, target_columns, schema, model_type=None):
   # Virtualize each possible column.
   for iter in target_columns:
+    # Set a validity flag.
+    iter['is-valid'] = True
+
+    # Create the virtual layout for this column.
     curr_updates = create_virtual_column_layout(con, iter, schema, model_type)
 
     # No updates? Then skip.
     if not curr_updates:
       continue
+
+    print(curr_updates)
 
     # Try to update it.
     try:
@@ -613,12 +627,23 @@ def create_virtual_table_layout(con, target_columns, schema, model_type=None):
 
       debug_base_table(con, f"{iter['target-name']} @after updates")
     except Exception as e:
-      # Otherwise, skip it.
+      # Otherwise, mark it as invalid.
+      print(e)
+      iter['is-valid'] = False
       continue
-  return
+
+  print(target_columns)
+
+  # Filter out the invalid functions.
+  target_columns = list(filter(lambda iter: iter['is-valid'], target_columns))
+
+  # And return the curated list.
+  return target_columns
 
 def reoptimize_virtual_table_layout(con, target_columns):
   freqs = virtual.utils._get_distinct_counts(con)
+
+  print(freqs)
 
   to_remove = []
   for target_column in target_columns:
@@ -637,6 +662,8 @@ def reoptimize_virtual_table_layout(con, target_columns):
       # Then remove it if it is an auxiliary column.
       if virtual.utils.is_attached_column_of(target_column['target-name'], cn) and is_special_column(cn):
         to_remove.append(cn)
+
+  print(f'to_remove={to_remove}')
 
   if len(to_remove):
     for cn in to_remove:
@@ -723,7 +750,9 @@ def compute_sizes_of_target_columns(functions, data: pd.DataFrame | pathlib.Path
     os.remove(sample_path)
 
     # Finalize the layout. This works for both simple and k-regression.
-    create_virtual_table_layout(con, functions, schema, model_type)
+    # Note: We also reset `functions`, in case some function evaluations _might_ fail in duckdb.
+    # TODO: Fix this behavior in the future.
+    functions = create_virtual_table_layout(con, functions, schema, model_type)
 
     debug_base_table(con, 'After `create_virtual_table_layout`.')
 

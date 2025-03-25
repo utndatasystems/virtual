@@ -48,6 +48,7 @@ def solve_custom_cols(data_wrapper, category, sample_size=None):
         continue
 
       results.append({
+        'category' : category,
         'target-index' : target_index,
         'target-name': data_wrapper.v_cols[category]['names'][idx1],
         'models' : {
@@ -166,6 +167,7 @@ def solve_num_cols(data_wrapper, sample_size=None, model_types=None):
     local_results = None
     try:
       local_results = {
+        'category' : 'num',
         'target-index': target_index,
         'target-name': data_wrapper.column_names[target_index],
         'target-stats': {

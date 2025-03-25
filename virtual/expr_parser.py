@@ -138,6 +138,25 @@ class ExprParser:
       'expr' : expr,
       'scale' : scale
     })
+  
+  def make_interval_expr(self):
+    # print(f'[interval] {self.expr_[self.pos:]}')
+    assert self.curr_token() == 'make_interval'
+    self.advance_token()
+
+    assert self.curr_char() == '('
+    self.advance_char()
+    expr = self.E()
+
+    print(f'expr={expr}')
+
+    assert self.curr_char() == ')'
+    self.advance_char()
+
+    return debug({
+      'type' : 'make_interval',
+      'expr' : expr
+    })
 
   def coalesce_expr(self):
     # print(f'[coalesce]')
@@ -187,6 +206,11 @@ class ExprParser:
     if self.curr_token() == 'round':
       ret = self.round_expr()
       return ret
+    
+    # MAKE_INTERVAL.
+    if self.curr_token() == 'make_interval':
+      ret = self.make_interval_expr()
+      return ret
 
     # NULL.
     if self.curr_token() == 'null':
@@ -232,6 +256,8 @@ class ExprParser:
         'expr' : expr
       })
 
+    # TODO: This is not yet correct, since we fail on simple functions like `a + b = c`.
+    # TODO: This is because the literals have double quotes.
     # Otherwise, we have a simple numeric. This is for the intercept or for the round scale.
     return debug({
       'type' : 'literal',
@@ -301,6 +327,9 @@ def print_expr(tree):
   
   if tree['type'] == 'round':
     return f"round({print_expr(tree['expr'])}, {print_expr(tree['scale'])})"
+
+  if tree['type'] == 'make_interval':
+    return f"INTERVAL '1 second' * {print_expr(tree['expr'])}"
 
   if tree['type'] == 'sum':
     exprs = ' + '.join(map(print_expr, tree['terms']))

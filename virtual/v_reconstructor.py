@@ -62,7 +62,13 @@ def generate_formula(schema, parquet_header, target_iter, all_virtual_columns, e
   # TODO: Since we anyway do this check if we have an offset column.
   if offset_col in parquet_header:
     assert formula and formula is not None
-    formula = formula + f" + \"{offset_col}\""
+
+    # Corner case for TIMESTAMP columns.
+    if target_iter['category'] == 'timestamp':
+      formula = f"{formula} + make_interval(\"{offset_col}\")"
+    else:
+      # Default case.
+      formula = f"{formula} + \"{offset_col}\""
 
   # Do we have an outlier column?
   if outlier_col in parquet_header:
@@ -80,10 +86,14 @@ def generate_formula(schema, parquet_header, target_iter, all_virtual_columns, e
   # Optimize the formula.
   new_formula = None
   if not model_type.is_k_regression():
+    print(f'formula={formula}')
     parser = expr_parser.ExprParser(formula)
     formula_tree = parser.parse()
     optimized_tree = expr_optimizer.optimize(formula_tree)
     new_formula = expr_parser.print_expr(optimized_tree)
+
+    print(f'new_formula={new_formula}')
+
   else:
     # TODO: Implement the optimization for k-regression.
     new_formula = formula
