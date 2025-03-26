@@ -1,6 +1,6 @@
 [project]
 name = "virtual-parquet"
-version = "0.2.0"
+version = "0.2.1"
 description = "🗜️Compressing Parquet files using functions"
 readme = "README.md"
 license = { file = "LICENSE" }
