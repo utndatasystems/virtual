@@ -1,0 +1,226 @@
+{
+  "wikimedia/wikipedia": {
+    "configs": [
+      {
+        "file": "20231101.zh-classical",
+        "status": "downloaded",
+        "download_datetime": "2025-04-29 10:18:25",
+        "path": "./datasets/wikimedia/wikipedia/20231101.zh-classical",
+        "size_original": 10098073,
+        "size_snappy": 10045265,
+        "size_gzip": 6720454,
+        "size_brotli": 5923439,
+        "size_lz4": 10312312,
+        "size_zstd": 8060171,
+        "compress": [
+          {
+            "method": "url=offset+transfer(title)",
+            "size_compression_snappy": 9801722,
+            "size_compression_gzip": 6571074,
+            "size_compression_brotli": 5789286,
+            "size_compression_lz4": 10070543,
+            "size_compression_zstd": 7905411
+          }
+        ]
+      },
+      {
+        "file": "20231101.ab",
+        "status": "downloaded",
+        "download_datetime": "2025-04-29 10:18:25",
+        "path": "./datasets/wikimedia/wikipedia/20231101.ab",
+        "size_original": 1237796,
+        "size_snappy": 1250760,
+        "size_gzip": 734391,
+        "size_brotli": 598625,
+        "size_lz4": 1193819,
+        "size_zstd": 795091,
+        "compress": [
+          {
+            "method": "url=offset+transfer(title)",
+            "size_compression_snappy": 1171212,
+            "size_compression_gzip": 684773,
+            "size_compression_brotli": 560022,
+            "size_compression_lz4": 1106263,
+            "size_compression_zstd": 745279
+          }
+        ]
+      },
+      {
+        "file": "20231101.af",
+        "status": "downloaded",
+        "download_datetime": "2025-04-29 10:18:26",
+        "path": "./datasets/wikimedia/wikipedia/20231101.af",
+        "size_original": 124485544,
+        "size_snappy": 123559233,
+        "size_gzip": 78611578,
+        "size_brotli": 65477599,
+        "size_lz4": 124147770,
+        "size_zstd": 85121628,
+        "compress": [
+          {
+            "method": "url=offset+transfer(title)",
+            "size_compression_snappy": 121922084,
+            "size_compression_gzip": 77507722,
+            "size_compression_brotli": 64503145,
+            "size_compression_lz4": 122501863,
+            "size_compression_zstd": 83997064
+          }
+        ]
+      },
+      {
+        "file": "20231101.azb",
+        "status": "downloaded",
+        "download_datetime": "2025-04-29 10:18:27",
+        "path": "./datasets/wikimedia/wikipedia/20231101.azb",
+        "size_original": 46739926,
+        "size_snappy": 44583796,
+        "size_gzip": 24329832,
+        "size_brotli": 19834206,
+        "size_lz4": 41049562,
+        "size_zstd": 26863160,
+        "compress": [
+          {
+            "method": "url=offset+transfer(title)",
+            "size_compression_snappy": 39090034,
+            "size_compression_gzip": 21690234,
+            "size_compression_brotli": 17536018,
+            "size_compression_lz4": 34661169,
+            "size_compression_zstd": 23256142
+          }
+        ]
+      },
+      {
+        "file": "20231101.bg",
+        "status": "downloaded",
+        "download_datetime": "2025-04-29 10:18:28",
+        "path": "./datasets/wikimedia/wikipedia/20231101.bg",
+        "size_original": 512344058,
+        "size_snappy": 508936001,
+        "size_gzip": 295952300,
+        "size_brotli": 230839619,
+        "size_lz4": 491488792,
+        "size_zstd": 323812286,
+        "compress": [
+          {
+            "method": "url=offset+transfer(title)",
+            "size_compression_snappy": 500457346,
+            "size_compression_gzip": 291407996,
+            "size_compression_brotli": 226946085,
+            "size_compression_lz4": 481193161,
+            "size_compression_zstd": 318066777
+          }
+        ]
+      },
+      {
+        "file": "20231101.ady",
+        "status": "downloaded",
+        "download_datetime": "2025-04-29 10:18:28",
+        "path": "./datasets/wikimedia/wikipedia/20231101.ady",
+        "size_original": 347450,
+        "size_snappy": 348045,
+        "size_gzip": 208186,
+        "size_brotli": 171466,
+        "size_lz4": 342175,
+        "size_zstd": 225276,
+        "compress": [
+          {
+            "method": "url=offset+transfer(title)",
+            "size_compression_snappy": 332210,
+            "size_compression_gzip": 198338,
+            "size_compression_brotli": 162324,
+            "size_compression_lz4": 322819,
+            "size_compression_zstd": 213155
+          }
+        ]
+      },
+      {
+        "file": "20231101.ar",
+        "status": "downloaded",
+        "download_datetime": "2025-04-29 10:18:34",
+        "path": "./datasets/wikimedia/wikipedia/20231101.ar",
+        "size_original": 1323304271,
+        "size_snappy": 1310000519,
+        "size_gzip": 758601393,
+        "size_brotli": 634637977,
+        "size_lz4": 1270401474,
+        "size_zstd": 837074831,
+        "compress": [
+          {
+            "method": "url=offset+transfer(title)",
+            "size_compression_snappy": 1277792503,
+            "size_compression_gzip": 742341465,
+            "size_compression_brotli": 620492539,
+            "size_compression_lz4": 1231900191,
+            "size_compression_zstd": 815220579
+          }
+        ]
+      },
+      {
+        "file": "20231101.de",
+        "status": "downloaded",
+        "download_datetime": "2025-04-29 10:19:08",
+        "path": "./datasets/wikimedia/wikipedia/20231101.de",
+        "size_original": 5771317942,
+        "size_snappy": 5733807045,
+        "size_gzip": 3679954109,
+        "size_brotli": 2987801835,
+        "size_lz4": 5822421645,
+        "size_zstd": 4090178227,
+        "compress": [
+          {
+            "method": "url=offset+transfer(title)",
+            "size_compression_snappy": 5678999955,
+            "size_compression_gzip": 3643965523,
+            "size_compression_brotli": 2957300905,
+            "size_compression_lz4": 5768579004,
+            "size_compression_zstd": 4053576605
+          }
+        ]
+      },
+      {
+        "file": "20231101.ceb",
+        "status": "downloaded",
+        "download_datetime": "2025-04-29 10:19:12",
+        "path": "./datasets/wikimedia/wikipedia/20231101.ceb",
+        "size_original": 828085216,
+        "size_snappy": 771045025,
+        "size_gzip": 404016707,
+        "size_brotli": 324393374,
+        "size_lz4": 673044130,
+        "size_zstd": 438265819,
+        "compress": [
+          {
+            "method": "url=offset+transfer(title)",
+            "size_compression_snappy": 687906349,
+            "size_compression_gzip": 351841254,
+            "size_compression_brotli": 279085201,
+            "size_compression_lz4": 589613240,
+            "size_compression_zstd": 382683312
+          }
+        ]
+      },
+      {
+        "file": "20231101.nl",
+        "status": "downloaded",
+        "download_datetime": "2025-04-29 10:19:16",
+        "path": "./datasets/wikimedia/wikipedia/20231101.nl",
+        "size_original": 1436843432,
+        "size_snappy": 1414828084,
+        "size_gzip": 907346209,
+        "size_brotli": 760254830,
+        "size_lz4": 1427595252,
+        "size_zstd": 983409566,
+        "compress": [
+          {
+            "method": "url=offset+transfer(title)",
+            "size_compression_snappy": 1382512521,
+            "size_compression_gzip": 885978997,
+            "size_compression_brotli": 741646636,
+            "size_compression_lz4": 1395371551,
+            "size_compression_zstd": 961661243
+          }
+        ]
+      }
+    ]
+  }
+}
