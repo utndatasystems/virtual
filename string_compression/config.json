@@ -486,7 +486,25 @@
         "size_brotli": 1117233751,
         "size_lz4": 2078916387,
         "size_zstd": 1427266717,
-        "rows": 1000000
+        "rows": 1000000,
+        "compress": [
+          {
+            "method": "dump=file_path.split('/')[4].split('/')[0]",
+            "size_compression_snappy": 2036850933,
+            "size_compression_gzip": 1304549930,
+            "size_compression_brotli": 1117228637,
+            "size_compression_lz4": 2078905984,
+            "size_compression_zstd": 1427259905
+          },
+          {
+            "method": "file_path=file_path+dump+file_path",
+            "size_compression_snappy": 2035496849,
+            "size_compression_gzip": 1304414401,
+            "size_compression_brotli": 1117108748,
+            "size_compression_lz4": 2078761433,
+            "size_compression_zstd": 1427074982
+          }
+        ]
       }
     ]
   }
