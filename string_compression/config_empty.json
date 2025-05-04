@@ -1,0 +1,55 @@
+{
+  "wikimedia/wikipedia": {
+    "configs": [
+      {
+        "file":"20231101.zh-classical",
+        "status": "not yet started"
+      },
+      {
+        "file":"20231101.ab",
+        "status": "not yet started"
+      },
+      {
+        "file":"20231101.af",
+        "status": "not yet started"
+      },
+      {
+        "file":"20231101.azb",
+        "status": "not yet started"
+      },
+      {
+        "file":"20231101.bg",
+        "status": "not yet started"
+      },
+      {
+        "file":"20231101.ady",
+        "status": "not yet started"
+      },
+      {
+        "file":"20231101.ar",
+        "status": "not yet started"
+      },
+      {
+        "file":"20231101.de",
+        "status": "not yet started"
+      },
+      {
+        "file":"20231101.ceb",
+        "status": "not yet started"
+      },
+      {
+        "file":"20231101.nl",
+        "status": "not yet started"
+      }
+    ]
+  },
+  "HuggingFaceFW/fineweb":{
+    "configs": [
+      {
+        "file":"sample-10BT",
+        "status": "not yet started"
+      }
+    ]
+  }
+}
+

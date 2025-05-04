@@ -10,20 +10,42 @@ def write_parquet(df, path, PARQUET_COMPRESSION_TYPE="snappy"):
     table = pa.Table.from_pandas(df)
     pq.write_table(table, path, compression=PARQUET_COMPRESSION_TYPE)
 
-def get_df(path):
-    file_list = os.listdir(path)
-    # print(file_list)
-    dfs = [pd.read_parquet(os.path.join(path, file)) for file in file_list]
-    combined_df = pd.concat(dfs, ignore_index=True)
-    return combined_df
+def get_df(path, max_rows=1_000_000):
+    parts = []
+    total_rows = 0
+
+    for fname in sorted(os.listdir(path)):
+        df_part = pd.read_parquet(os.path.join(path, fname))
+        n = len(df_part)
+
+        if total_rows + n >= max_rows:
+            # Only take what we still need to reach the cap
+            df_part = df_part.iloc[: max_rows - total_rows]
+            parts.append(df_part)
+            break
+
+        parts.append(df_part)
+        total_rows += n
+
+        if total_rows >= max_rows:
+            break
+
+    return pd.concat(parts, ignore_index=True)
 
 def download_dataset(dataset_id, config):
+    if dataset_id == "HuggingFaceFW/fineweb":
+        pattern = f"{config.split('-')[0]}/{config.split('-')[1]}/*"
+    elif dataset_id == "wikimedia/wikipedia":
+        pattern = f"{config}/*"
+    else:
+        print(f"Unknown dataset_id: {dataset_id}")
+        return
     snapshot_download(
         repo_id=dataset_id,
         repo_type="dataset",
         local_dir=f"./datasets/{dataset_id}",
         cache_dir="./datasets/.cache",
-        allow_patterns=[f"{config}/*"]
+        allow_patterns=[pattern]
     )
 
 def get_size(start_path = '.'):
@@ -59,6 +81,7 @@ for info in config_dict:
                 for compression_method in compression_methods:
                     write_parquet(df, tmp_parquet, PARQUET_COMPRESSION_TYPE=compression_method)
                     config["size_" + compression_method] = get_size(tmp_parquet)
+                config["rows"] = len(df)
             pass
     os.system(f"rm -rf ./datasets/{info}/.cache")
 
