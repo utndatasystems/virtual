@@ -503,6 +503,38 @@
             "size_compression_brotli": 1117108748,
             "size_compression_lz4": 2078761433,
             "size_compression_zstd": 1427074982
+          },
+          {
+            "method": "combine all string columns",
+            "size_compression_snappy": 2064808011,
+            "size_compression_gzip": 1337756388,
+            "size_compression_brotli": 1142616262,
+            "size_compression_lz4": 2102381440,
+            "size_compression_zstd": 1469328673
+          },
+          {
+            "method": "linear regression: text_len to token_count",
+            "size_compression_snappy": 2036581881,
+            "size_compression_gzip": 1304151612,
+            "size_compression_brotli": 1116832093,
+            "size_compression_lz4": 2078636359,
+            "size_compression_zstd": 1426869733
+          },
+          {
+            "method": "remove prefixs",
+            "size_compression_snappy": 2033539538,
+            "size_compression_gzip": 1303614748,
+            "size_compression_brotli": 1116283513,
+            "size_compression_lz4": 2078274030,
+            "size_compression_zstd": 1426362003
+          },
+          {
+            "method": "split the id",
+            "size_compression_snappy": 2028296259,
+            "size_compression_gzip": 1301614507,
+            "size_compression_brotli": 1114656440,
+            "size_compression_lz4": 2069110002,
+            "size_compression_zstd": 1425216303
           }
         ]
       }
