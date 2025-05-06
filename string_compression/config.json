@@ -15,7 +15,7 @@
         "rows": 12708,
         "compress": [
           {
-            "method": "url=offset+transfer(title)",
+            "function": "url=offset+transfer(title)",
             "size_compression_snappy": 9801722,
             "size_compression_gzip": 6571074,
             "size_compression_brotli": 5789286,
@@ -23,7 +23,7 @@
             "size_compression_zstd": 7905411
           },
           {
-            "method": "title=combine[:len], text=combine[len:]",
+            "function": "title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 9951003,
             "size_compression_gzip": 6652741,
             "size_compression_brotli": 5859598,
@@ -31,7 +31,7 @@
             "size_compression_zstd": 7991473
           },
           {
-            "method": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 9707460,
             "size_compression_gzip": 6503362,
             "size_compression_brotli": 5725445,
@@ -39,7 +39,7 @@
             "size_compression_zstd": 7836713
           },
           {
-            "method": "title=transfer(url-prefix)",
+            "function": "title=transfer(url-prefix)",
             "size_compression_snappy": 9888625,
             "size_compression_gzip": 6608106,
             "size_compression_brotli": 5820168,
@@ -62,7 +62,7 @@
         "rows": 6152,
         "compress": [
           {
-            "method": "url=offset+transfer(title)",
+            "function": "url=offset+transfer(title)",
             "size_compression_snappy": 1171212,
             "size_compression_gzip": 684773,
             "size_compression_brotli": 560022,
@@ -70,7 +70,7 @@
             "size_compression_zstd": 745279
           },
           {
-            "method": "title=combine[:len], text=combine[len:]",
+            "function": "title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 1263467,
             "size_compression_gzip": 720790,
             "size_compression_brotli": 585448,
@@ -78,7 +78,7 @@
             "size_compression_zstd": 778127
           },
           {
-            "method": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 1183919,
             "size_compression_gzip": 671172,
             "size_compression_brotli": 546845,
@@ -86,7 +86,7 @@
             "size_compression_zstd": 728315
           },
           {
-            "method": "title=transfer(url-prefix)",
+            "function": "title=transfer(url-prefix)",
             "size_compression_snappy": 1191617,
             "size_compression_gzip": 692799,
             "size_compression_brotli": 566834,
@@ -109,7 +109,7 @@
         "rows": 112518,
         "compress": [
           {
-            "method": "url=offset+transfer(title)",
+            "function": "url=offset+transfer(title)",
             "size_compression_snappy": 121922084,
             "size_compression_gzip": 77507722,
             "size_compression_brotli": 64503145,
@@ -117,7 +117,7 @@
             "size_compression_zstd": 83997064
           },
           {
-            "method": "title=combine[:len], text=combine[len:]",
+            "function": "title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 122686023,
             "size_compression_gzip": 78044821,
             "size_compression_brotli": 64954269,
@@ -125,7 +125,7 @@
             "size_compression_zstd": 84486509
           },
           {
-            "method": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 121048874,
             "size_compression_gzip": 76940966,
             "size_compression_brotli": 63979816,
@@ -133,7 +133,7 @@
             "size_compression_zstd": 83361946
           },
           {
-            "method": "title=transfer(url-prefix)",
+            "function": "title=transfer(url-prefix)",
             "size_compression_snappy": 122067560,
             "size_compression_gzip": 77600413,
             "size_compression_brotli": 64561244,
@@ -156,7 +156,7 @@
         "rows": 243376,
         "compress": [
           {
-            "method": "url=offset+transfer(title)",
+            "function": "url=offset+transfer(title)",
             "size_compression_snappy": 39090034,
             "size_compression_gzip": 21690234,
             "size_compression_brotli": 17536018,
@@ -164,7 +164,7 @@
             "size_compression_zstd": 23256142
           },
           {
-            "method": "title=combine[:len], text=combine[len:]",
+            "function": "title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 43360402,
             "size_compression_gzip": 23450011,
             "size_compression_brotli": 19164101,
@@ -172,7 +172,7 @@
             "size_compression_zstd": 26082580
           },
           {
-            "method": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 37866640,
             "size_compression_gzip": 20810413,
             "size_compression_brotli": 16865913,
@@ -180,7 +180,7 @@
             "size_compression_zstd": 22475562
           },
           {
-            "method": "title=transfer(url-prefix)",
+            "function": "title=transfer(url-prefix)",
             "size_compression_snappy": 41423685,
             "size_compression_gzip": 22425843,
             "size_compression_brotli": 18107908,
@@ -203,7 +203,7 @@
         "rows": 294275,
         "compress": [
           {
-            "method": "url=offset+transfer(title)",
+            "function": "url=offset+transfer(title)",
             "size_compression_snappy": 500472984,
             "size_compression_gzip": 291402610,
             "size_compression_brotli": 226831136,
@@ -211,7 +211,7 @@
             "size_compression_zstd": 318057880
           },
           {
-            "method": "title=combine[:len], text=combine[len:]",
+            "function": "title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 506343868,
             "size_compression_gzip": 294457869,
             "size_compression_brotli": 229583547,
@@ -219,7 +219,7 @@
             "size_compression_zstd": 322092595
           },
           {
-            "method": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 497865889,
             "size_compression_gzip": 289916193,
             "size_compression_brotli": 225693874,
@@ -227,7 +227,7 @@
             "size_compression_zstd": 316351085
           },
           {
-            "method": "title=transfer(url-prefix)",
+            "function": "title=transfer(url-prefix)",
             "size_compression_snappy": 503614552,
             "size_compression_gzip": 292653379,
             "size_compression_brotli": 227979607,
@@ -250,7 +250,7 @@
         "rows": 706,
         "compress": [
           {
-            "method": "url=offset+transfer(title)",
+            "function": "url=offset+transfer(title)",
             "size_compression_snappy": 332210,
             "size_compression_gzip": 198338,
             "size_compression_brotli": 162324,
@@ -258,7 +258,7 @@
             "size_compression_zstd": 213155
           },
           {
-            "method": "title=combine[:len], text=combine[len:]",
+            "function": "title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 344176,
             "size_compression_gzip": 205026,
             "size_compression_brotli": 167987,
@@ -266,7 +266,7 @@
             "size_compression_zstd": 221485
           },
           {
-            "method": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 328349,
             "size_compression_gzip": 195186,
             "size_compression_brotli": 158854,
@@ -274,7 +274,7 @@
             "size_compression_zstd": 209372
           },
           {
-            "method": "title=transfer(url-prefix)",
+            "function": "title=transfer(url-prefix)",
             "size_compression_snappy": 337023,
             "size_compression_gzip": 200464,
             "size_compression_brotli": 164007,
@@ -297,7 +297,7 @@
         "rows": 1000000,
         "compress": [
           {
-            "method": "url=offset+transfer(title)",
+            "function": "url=offset+transfer(title)",
             "size_compression_snappy": 952201657,
             "size_compression_gzip": 551737830,
             "size_compression_brotli": 461611447,
@@ -305,7 +305,7 @@
             "size_compression_zstd": 606291226
           },
           {
-            "method": "title=combine[:len], text=combine[len:]",
+            "function": "title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 971694860,
             "size_compression_gzip": 560666848,
             "size_compression_brotli": 469703510,
@@ -313,7 +313,7 @@
             "size_compression_zstd": 619679319
           },
           {
-            "method": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 946275186,
             "size_compression_gzip": 547909615,
             "size_compression_brotli": 458617345,
@@ -321,7 +321,7 @@
             "size_compression_zstd": 602474715
           },
           {
-            "method": "title=transfer(url-prefix)",
+            "function": "title=transfer(url-prefix)",
             "size_compression_snappy": 962640051,
             "size_compression_gzip": 555500336,
             "size_compression_brotli": 464851641,
@@ -344,7 +344,7 @@
         "rows": 1000000,
         "compress": [
           {
-            "method": "url=offset+transfer(title)",
+            "function": "url=offset+transfer(title)",
             "size_compression_snappy": 2718369382,
             "size_compression_gzip": 1741305564,
             "size_compression_brotli": 1422561310,
@@ -352,7 +352,7 @@
             "size_compression_zstd": 1944309473
           },
           {
-            "method": "title=combine[:len], text=combine[len:]",
+            "function": "title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 2727218628,
             "size_compression_gzip": 1747975907,
             "size_compression_brotli": 1428527521,
@@ -360,7 +360,7 @@
             "size_compression_zstd": 1949991722
           },
           {
-            "method": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 2709098861,
             "size_compression_gzip": 1736030884,
             "size_compression_brotli": 1418313966,
@@ -368,7 +368,7 @@
             "size_compression_zstd": 1937839237
           },
           {
-            "method": "title=transfer(url-prefix)",
+            "function": "title=transfer(url-prefix)",
             "size_compression_snappy": 2721034017,
             "size_compression_gzip": 1743186341,
             "size_compression_brotli": 1424102977,
@@ -391,7 +391,7 @@
         "rows": 1000000,
         "compress": [
           {
-            "method": "url=offset+transfer(title)",
+            "function": "url=offset+transfer(title)",
             "size_compression_snappy": 81159844,
             "size_compression_gzip": 46861866,
             "size_compression_brotli": 37780262,
@@ -399,7 +399,7 @@
             "size_compression_zstd": 48833584
           },
           {
-            "method": "title=combine[:len], text=combine[len:]",
+            "function": "title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 88583021,
             "size_compression_gzip": 51914372,
             "size_compression_brotli": 42731549,
@@ -407,7 +407,7 @@
             "size_compression_zstd": 54200641
           },
           {
-            "method": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 76939034,
             "size_compression_gzip": 44243521,
             "size_compression_brotli": 35997385,
@@ -415,7 +415,7 @@
             "size_compression_zstd": 46449718
           },
           {
-            "method": "title=transfer(url-prefix)",
+            "function": "title=transfer(url-prefix)",
             "size_compression_snappy": 82320098,
             "size_compression_gzip": 47863413,
             "size_compression_brotli": 38405814,
@@ -438,7 +438,7 @@
         "rows": 1000000,
         "compress": [
           {
-            "method": "url=offset+transfer(title)",
+            "function": "url=offset+transfer(title)",
             "size_compression_snappy": 841323539,
             "size_compression_gzip": 539433301,
             "size_compression_brotli": 453826761,
@@ -446,7 +446,7 @@
             "size_compression_zstd": 587519360
           },
           {
-            "method": "title=combine[:len], text=combine[len:]",
+            "function": "title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 850061485,
             "size_compression_gzip": 545541138,
             "size_compression_brotli": 459261582,
@@ -454,7 +454,7 @@
             "size_compression_zstd": 593423503
           },
           {
-            "method": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
             "size_compression_snappy": 834847782,
             "size_compression_gzip": 535463483,
             "size_compression_brotli": 450485218,
@@ -462,7 +462,7 @@
             "size_compression_zstd": 583148865
           },
           {
-            "method": "title=transfer(url-prefix)",
+            "function": "title=transfer(url-prefix)",
             "size_compression_snappy": 843370129,
             "size_compression_gzip": 540910358,
             "size_compression_brotli": 454964806,
@@ -489,7 +489,7 @@
         "rows": 1000000,
         "compress": [
           {
-            "method": "dump=file_path.split('/')[4].split('/')[0]",
+            "function": "dump=file_path.split('/')[4].split('/')[0]",
             "size_compression_snappy": 2036850933,
             "size_compression_gzip": 1304549930,
             "size_compression_brotli": 1117228637,
@@ -497,7 +497,7 @@
             "size_compression_zstd": 1427259905
           },
           {
-            "method": "file_path=file_path+dump+file_path",
+            "function": "file_path=file_path+dump+file_path",
             "size_compression_snappy": 2035496849,
             "size_compression_gzip": 1304414401,
             "size_compression_brotli": 1117108748,
@@ -505,7 +505,7 @@
             "size_compression_zstd": 1427074982
           },
           {
-            "method": "combine all string columns",
+            "function": "combine all string columns",
             "size_compression_snappy": 2064808011,
             "size_compression_gzip": 1337756388,
             "size_compression_brotli": 1142616262,
@@ -513,7 +513,7 @@
             "size_compression_zstd": 1469328673
           },
           {
-            "method": "linear regression: text_len to token_count",
+            "function": "linear regression: text_len to token_count",
             "size_compression_snappy": 2036581881,
             "size_compression_gzip": 1304151612,
             "size_compression_brotli": 1116832093,
@@ -521,7 +521,7 @@
             "size_compression_zstd": 1426869733
           },
           {
-            "method": "remove prefixs",
+            "function": "remove prefixs",
             "size_compression_snappy": 2033539538,
             "size_compression_gzip": 1303614748,
             "size_compression_brotli": 1116283513,
@@ -529,7 +529,7 @@
             "size_compression_zstd": 1426362003
           },
           {
-            "method": "split the id",
+            "function": "split the id",
             "size_compression_snappy": 2028296259,
             "size_compression_gzip": 1301614507,
             "size_compression_brotli": 1114656440,
@@ -537,6 +537,14 @@
             "size_compression_zstd": 1425216303
           }
         ]
+      }
+    ]
+  },
+  "Metanova/SAVI-2020": {
+    "configs": [
+      {
+        "file":"default",
+        "status": "not yet started"
       }
     ]
   }
