@@ -535,6 +535,22 @@
             "size_compression_brotli": 1114656440,
             "size_compression_lz4": 2069110002,
             "size_compression_zstd": 1425216303
+          },
+          {
+            "function": "concat text and url",
+            "size_compression_snappy": 2040244944,
+            "size_compression_gzip": 1308849646,
+            "size_compression_brotli": 1121920674,
+            "size_compression_lz4": 2083204384,
+            "size_compression_zstd": 1433196298
+          },
+          {
+            "function": "concat text and url_last_part, url = url_prefix + url_last_part",
+            "size_compression_snappy": 2037796312,
+            "size_compression_gzip": 1308519786,
+            "size_compression_brotli": 1120692221,
+            "size_compression_lz4": 2080776975,
+            "size_compression_zstd": 1432063780
           }
         ]
       }
@@ -543,8 +559,35 @@
   "Metanova/SAVI-2020": {
     "configs": [
       {
-        "file":"default",
-        "status": "not yet started"
+        "file": "default",
+        "status": "downloaded",
+        "download_datetime": "2025-05-13 13:57:23",
+        "path": "./datasets/Metanova/SAVI-2020/default",
+        "size_original": 1459369994,
+        "size_snappy": 476431909,
+        "size_gzip": 271022175,
+        "size_brotli": 213915651,
+        "size_lz4": 445508239,
+        "size_zstd": 258567006,
+        "rows": 1000000,
+        "compress": [
+          {
+            "function": "remove product_hashisy, product_hashisy=product_name[:19]+'\"'",
+            "size_compression_snappy": 459473936,
+            "size_compression_gzip": 260523258,
+            "size_compression_brotli": 204057249,
+            "size_compression_lz4": 427882066,
+            "size_compression_zstd": 249895791
+          },
+          {
+            "function": "product_name = product_name[0] + product_hashisy[1:-1] + product_name[1:]",
+            "size_compression_snappy": 459736485,
+            "size_compression_gzip": 260841661,
+            "size_compression_brotli": 204493721,
+            "size_compression_lz4": 427910222,
+            "size_compression_zstd": 249251534
+          }
+        ]
       }
     ]
   }

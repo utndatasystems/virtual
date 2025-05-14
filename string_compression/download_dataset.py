@@ -33,20 +33,35 @@ def get_df(path, max_rows=1_000_000):
     return pd.concat(parts, ignore_index=True)
 
 def download_dataset(dataset_id, config):
+    revision = None
     if dataset_id == "HuggingFaceFW/fineweb":
         pattern = f"{config.split('-')[0]}/{config.split('-')[1]}/*"
     elif dataset_id == "wikimedia/wikipedia":
         pattern = f"{config}/*"
+    elif dataset_id == "Metanova/SAVI-2020":
+        pattern = f"{config}/*"
+        revision = "refs/convert/parquet"
     else:
         print(f"Unknown dataset_id: {dataset_id}")
         return
-    snapshot_download(
-        repo_id=dataset_id,
-        repo_type="dataset",
-        local_dir=f"./datasets/{dataset_id}",
-        cache_dir="./datasets/.cache",
-        allow_patterns=[pattern]
-    )
+    
+    if revision is None:
+        snapshot_download(
+            repo_id=dataset_id,
+            repo_type="dataset",
+            local_dir=f"./datasets/{dataset_id}",
+            cache_dir="./datasets/.cache",
+            allow_patterns=[pattern]
+        )
+    else:
+        snapshot_download(
+            repo_id=dataset_id,
+            repo_type="dataset",
+            revision=revision,
+            local_dir=f"./datasets/{dataset_id}",
+            cache_dir="./datasets/.cache",
+            allow_patterns=[pattern]
+        )
 
 def get_size(start_path = '.'):
     # check is it a file or directory
