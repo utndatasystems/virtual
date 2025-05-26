@@ -1,6 +1,6 @@
 import json
 import os
-from huggingface_hub import snapshot_download
+from huggingface_hub import snapshot_download, list_repo_files
 from datetime import datetime
 import pandas as pd
 import pyarrow as pa
@@ -35,12 +35,15 @@ def get_df(path, max_rows=1_000_000):
 def download_dataset(dataset_id, config):
     revision = None
     if dataset_id == "HuggingFaceFW/fineweb":
-        pattern = f"{config.split('-')[0]}/{config.split('-')[1]}/*"
+        pattern = [f"{config.split('-')[0]}/{config.split('-')[1]}/*"]
     elif dataset_id == "wikimedia/wikipedia":
-        pattern = f"{config}/*"
+        pattern = [f"{config}/*"]
     elif dataset_id == "Metanova/SAVI-2020":
-        pattern = f"{config}/*"
+        pattern = [f"{config}/*"]
         revision = "refs/convert/parquet"
+    elif dataset_id == "bigdata-pw/Flickr":
+        files = list_repo_files(dataset_id, repo_type="dataset")
+        pattern = files[2:22]
     else:
         print(f"Unknown dataset_id: {dataset_id}")
         return
@@ -51,7 +54,7 @@ def download_dataset(dataset_id, config):
             repo_type="dataset",
             local_dir=f"./datasets/{dataset_id}",
             cache_dir="./datasets/.cache",
-            allow_patterns=[pattern]
+            allow_patterns=pattern
         )
     else:
         snapshot_download(
@@ -60,7 +63,7 @@ def download_dataset(dataset_id, config):
             revision=revision,
             local_dir=f"./datasets/{dataset_id}",
             cache_dir="./datasets/.cache",
-            allow_patterns=[pattern]
+            allow_patterns=pattern
         )
 
 def get_size(start_path = '.'):
