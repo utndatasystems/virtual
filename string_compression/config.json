@@ -22,12 +22,12 @@
             "size_compression_lz4": 10070543,
             "size_compression_zstd": 7905411,
             "query": {
-              "original": "SELECT title, url FROM df",
-              "compressed": "SELECT title, 'https://zh-classical.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://zh-classical.wikipedia.org/wiki/' || quote(title) AS url FROM df"
             },
             "query_time": {
-              "original": 0.007839202880859375,
-              "compressed": 0.03337907791137695
+              "url_ori": 0.005398273468017578,
+              "url_com": 0.03303956985473633
             }
           },
           {
@@ -38,12 +38,16 @@
             "size_compression_lz4": 10218516,
             "size_compression_zstd": 7991473,
             "query": {
-              "original": "SELECT title, text FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
             },
             "query_time": {
-              "original": 0.060590267181396484,
-              "compressed": 0.06995797157287598
+              "title_ori": 0.0052530765533447266,
+              "title_com": 0.035956621170043945,
+              "text_ori": 0.054316043853759766,
+              "text_com": 0.09222197532653809
             }
           },
           {
@@ -54,12 +58,20 @@
             "size_compression_lz4": 9976747,
             "size_compression_zstd": 7836713,
             "query": {
-              "original": "SELECT title, text, url FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text, 'https://zh-classical.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://zh-classical.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
             },
             "query_time": {
-              "original": 0.06069612503051758,
-              "compressed": 0.09505176544189453
+              "title_ori": 0.0052127838134765625,
+              "title_com": 0.03613638877868652,
+              "text_ori": 0.05492067337036133,
+              "text_com": 0.0743706226348877,
+              "url_ori": 0.006178379058837891,
+              "url_com": 0.06236743927001953
             }
           },
           {
@@ -70,12 +82,12 @@
             "size_compression_lz4": 10153794,
             "size_compression_zstd": 7939025,
             "query": {
-              "original": "SELECT url, title FROM df",
-              "compressed": "SELECT url, strip_and_unquote(url, 'https://zh-classical.wikipedia.org/wiki/') AS title FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://zh-classical.wikipedia.org/wiki/') AS title FROM df"
             },
             "query_time": {
-              "original": 0.008322000503540039,
-              "compressed": 0.07768845558166504
+              "title_ori": 0.005607128143310547,
+              "title_com": 0.07560491561889648
             }
           }
         ]
@@ -101,12 +113,12 @@
             "size_compression_lz4": 1106263,
             "size_compression_zstd": 745279,
             "query": {
-              "original": "SELECT title, url FROM df",
-              "compressed": "SELECT title, 'https://ab.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ab.wikipedia.org/wiki/' || quote(title) AS url FROM df"
             },
             "query_time": {
-              "original": 0.005348920822143555,
-              "compressed": 0.017761945724487305
+              "url_ori": 0.003970146179199219,
+              "url_com": 0.017320871353149414
             }
           },
           {
@@ -117,12 +129,16 @@
             "size_compression_lz4": 1177312,
             "size_compression_zstd": 778127,
             "query": {
-              "original": "SELECT title, text FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
             },
             "query_time": {
-              "original": 0.027512073516845703,
-              "compressed": 0.03699469566345215
+              "title_ori": 0.0038306713104248047,
+              "title_com": 0.017389297485351562,
+              "text_ori": 0.024559736251831055,
+              "text_com": 0.030718564987182617
             }
           },
           {
@@ -133,12 +149,20 @@
             "size_compression_lz4": 1089756,
             "size_compression_zstd": 728315,
             "query": {
-              "original": "SELECT title, text, url FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text, 'https://ab.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ab.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
             },
             "query_time": {
-              "original": 0.027301788330078125,
-              "compressed": 0.04972553253173828
+              "title_ori": 0.004028797149658203,
+              "title_com": 0.018258333206176758,
+              "text_ori": 0.024839401245117188,
+              "text_com": 0.031986236572265625,
+              "url_ori": 0.004456996917724609,
+              "url_com": 0.03165721893310547
             }
           },
           {
@@ -149,12 +173,12 @@
             "size_compression_lz4": 1135673,
             "size_compression_zstd": 755525,
             "query": {
-              "original": "SELECT url, title FROM df",
-              "compressed": "SELECT url, strip_and_unquote(url, 'https://ab.wikipedia.org/wiki/') AS title FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://ab.wikipedia.org/wiki/') AS title FROM df"
             },
             "query_time": {
-              "original": 0.005116701126098633,
-              "compressed": 0.03519558906555176
+              "title_ori": 0.0039060115814208984,
+              "title_com": 0.034157514572143555
             }
           }
         ]
@@ -180,12 +204,12 @@
             "size_compression_lz4": 122501863,
             "size_compression_zstd": 83997064,
             "query": {
-              "original": "SELECT title, url FROM df",
-              "compressed": "SELECT title, 'https://af.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://af.wikipedia.org/wiki/' || quote(title) AS url FROM df"
             },
             "query_time": {
-              "original": 0.034246206283569336,
-              "compressed": 0.28464603424072266
+              "url_ori": 0.01942753791809082,
+              "url_com": 0.27159929275512695
             }
           },
           {
@@ -196,12 +220,16 @@
             "size_compression_lz4": 123295226,
             "size_compression_zstd": 84486509,
             "query": {
-              "original": "SELECT title, text FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
             },
             "query_time": {
-              "original": 1.1648108959197998,
-              "compressed": 1.270777940750122
+              "title_ori": 0.017326831817626953,
+              "title_com": 0.8322708606719971,
+              "text_ori": 1.1560721397399902,
+              "text_com": 1.2552547454833984
             }
           },
           {
@@ -212,12 +240,20 @@
             "size_compression_lz4": 121649319,
             "size_compression_zstd": 83361946,
             "query": {
-              "original": "SELECT title, text, url FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text, 'https://af.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://af.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
             },
             "query_time": {
-              "original": 1.1005363464355469,
-              "compressed": 1.4696471691131592
+              "title_ori": 0.017652511596679688,
+              "title_com": 0.8349556922912598,
+              "text_ori": 1.170478343963623,
+              "text_com": 1.2703619003295898,
+              "url_ori": 0.032517194747924805,
+              "url_com": 1.020777702331543
             }
           },
           {
@@ -228,12 +264,12 @@
             "size_compression_lz4": 122618329,
             "size_compression_zstd": 84007433,
             "query": {
-              "original": "SELECT url, title FROM df",
-              "compressed": "SELECT url, strip_and_unquote(url, 'https://af.wikipedia.org/wiki/') AS title FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://af.wikipedia.org/wiki/') AS title FROM df"
             },
             "query_time": {
-              "original": 0.03567194938659668,
-              "compressed": 0.4052846431732178
+              "title_ori": 0.01731133460998535,
+              "title_com": 0.38637495040893555
             }
           }
         ]
@@ -259,12 +295,12 @@
             "size_compression_lz4": 34661169,
             "size_compression_zstd": 23256142,
             "query": {
-              "original": "SELECT title, url FROM df",
-              "compressed": "SELECT title, 'https://azb.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://azb.wikipedia.org/wiki/' || quote(title) AS url FROM df"
             },
             "query_time": {
-              "original": 0.1274423599243164,
-              "compressed": 0.8728723526000977
+              "url_ori": 0.051531076431274414,
+              "url_com": 0.8911311626434326
             }
           },
           {
@@ -275,12 +311,16 @@
             "size_compression_lz4": 39891365,
             "size_compression_zstd": 26082580,
             "query": {
-              "original": "SELECT title, text FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
             },
             "query_time": {
-              "original": 0.8749451637268066,
-              "compressed": 1.072788953781128
+              "title_ori": 0.07311248779296875,
+              "title_com": 0.5550339221954346,
+              "text_ori": 0.7716398239135742,
+              "text_com": 0.9609270095825195
             }
           },
           {
@@ -291,12 +331,20 @@
             "size_compression_lz4": 33502972,
             "size_compression_zstd": 22475562,
             "query": {
-              "original": "SELECT title, text, url FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text, 'https://azb.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://azb.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
             },
             "query_time": {
-              "original": 0.9338016510009766,
-              "compressed": 1.712648868560791
+              "title_ori": 0.07791566848754883,
+              "title_com": 0.5423009395599365,
+              "text_ori": 0.7800557613372803,
+              "text_com": 0.9671909809112549,
+              "url_ori": 0.07142210006713867,
+              "url_com": 1.1301708221435547
             }
           },
           {
@@ -307,12 +355,12 @@
             "size_compression_lz4": 37812216,
             "size_compression_zstd": 24706274,
             "query": {
-              "original": "SELECT url, title FROM df",
-              "compressed": "SELECT url, strip_and_unquote(url, 'https://azb.wikipedia.org/wiki/') AS title FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://azb.wikipedia.org/wiki/') AS title FROM df"
             },
             "query_time": {
-              "original": 0.12980055809020996,
-              "compressed": 2.649083137512207
+              "title_ori": 0.07197928428649902,
+              "title_com": 2.685896158218384
             }
           }
         ]
@@ -338,12 +386,12 @@
             "size_compression_lz4": 481188069,
             "size_compression_zstd": 318057880,
             "query": {
-              "original": "SELECT title, url FROM df",
-              "compressed": "SELECT title, 'https://bg.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://bg.wikipedia.org/wiki/' || quote(title) AS url FROM df"
             },
             "query_time": {
-              "original": 0.16524672508239746,
-              "compressed": 1.1672592163085938
+              "url_ori": 0.05986833572387695,
+              "url_com": 1.0919201374053955
             }
           },
           {
@@ -354,12 +402,16 @@
             "size_compression_lz4": 488911380,
             "size_compression_zstd": 322092595,
             "query": {
-              "original": "SELECT title, text FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
             },
             "query_time": {
-              "original": 6.839226007461548,
-              "compressed": 8.6948401927948
+              "title_ori": 0.08926796913146973,
+              "title_com": 3.7814323902130127,
+              "text_ori": 6.410520076751709,
+              "text_com": 8.101375579833984
             }
           },
           {
@@ -370,12 +422,20 @@
             "size_compression_lz4": 478618462,
             "size_compression_zstd": 316351085,
             "query": {
-              "original": "SELECT title, text, url FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text, 'https://bg.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://bg.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
             },
             "query_time": {
-              "original": 7.018599510192871,
-              "compressed": 9.700055122375488
+              "title_ori": 0.09095931053161621,
+              "title_com": 3.806232452392578,
+              "text_ori": 6.389919281005859,
+              "text_com": 8.116683721542358,
+              "url_ori": 0.08988547325134277,
+              "url_com": 4.7205986976623535
             }
           },
           {
@@ -386,12 +446,12 @@
             "size_compression_lz4": 486253130,
             "size_compression_zstd": 320162174,
             "query": {
-              "original": "SELECT url, title FROM df",
-              "compressed": "SELECT url, strip_and_unquote(url, 'https://bg.wikipedia.org/wiki/') AS title FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://bg.wikipedia.org/wiki/') AS title FROM df"
             },
             "query_time": {
-              "original": 0.16371965408325195,
-              "compressed": 3.156018018722534
+              "title_ori": 0.09395551681518555,
+              "title_com": 3.339555501937866
             }
           }
         ]
@@ -417,12 +477,12 @@
             "size_compression_lz4": 322819,
             "size_compression_zstd": 213155,
             "query": {
-              "original": "SELECT title, url FROM df",
-              "compressed": "SELECT title, 'https://ady.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ady.wikipedia.org/wiki/' || quote(title) AS url FROM df"
             },
             "query_time": {
-              "original": 0.02140045166015625,
-              "compressed": 0.025295257568359375
+              "url_ori": 0.014778375625610352,
+              "url_com": 0.017722606658935547
             }
           },
           {
@@ -433,12 +493,16 @@
             "size_compression_lz4": 337014,
             "size_compression_zstd": 221485,
             "query": {
-              "original": "SELECT title, text FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
             },
             "query_time": {
-              "original": 0.04946112632751465,
-              "compressed": 0.06558346748352051
+              "title_ori": 0.007505893707275391,
+              "title_com": 0.0054929256439208984,
+              "text_ori": 0.04468894004821777,
+              "text_com": 0.009683609008789062
             }
           },
           {
@@ -449,12 +513,20 @@
             "size_compression_lz4": 317666,
             "size_compression_zstd": 209372,
             "query": {
-              "original": "SELECT title, text, url FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text, 'https://ady.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ady.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
             },
             "query_time": {
-              "original": 0.05945634841918945,
-              "compressed": 0.07782959938049316
+              "title_ori": 0.016248703002929688,
+              "title_com": 0.01245427131652832,
+              "text_ori": 0.008168935775756836,
+              "text_com": 0.010425329208374023,
+              "url_ori": 0.0021431446075439453,
+              "url_com": 0.006926536560058594
             }
           },
           {
@@ -465,12 +537,12 @@
             "size_compression_lz4": 330509,
             "size_compression_zstd": 216871,
             "query": {
-              "original": "SELECT url, title FROM df",
-              "compressed": "SELECT url, strip_and_unquote(url, 'https://ady.wikipedia.org/wiki/') AS title FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://ady.wikipedia.org/wiki/') AS title FROM df"
             },
             "query_time": {
-              "original": 0.02043008804321289,
-              "compressed": 0.030033349990844727
+              "title_ori": 0.009423494338989258,
+              "title_com": 0.014972448348999023
             }
           }
         ]
@@ -496,12 +568,12 @@
             "size_compression_lz4": 916421091,
             "size_compression_zstd": 606291226,
             "query": {
-              "original": "SELECT title, url FROM df",
-              "compressed": "SELECT title, 'https://ar.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ar.wikipedia.org/wiki/' || quote(title) AS url FROM df"
             },
             "query_time": {
-              "original": 0.5321948528289795,
-              "compressed": 3.769432306289673
+              "url_ori": 0.19169282913208008,
+              "url_com": 3.9354050159454346
             }
           },
           {
@@ -512,12 +584,16 @@
             "size_compression_lz4": 940861038,
             "size_compression_zstd": 619679319,
             "query": {
-              "original": "SELECT title, text FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
             },
             "query_time": {
-              "original": 14.199721574783325,
-              "compressed": 17.907652378082275
+              "title_ori": 0.31030964851379395,
+              "title_com": 8.459089756011963,
+              "text_ori": 13.543342590332031,
+              "text_com": 17.326791763305664
             }
           },
           {
@@ -528,12 +604,20 @@
             "size_compression_lz4": 910595426,
             "size_compression_zstd": 602474715,
             "query": {
-              "original": "SELECT title, text, url FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text, 'https://ar.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ar.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
             },
             "query_time": {
-              "original": 14.346141815185547,
-              "compressed": 20.728140354156494
+              "title_ori": 0.33222198486328125,
+              "title_com": 8.453408002853394,
+              "text_ori": 13.553331136703491,
+              "text_com": 17.261098623275757,
+              "url_ori": 0.33881473541259766,
+              "url_com": 11.427063465118408
             }
           },
           {
@@ -544,12 +628,12 @@
             "size_compression_lz4": 931695371,
             "size_compression_zstd": 613530176,
             "query": {
-              "original": "SELECT url, title FROM df",
-              "compressed": "SELECT url, strip_and_unquote(url, 'https://ar.wikipedia.org/wiki/') AS title FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://ar.wikipedia.org/wiki/') AS title FROM df"
             },
             "query_time": {
-              "original": 0.5462665557861328,
-              "compressed": 10.294740676879883
+              "title_ori": 0.32173728942871094,
+              "title_com": 10.363605260848999
             }
           }
         ]
@@ -575,12 +659,12 @@
             "size_compression_lz4": 2761315745,
             "size_compression_zstd": 1944309473,
             "query": {
-              "original": "SELECT title, url FROM df",
-              "compressed": "SELECT title, 'https://de.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://de.wikipedia.org/wiki/' || quote(title) AS url FROM df"
             },
             "query_time": {
-              "original": 0.3729736804962158,
-              "compressed": 3.34822940826416
+              "url_ori": 0.18376445770263672,
+              "url_com": 3.3625402450561523
             }
           },
           {
@@ -591,12 +675,16 @@
             "size_compression_lz4": 2769940564,
             "size_compression_zstd": 1949991722,
             "query": {
-              "original": "SELECT title, text FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
             },
             "query_time": {
-              "original": 25.346025943756104,
-              "compressed": 28.875707864761353
+              "title_ori": 0.1928114891052246,
+              "title_com": 18.028475522994995,
+              "text_ori": 24.570136308670044,
+              "text_com": 28.176860332489014
             }
           },
           {
@@ -607,12 +695,20 @@
             "size_compression_lz4": 2752031957,
             "size_compression_zstd": 1937839237,
             "query": {
-              "original": "SELECT title, text, url FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text, 'https://de.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://de.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
             },
             "query_time": {
-              "original": 25.698196172714233,
-              "compressed": 31.335041046142578
+              "title_ori": 0.21020913124084473,
+              "title_com": 17.90546679496765,
+              "text_ori": 24.453842878341675,
+              "text_com": 27.989896774291992,
+              "url_ori": 0.3229653835296631,
+              "url_com": 19.89884066581726
             }
           },
           {
@@ -623,12 +719,12 @@
             "size_compression_lz4": 2763213100,
             "size_compression_zstd": 1945097967,
             "query": {
-              "original": "SELECT url, title FROM df",
-              "compressed": "SELECT url, strip_and_unquote(url, 'https://de.wikipedia.org/wiki/') AS title FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://de.wikipedia.org/wiki/') AS title FROM df"
             },
             "query_time": {
-              "original": 0.3545064926147461,
-              "compressed": 4.350833177566528
+              "title_ori": 0.18927788734436035,
+              "title_com": 4.468607187271118
             }
           }
         ]
@@ -654,12 +750,12 @@
             "size_compression_lz4": 74766019,
             "size_compression_zstd": 48833584,
             "query": {
-              "original": "SELECT title, url FROM df",
-              "compressed": "SELECT title, 'https://ceb.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ceb.wikipedia.org/wiki/' || quote(title) AS url FROM df"
             },
             "query_time": {
-              "original": 0.3005342483520508,
-              "compressed": 2.9561965465545654
+              "url_ori": 0.16400885581970215,
+              "url_com": 3.0116593837738037
             }
           },
           {
@@ -670,12 +766,16 @@
             "size_compression_lz4": 83098581,
             "size_compression_zstd": 54200641,
             "query": {
-              "original": "SELECT title, text FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
             },
             "query_time": {
-              "original": 1.8822038173675537,
-              "compressed": 2.159919023513794
+              "title_ori": 0.13510847091674805,
+              "title_com": 0.4328641891479492,
+              "text_ori": 1.3987812995910645,
+              "text_com": 1.5281922817230225
             }
           },
           {
@@ -686,12 +786,20 @@
             "size_compression_lz4": 71279847,
             "size_compression_zstd": 46449718,
             "query": {
-              "original": "SELECT title, text, url FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text, 'https://ceb.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ceb.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
             },
             "query_time": {
-              "original": 1.9918999671936035,
-              "compressed": 6.048213720321655
+              "title_ori": 0.13065242767333984,
+              "title_com": 0.43034911155700684,
+              "text_ori": 0.6602034568786621,
+              "text_com": 0.9470686912536621,
+              "url_ori": 0.19298243522644043,
+              "url_com": 3.659292459487915
             }
           },
           {
@@ -702,12 +810,12 @@
             "size_compression_lz4": 76061402,
             "size_compression_zstd": 49549437,
             "query": {
-              "original": "SELECT url, title FROM df",
-              "compressed": "SELECT url, strip_and_unquote(url, 'https://ceb.wikipedia.org/wiki/') AS title FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://ceb.wikipedia.org/wiki/') AS title FROM df"
             },
             "query_time": {
-              "original": 0.31351733207702637,
-              "compressed": 4.18092942237854
+              "title_ori": 0.13786721229553223,
+              "title_com": 4.057954549789429
             }
           }
         ]
@@ -733,12 +841,12 @@
             "size_compression_lz4": 850589176,
             "size_compression_zstd": 587519360,
             "query": {
-              "original": "SELECT title, url FROM df",
-              "compressed": "SELECT title, 'https://nl.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://nl.wikipedia.org/wiki/' || quote(title) AS url FROM df"
             },
             "query_time": {
-              "original": 0.32567405700683594,
-              "compressed": 3.1469807624816895
+              "url_ori": 0.15874719619750977,
+              "url_com": 3.0466203689575195
             }
           },
           {
@@ -749,12 +857,16 @@
             "size_compression_lz4": 859538898,
             "size_compression_zstd": 593423503,
             "query": {
-              "original": "SELECT title, text FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
             },
             "query_time": {
-              "original": 8.410111427307129,
-              "compressed": 8.617475032806396
+              "title_ori": 0.15853381156921387,
+              "title_com": 5.553678512573242,
+              "text_ori": 7.057876825332642,
+              "text_com": 8.232805252075195
             }
           },
           {
@@ -765,12 +877,20 @@
             "size_compression_lz4": 844369455,
             "size_compression_zstd": 583148865,
             "query": {
-              "original": "SELECT title, text, url FROM df",
-              "compressed": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title, SUBSTR(combine_title_text, title_len + 1) AS text, 'https://nl.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://nl.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
             },
             "query_time": {
-              "original": 8.748606443405151,
-              "compressed": 11.658809661865234
+              "title_ori": 0.15602326393127441,
+              "title_com": 5.539249658584595,
+              "text_ori": 6.961951971054077,
+              "text_com": 7.958146095275879,
+              "url_ori": 0.20956873893737793,
+              "url_com": 7.903232097625732
             }
           },
           {
@@ -781,12 +901,12 @@
             "size_compression_lz4": 852309152,
             "size_compression_zstd": 588334994,
             "query": {
-              "original": "SELECT url, title FROM df",
-              "compressed": "SELECT url, strip_and_unquote(url, 'https://nl.wikipedia.org/wiki/') AS title FROM df"
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://nl.wikipedia.org/wiki/') AS title FROM df"
             },
             "query_time": {
-              "original": 0.32712531089782715,
-              "compressed": 4.3057029247283936
+              "title_ori": 0.15410923957824707,
+              "title_com": 4.389993190765381
             }
           }
         ]
