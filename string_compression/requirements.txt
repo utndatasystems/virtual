@@ -3,3 +3,4 @@ datasets
 commitizen
 matplotlib
 hf_xet
+rdkit
