@@ -165,10 +165,11 @@ class SummarizePlotter:
             
         # Plot the results
         self.plot_results(
-            query_times
+            query_times,
+            target_column=target_column
         )
     
-    def plot_results(self, query_times: list):
+    def plot_results(self, query_times: list, target_column: str = "Target Column"):
         """
         Generates and displays a plot comparing file sizes and query times.
 
@@ -190,7 +191,7 @@ class SummarizePlotter:
         compressed_list = [compressed_ratio, (times[1] / times[0]) * 100, (times[3] / times[2]) * 100]
         if len(times) == 5:
             trick_list = [0, 0, (times[4] / times[2]) * 100]
-        x_labels = ['Size', 'SUMMARIZE column', 'SUMMARIZE LENGTH(column)']
+        x_labels = ['Size', f'SUMMARIZE {target_column}', f'SUMMARIZE LENGTH({target_column})']
 
         bar_width = 0.25
         x = np.arange(len(x_labels))
@@ -210,11 +211,11 @@ class SummarizePlotter:
         if len(times) == 5:
             plt.bar(x_3, trick_list, bar_width, color=['yellow'], label='Compressed Len Trick')
 
-        plt.ylabel('Percentage(%)')
+        plt.ylabel('Percentage(\%)')
         plt.xticks(x, x_labels)
         # log scale y
         # plt.yscale('log')
-        plt.title(f'Parquet Compression {self.dataset_name}')
+        plt.title(f'Parquet Compression {self.dataset_name} - ({target_column})')
         plt.grid(True)
         plt.legend()
 
