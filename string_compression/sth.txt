@@ -1,0 +1,99 @@
+Total size of the dataset (snappy): 9685941.18 kB
+Total size of the compression (snappy): 9472642.52 kB
+Total compression ratio (snappy): 2.20 %
+Total size of the dataset (gzip): 6012182.77 kB
+Total size of the compression (gzip): 5881042.36 kB
+Total compression ratio (gzip): 2.18 %
+Total size of the dataset (brotli): 4912043.92 kB
+Total size of the compression (brotli): 4798849.77 kB
+Total compression ratio (brotli): 2.30 %
+Total size of the dataset (lz4): 9630856.38 kB
+Total size of the compression (lz4): 9409492.00 kB
+Total compression ratio (lz4): 2.30 %
+Total size of the dataset (zstd): 6634576.23 kB
+Total size of the compression (zstd): 6491528.87 kB
+Total compression ratio (zstd): 2.16 %
+
+Total size of the dataset (snappy): 9685941.18 kB
+Total size of the compression (snappy): 9404222.70 kB
+Total compression ratio (snappy): 2.91 %
+
+
+id: 35983.81 KB
+dump: 9.67 KB
+date: 8332.33 KB
+file_path: 14870.00 KB
+language: 0.07 KB
+language_score: 5810.29 KB
+token_count: 1754.40 KB
+combine: 1924556.01 KB
+url_len: 1102.69 KB
+
+text: 1870146.23 KB
+id: 35983.81 KB
+dump: 9.67 KB
+url: 52205.48 KB
+date: 8332.33 KB
+file_path: 14870.00 KB
+language: 0.07 KB
+language_score: 5810.29 KB
+token_count: 1754.40 KB
+
+id: 35983.81 KB
+dump: 9.67 KB
+date: 8332.33 KB
+file_path: 14870.00 KB
+language: 0.07 KB
+language_score: 5810.29 KB
+token_count: 1754.40 KB
+url_prefix: 15735.26 KB
+combine: 1906429.44 KB
+url_len: 1102.64 KB
+
+no offset_outlier
+text: 1870146.23 KB
+id: 35983.81 KB
+dump: 9.67 KB
+url: 52205.48 KB
+date: 8332.33 KB
+file_path: 14870.00 KB
+language: 0.07 KB
+language_score: 5810.29 KB
+token_count_offset: 1481.49 KB
+
+alpha = 0.01
+text: 1870146.23 KB
+id: 35983.81 KB
+dump: 9.67 KB
+url: 52205.48 KB
+date: 8332.33 KB
+file_path: 14870.00 KB
+language: 0.07 KB
+language_score: 5810.29 KB
+token_count_offset: 1479.54 KB
+offset_outlier: 12.06 KB
+
+alpha = 0.001
+text: 1870146.23 KB
+id: 35983.81 KB
+dump: 9.67 KB
+url: 52205.48 KB
+date: 8332.33 KB
+file_path: 14870.00 KB
+language: 0.07 KB
+language_score: 5810.29 KB
+token_count_offset: 1122.65 KB
+offset_outlier: 245.78 KB
+1368.43
+
+alpha = 0.0005
+text: 1870146.23 KB
+id: 35983.81 KB
+dump: 9.67 KB
+url: 52205.48 KB
+date: 8332.33 KB
+file_path: 14870.00 KB
+language: 0.07 KB
+language_score: 5810.29 KB
+token_count_offset: 909.33 KB
+offset_outlier: 477.78 KB

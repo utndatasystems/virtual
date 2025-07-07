@@ -50,6 +50,22 @@
         "status": "not yet started"
       }
     ]
+  },
+  "Metanova/SAVI-2020": {
+    "configs": [
+      {
+        "file":"default",
+        "status": "not yet started"
+      }
+    ]
+  },
+  "bigdata-pw/Flickr": {
+    "configs": [
+      {
+        "file":"default",
+        "status": "not yet started"
+      }
+    ]
   }
 }
 

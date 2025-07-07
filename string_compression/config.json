@@ -3,7 +3,7 @@
     "configs": [
       {
         "file": "20231101.zh-classical",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-04-29 10:18:25",
         "path": "./datasets/wikimedia/wikipedia/20231101.zh-classical",
         "size_original": 10098073,
@@ -94,7 +94,7 @@
       },
       {
         "file": "20231101.ab",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-04-29 10:18:25",
         "path": "./datasets/wikimedia/wikipedia/20231101.ab",
         "size_original": 1237796,
@@ -185,7 +185,7 @@
       },
       {
         "file": "20231101.af",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-04-29 10:18:26",
         "path": "./datasets/wikimedia/wikipedia/20231101.af",
         "size_original": 124485544,
@@ -276,7 +276,7 @@
       },
       {
         "file": "20231101.azb",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-04-29 10:18:27",
         "path": "./datasets/wikimedia/wikipedia/20231101.azb",
         "size_original": 46739926,
@@ -367,7 +367,7 @@
       },
       {
         "file": "20231101.bg",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-04-29 10:18:28",
         "path": "./datasets/wikimedia/wikipedia/20231101.bg",
         "size_original": 512344058,
@@ -458,7 +458,7 @@
       },
       {
         "file": "20231101.ady",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-04-29 10:18:28",
         "path": "./datasets/wikimedia/wikipedia/20231101.ady",
         "size_original": 347450,
@@ -549,7 +549,7 @@
       },
       {
         "file": "20231101.ar",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-04-29 10:18:34",
         "path": "./datasets/wikimedia/wikipedia/20231101.ar",
         "size_original": 1323304271,
@@ -640,7 +640,7 @@
       },
       {
         "file": "20231101.de",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-04-29 10:19:08",
         "path": "./datasets/wikimedia/wikipedia/20231101.de",
         "size_original": 5771317942,
@@ -731,7 +731,7 @@
       },
       {
         "file": "20231101.ceb",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-04-29 10:19:12",
         "path": "./datasets/wikimedia/wikipedia/20231101.ceb",
         "size_original": 828085216,
@@ -822,7 +822,7 @@
       },
       {
         "file": "20231101.nl",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-04-29 10:19:16",
         "path": "./datasets/wikimedia/wikipedia/20231101.nl",
         "size_original": 1436843432,
@@ -917,7 +917,7 @@
     "configs": [
       {
         "file": "sample-10BT",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-05-02 14:40:06",
         "path": "./datasets/HuggingFaceFW/fineweb/sample/10BT",
         "size_original": 30639384917,
@@ -1000,7 +1000,7 @@
     "configs": [
       {
         "file": "default",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-05-13 13:57:23",
         "path": "./datasets/Metanova/SAVI-2020/default",
         "size_original": 1459369994,
@@ -1059,7 +1059,7 @@
     "configs": [
       {
         "file": "",
-        "status": "downloaded",
+        "status": "processed",
         "download_datetime": "2025-05-19 22:39:06",
         "path": "./datasets/bigdata-pw/Flickr/",
         "size_original": 7594417023,
@@ -1077,6 +1077,99 @@
             "size_compression_brotli": 169180532,
             "size_compression_lz4": 297670721,
             "size_compression_zstd": 192281716
+          }
+        ]
+      }
+    ]
+  },
+  "vCache/SemBenchmarkLmArena": {
+    "configs": [
+      {
+        "file": "default",
+        "status": "processed",
+        "download_datetime": "2025-06-03 10:18:16",
+        "path": "./datasets/vCache/SemBenchmarkLmArena/default",
+        "size_original": 4419911035,
+        "size_snappy": 4318143482,
+        "size_gzip": 3165994202,
+        "size_brotli": 3120084324,
+        "size_lz4": 3986213333,
+        "size_zstd": 3574676287,
+        "rows": 63796
+      }
+    ]
+  },
+  "vCache/SemBenchmarkClassification": {
+    "configs": [
+      {
+        "file": "default",
+        "status": "processed",
+        "download_datetime": "2025-06-03 10:35:07",
+        "path": "./datasets/vCache/SemBenchmarkClassification/default",
+        "size_original": 1711303782,
+        "size_snappy": 1673925130,
+        "size_gzip": 1311899014,
+        "size_brotli": 1266929449,
+        "size_lz4": 1644752205,
+        "size_zstd": 1445318588,
+        "rows": 45000
+      }
+    ]
+  },
+  "nhagar/fineweb_urls": {
+    "configs": [
+      {
+        "file": "",
+        "status": "processed",
+        "download_datetime": "2025-06-06 23:51:59",
+        "path": "./datasets/nhagar/fineweb_urls/",
+        "size_original": 147411812968,
+        "size_snappy": 59181439,
+        "size_gzip": 38074768,
+        "size_brotli": 33300273,
+        "size_lz4": 60668849,
+        "size_zstd": 41363647,
+        "rows": 1000000,
+        "compress": [
+          {
+            "function": "domain are the infix of the url",
+            "size_compression_snappy": 49155689,
+            "size_compression_gzip": 31779836,
+            "size_compression_brotli": 27967584,
+            "size_compression_lz4": 50459812,
+            "size_compression_zstd": 34598479,
+            "query": {
+              "url_ori": "SELECT domain FROM df",
+              "url_com": "SELECT regexp_extract(url, 'https?://(?:[^./]+\\.)*([^./]+\\.[^./]+)', 1) AS domain FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.13015198707580566,
+              "url_com": 1.2295916080474854
+            }
+          },
+          {
+            "function": "remove the domain in url",
+            "size_compression_snappy": 50399035,
+            "size_compression_gzip": 32445511,
+            "size_compression_brotli": 28333014,
+            "size_compression_lz4": 51953838,
+            "size_compression_zstd": 35271104
+          },
+          {
+            "function": "domain are the infix of the url, and store the domain offset and length",
+            "size_compression_snappy": 49155689,
+            "size_compression_gzip": 32747002,
+            "size_compression_brotli": 28924099,
+            "size_compression_lz4": 51704639,
+            "size_compression_zstd": 35611245,
+            "query": {
+              "url_ori": "SELECT domain FROM df",
+              "url_com": "SELECT substr(url, domain_offset + 1, domain_length) AS domain FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.12843608856201172,
+              "url_com": 0.17068243026733398
+            }
           }
         ]
       }
