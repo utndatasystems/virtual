@@ -165,11 +165,12 @@ class SummarizePlotter:
             
         # Plot the results
         self.plot_results(
-            query_times,
+            query_col_times,
+            query_all_times,
             target_column=target_column
         )
     
-    def plot_results(self, query_times: list, target_column: str = "Target Column"):
+    def plot_results(self, query_col_times: list, query_all_times: list, target_column: str = "Target Column"):
         """
         Generates and displays a plot comparing file sizes and query times.
 
@@ -190,9 +191,27 @@ class SummarizePlotter:
         original_list = [original_ratio, (times[0] / times[0]) * 100, (times[2] / times[2]) * 100]
         compressed_list = [compressed_ratio, (times[1] / times[0]) * 100, (times[3] / times[2]) * 100]
         if len(times) == 5:
-            trick_list = [0, 0, (times[4] / times[2]) * 100]
-        x_labels = ['Size', f'SUMMARIZE {target_column}', f'SUMMARIZE LENGTH({target_column})']
+            trick_list = [
+                0, 0, 
+                (times[4] / times[2]) * 100 if times[2] else 0,
+                0, 
+                (all_times[4] / all_times[2]) * 100 if len(all_times) == 5 and all_times[2] else 0
+            ]
 
+        # Determine the y-axis limit for the plots
+        y_max_values = compressed_list[1:]
+        if trick_list:
+            y_max_values.extend(trick_list)
+        y_max = max([v for v in y_max_values if v is not None] + [120]) * 1.1
+
+        # --- Plotting setup ---
+        x_labels = [
+            r'$\texttt{File Size}$',
+            rf'$\texttt{{SUMMARIZE\ {target_column}}}$',
+            rf'$\texttt{{SUMMARIZE\ LENGTH({target_column})}}$',
+            rf'$\texttt{{SUMMARIZE\ *}}$',
+            rf'$\texttt{{SUMMARIZE\ LENGTH(*)}}$'
+        ]
         bar_width = 0.25
         x = np.arange(len(x_labels))
 
@@ -206,18 +225,44 @@ class SummarizePlotter:
             x_1 = x - bar_width/2
             x_2 = x + bar_width/2
 
-        plt.bar(x_1, original_list, bar_width, color=['blue'], label='Original')
-        plt.bar(x_2, compressed_list, bar_width, color=['orange'], label='Compressed')
-        if len(times) == 5:
-            plt.bar(x_3, trick_list, bar_width, color=['yellow'], label='Compressed Len Trick')
+        # --- Plot 1: File size comparison ---
+        ax1.bar(0 - bar_width/2, original_list[0], bar_width, color='blue', label=r'$\texttt{parquet}$')
+        ax1.bar(0 + bar_width/2, compressed_list[0], bar_width, color='orange', label=r'$\texttt{virtual}$')
+        ax1.set_xticks([0])
+        ax1.set_xticklabels([x_labels[0]])
+        ax1.set_ylabel(r'File Size [\%]')
+        ax1.grid(True)
+        ax1.legend(loc='upper left')
 
-        plt.ylabel('Percentage(\%)')
-        plt.xticks(x, x_labels)
-        # log scale y
-        # plt.yscale('log')
-        plt.title(f'Parquet Compression {self.dataset_name} - ({target_column})')
-        plt.grid(True)
-        plt.legend()
+        # --- Plot 2: Query latency for target column ---
+        x_query = np.arange(2)  # Two groups of bars
+        
+        ax2.bar(x_1, original_list[1:3], bar_width, color='blue', label=r'$\texttt{parquet}$')
+        ax2.bar(x_2, compressed_list[1:3], bar_width, color='orange', label=r'$\texttt{virtual}$')
+        if trick_list and trick_list[2] is not None:
+            ax2.bar(x_3[2], trick_list[2], bar_width, color='yellow', label=r'fast $\texttt{virtual}$')
 
-        plt.tight_layout()
+        ax2.set_xticks(x_query)
+        ax2.set_xticklabels(x_labels[1:3])
+        ax2.set_ylabel(r'Query Latency [\%]')
+        ax2.set_ylim(0, y_max)
+        ax2.grid(True)
+        ax2.legend(loc='upper left')
+
+        # --- Plot 3: Query latency for all columns ---
+        ax3.bar(x_1, original_list[3:], bar_width, color='blue', label=r'$\texttt{parquet}$')
+        ax3.bar(x_2, compressed_list[3:], bar_width, color='orange', label=r'$\texttt{virtual}$')
+        if trick_list and trick_list[4] is not None:
+            ax3.bar(x_3[2], trick_list[4], bar_width, color='yellow', label=r'fast $\texttt{virtual}$')
+        
+        ax3.set_xticks(x_query)
+        ax3.set_xticklabels(x_labels[3:])
+        ax3.set_ylabel(r'Query Latency [\%]')
+        ax3.set_ylim(0, y_max)
+        ax3.grid(True)
+        ax3.legend(loc='upper left')
+
+        # --- Final plot adjustments ---
+        fig.suptitle(rf'{self.dataset_name.lower()} - column $\texttt{{{target_column}}}$')
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
         plt.show()
