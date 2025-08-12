@@ -19,12 +19,11 @@ def write_parquet(df: pd.DataFrame, path: str, PARQUET_COMPRESSION_TYPE: str = "
 
 def get_df(path: str, max_rows: int = 1_000_000) -> pd.DataFrame:
     """
-    Reads multiple Parquet files from a directory into a single DataFrame.
-
-    Stops reading once max_rows is reached.
+    Recursively reads multiple Parquet files from a directory (including subdirectories)
+    into a single DataFrame. Stops reading once max_rows is reached.
 
     Args:
-        path: The directory containing the Parquet files.
+        path: The root directory containing the Parquet files.
         max_rows: The maximum number of rows to load.
 
     Returns:
@@ -37,27 +36,32 @@ def get_df(path: str, max_rows: int = 1_000_000) -> pd.DataFrame:
         print(f"Error: Path is not a directory: {path}")
         return pd.DataFrame()
 
-    for fname in sorted(os.listdir(path)):
-        if not fname.endswith(('.parquet', '.parq')):
-            continue
+    # Recursively traverse the directory and subdirectories
+    for root, _, files in os.walk(path):
+        for fname in sorted(files):
+            if not fname.endswith(('.parquet', '.parq')):
+                continue
 
-        file_path = os.path.join(path, fname)
-        try:
-            df_part = pd.read_parquet(file_path)
-            n = len(df_part)
+            file_path = os.path.join(root, fname)
+            try:
+                df_part = pd.read_parquet(file_path)
+                n = len(df_part)
 
-            if total_rows + n >= max_rows:
-                # Only take what we still need to reach the cap
-                rows_to_take = max_rows - total_rows
-                df_part = df_part.iloc[:rows_to_take]
+                if total_rows + n >= max_rows:
+                    rows_to_take = max_rows - total_rows
+                    df_part = df_part.iloc[:rows_to_take]
+                    parts.append(df_part)
+                    total_rows += rows_to_take
+                    break
+
                 parts.append(df_part)
-                break
+                total_rows += n
+            except Exception as e:
+                print(f"Warning: Could not read {file_path}. Error: {e}")
+                continue
 
-            parts.append(df_part)
-            total_rows += n
-        except Exception as e:
-            print(f"Warning: Could not read {file_path}. Error: {e}")
-            continue
+        if total_rows >= max_rows:
+            break
 
     if not parts:
         return pd.DataFrame()
@@ -126,7 +130,8 @@ def filter_sample_df(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Index]:
     """
     string_columns = df.select_dtypes(include=['object', 'string']).columns
     df = df[string_columns]
-    sampled_df = df.sample(n=10000, random_state=42)
+    sample_size = min(len(df), 10000)
+    sampled_df = df.sample(n=sample_size, random_state=42, replace=False)
     return sampled_df, string_columns
 
 def get_pre_suffix(sampled_df: pd.DataFrame, string_columns: pd.Index, filter_threshold: float = 0.9) -> List[Dict[str, Any]]:
@@ -229,7 +234,7 @@ def get_pre_suffix(sampled_df: pd.DataFrame, string_columns: pd.Index, filter_th
     
     return results
 
-def longest_common_substring(a: str, b: str) -> int:
+def longest_common_substring(a: Any, b: Any) -> int:
     """
     Calculates the length of the longest common substring between two strings.
 
@@ -238,10 +243,13 @@ def longest_common_substring(a: str, b: str) -> int:
         b: The second string.
 
     Returns:
-        The length of the longest common substring.
+        The length of the longest common substring, or 0 if input is invalid.
     """
+    if not isinstance(a, str) or not isinstance(b, str):
+        return 0
     if not a or not b:
         return 0
+
     dp = [[0] * (len(b)+1) for _ in range(len(a)+1)]
     max_len = 0
     for i in range(1, len(a)+1):
