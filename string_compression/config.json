@@ -1,0 +1,1178 @@
+{
+  "wikimedia/wikipedia": {
+    "configs": [
+      {
+        "file": "20231101.zh-classical",
+        "status": "processed",
+        "download_datetime": "2025-04-29 10:18:25",
+        "path": "./datasets/wikimedia/wikipedia/20231101.zh-classical",
+        "size_original": 10098073,
+        "size_snappy": 10045265,
+        "size_gzip": 6720454,
+        "size_brotli": 5923439,
+        "size_lz4": 10312312,
+        "size_zstd": 8060171,
+        "rows": 12708,
+        "compress": [
+          {
+            "function": "url=offset+transfer(title)",
+            "size_compression_snappy": 9801722,
+            "size_compression_gzip": 6571074,
+            "size_compression_brotli": 5789286,
+            "size_compression_lz4": 10070543,
+            "size_compression_zstd": 7905411,
+            "query": {
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://zh-classical.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.005398273468017578,
+              "url_com": 0.03303956985473633
+            }
+          },
+          {
+            "function": "title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 9951003,
+            "size_compression_gzip": 6652741,
+            "size_compression_brotli": 5859598,
+            "size_compression_lz4": 10218516,
+            "size_compression_zstd": 7991473,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.0052530765533447266,
+              "title_com": 0.035956621170043945,
+              "text_ori": 0.054316043853759766,
+              "text_com": 0.09222197532653809
+            }
+          },
+          {
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 9707460,
+            "size_compression_gzip": 6503362,
+            "size_compression_brotli": 5725445,
+            "size_compression_lz4": 9976747,
+            "size_compression_zstd": 7836713,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://zh-classical.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.0052127838134765625,
+              "title_com": 0.03613638877868652,
+              "text_ori": 0.05492067337036133,
+              "text_com": 0.0743706226348877,
+              "url_ori": 0.006178379058837891,
+              "url_com": 0.06236743927001953
+            }
+          },
+          {
+            "function": "title=transfer(url-prefix)",
+            "size_compression_snappy": 9888625,
+            "size_compression_gzip": 6608106,
+            "size_compression_brotli": 5820168,
+            "size_compression_lz4": 10153794,
+            "size_compression_zstd": 7939025,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://zh-classical.wikipedia.org/wiki/') AS title FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.005607128143310547,
+              "title_com": 0.07560491561889648
+            }
+          }
+        ]
+      },
+      {
+        "file": "20231101.ab",
+        "status": "processed",
+        "download_datetime": "2025-04-29 10:18:25",
+        "path": "./datasets/wikimedia/wikipedia/20231101.ab",
+        "size_original": 1237796,
+        "size_snappy": 1250760,
+        "size_gzip": 734391,
+        "size_brotli": 598625,
+        "size_lz4": 1193819,
+        "size_zstd": 795091,
+        "rows": 6152,
+        "compress": [
+          {
+            "function": "url=offset+transfer(title)",
+            "size_compression_snappy": 1171212,
+            "size_compression_gzip": 684773,
+            "size_compression_brotli": 560022,
+            "size_compression_lz4": 1106263,
+            "size_compression_zstd": 745279,
+            "query": {
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ab.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.003970146179199219,
+              "url_com": 0.017320871353149414
+            }
+          },
+          {
+            "function": "title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 1263467,
+            "size_compression_gzip": 720790,
+            "size_compression_brotli": 585448,
+            "size_compression_lz4": 1177312,
+            "size_compression_zstd": 778127,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.0038306713104248047,
+              "title_com": 0.017389297485351562,
+              "text_ori": 0.024559736251831055,
+              "text_com": 0.030718564987182617
+            }
+          },
+          {
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 1183919,
+            "size_compression_gzip": 671172,
+            "size_compression_brotli": 546845,
+            "size_compression_lz4": 1089756,
+            "size_compression_zstd": 728315,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ab.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.004028797149658203,
+              "title_com": 0.018258333206176758,
+              "text_ori": 0.024839401245117188,
+              "text_com": 0.031986236572265625,
+              "url_ori": 0.004456996917724609,
+              "url_com": 0.03165721893310547
+            }
+          },
+          {
+            "function": "title=transfer(url-prefix)",
+            "size_compression_snappy": 1191617,
+            "size_compression_gzip": 692799,
+            "size_compression_brotli": 566834,
+            "size_compression_lz4": 1135673,
+            "size_compression_zstd": 755525,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://ab.wikipedia.org/wiki/') AS title FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.0039060115814208984,
+              "title_com": 0.034157514572143555
+            }
+          }
+        ]
+      },
+      {
+        "file": "20231101.af",
+        "status": "processed",
+        "download_datetime": "2025-04-29 10:18:26",
+        "path": "./datasets/wikimedia/wikipedia/20231101.af",
+        "size_original": 124485544,
+        "size_snappy": 123559233,
+        "size_gzip": 78611578,
+        "size_brotli": 65477599,
+        "size_lz4": 124147770,
+        "size_zstd": 85121628,
+        "rows": 112518,
+        "compress": [
+          {
+            "function": "url=offset+transfer(title)",
+            "size_compression_snappy": 121922084,
+            "size_compression_gzip": 77507722,
+            "size_compression_brotli": 64503145,
+            "size_compression_lz4": 122501863,
+            "size_compression_zstd": 83997064,
+            "query": {
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://af.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.01942753791809082,
+              "url_com": 0.27159929275512695
+            }
+          },
+          {
+            "function": "title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 122686023,
+            "size_compression_gzip": 78044821,
+            "size_compression_brotli": 64954269,
+            "size_compression_lz4": 123295226,
+            "size_compression_zstd": 84486509,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.017326831817626953,
+              "title_com": 0.8322708606719971,
+              "text_ori": 1.1560721397399902,
+              "text_com": 1.2552547454833984
+            }
+          },
+          {
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 121048874,
+            "size_compression_gzip": 76940966,
+            "size_compression_brotli": 63979816,
+            "size_compression_lz4": 121649319,
+            "size_compression_zstd": 83361946,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://af.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.017652511596679688,
+              "title_com": 0.8349556922912598,
+              "text_ori": 1.170478343963623,
+              "text_com": 1.2703619003295898,
+              "url_ori": 0.032517194747924805,
+              "url_com": 1.020777702331543
+            }
+          },
+          {
+            "function": "title=transfer(url-prefix)",
+            "size_compression_snappy": 122067560,
+            "size_compression_gzip": 77600413,
+            "size_compression_brotli": 64561244,
+            "size_compression_lz4": 122618329,
+            "size_compression_zstd": 84007433,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://af.wikipedia.org/wiki/') AS title FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.01731133460998535,
+              "title_com": 0.38637495040893555
+            }
+          }
+        ]
+      },
+      {
+        "file": "20231101.azb",
+        "status": "processed",
+        "download_datetime": "2025-04-29 10:18:27",
+        "path": "./datasets/wikimedia/wikipedia/20231101.azb",
+        "size_original": 46739926,
+        "size_snappy": 44583796,
+        "size_gzip": 24329832,
+        "size_brotli": 19834206,
+        "size_lz4": 41049562,
+        "size_zstd": 26863160,
+        "rows": 243376,
+        "compress": [
+          {
+            "function": "url=offset+transfer(title)",
+            "size_compression_snappy": 39090034,
+            "size_compression_gzip": 21690234,
+            "size_compression_brotli": 17536018,
+            "size_compression_lz4": 34661169,
+            "size_compression_zstd": 23256142,
+            "query": {
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://azb.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.051531076431274414,
+              "url_com": 0.8911311626434326
+            }
+          },
+          {
+            "function": "title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 43360402,
+            "size_compression_gzip": 23450011,
+            "size_compression_brotli": 19164101,
+            "size_compression_lz4": 39891365,
+            "size_compression_zstd": 26082580,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.07311248779296875,
+              "title_com": 0.5550339221954346,
+              "text_ori": 0.7716398239135742,
+              "text_com": 0.9609270095825195
+            }
+          },
+          {
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 37866640,
+            "size_compression_gzip": 20810413,
+            "size_compression_brotli": 16865913,
+            "size_compression_lz4": 33502972,
+            "size_compression_zstd": 22475562,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://azb.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.07791566848754883,
+              "title_com": 0.5423009395599365,
+              "text_ori": 0.7800557613372803,
+              "text_com": 0.9671909809112549,
+              "url_ori": 0.07142210006713867,
+              "url_com": 1.1301708221435547
+            }
+          },
+          {
+            "function": "title=transfer(url-prefix)",
+            "size_compression_snappy": 41423685,
+            "size_compression_gzip": 22425843,
+            "size_compression_brotli": 18107908,
+            "size_compression_lz4": 37812216,
+            "size_compression_zstd": 24706274,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://azb.wikipedia.org/wiki/') AS title FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.07197928428649902,
+              "title_com": 2.685896158218384
+            }
+          }
+        ]
+      },
+      {
+        "file": "20231101.bg",
+        "status": "processed",
+        "download_datetime": "2025-04-29 10:18:28",
+        "path": "./datasets/wikimedia/wikipedia/20231101.bg",
+        "size_original": 512344058,
+        "size_snappy": 508936001,
+        "size_gzip": 295952300,
+        "size_brotli": 230839619,
+        "size_lz4": 491488792,
+        "size_zstd": 323812286,
+        "rows": 294275,
+        "compress": [
+          {
+            "function": "url=offset+transfer(title)",
+            "size_compression_snappy": 500472984,
+            "size_compression_gzip": 291402610,
+            "size_compression_brotli": 226831136,
+            "size_compression_lz4": 481188069,
+            "size_compression_zstd": 318057880,
+            "query": {
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://bg.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.05986833572387695,
+              "url_com": 1.0919201374053955
+            }
+          },
+          {
+            "function": "title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 506343868,
+            "size_compression_gzip": 294457869,
+            "size_compression_brotli": 229583547,
+            "size_compression_lz4": 488911380,
+            "size_compression_zstd": 322092595,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.08926796913146973,
+              "title_com": 3.7814323902130127,
+              "text_ori": 6.410520076751709,
+              "text_com": 8.101375579833984
+            }
+          },
+          {
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 497865889,
+            "size_compression_gzip": 289916193,
+            "size_compression_brotli": 225693874,
+            "size_compression_lz4": 478618462,
+            "size_compression_zstd": 316351085,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://bg.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.09095931053161621,
+              "title_com": 3.806232452392578,
+              "text_ori": 6.389919281005859,
+              "text_com": 8.116683721542358,
+              "url_ori": 0.08988547325134277,
+              "url_com": 4.7205986976623535
+            }
+          },
+          {
+            "function": "title=transfer(url-prefix)",
+            "size_compression_snappy": 503614552,
+            "size_compression_gzip": 292653379,
+            "size_compression_brotli": 227979607,
+            "size_compression_lz4": 486253130,
+            "size_compression_zstd": 320162174,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://bg.wikipedia.org/wiki/') AS title FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.09395551681518555,
+              "title_com": 3.339555501937866
+            }
+          }
+        ]
+      },
+      {
+        "file": "20231101.ady",
+        "status": "processed",
+        "download_datetime": "2025-04-29 10:18:28",
+        "path": "./datasets/wikimedia/wikipedia/20231101.ady",
+        "size_original": 347450,
+        "size_snappy": 348045,
+        "size_gzip": 208186,
+        "size_brotli": 171466,
+        "size_lz4": 342175,
+        "size_zstd": 225276,
+        "rows": 706,
+        "compress": [
+          {
+            "function": "url=offset+transfer(title)",
+            "size_compression_snappy": 332210,
+            "size_compression_gzip": 198338,
+            "size_compression_brotli": 162324,
+            "size_compression_lz4": 322819,
+            "size_compression_zstd": 213155,
+            "query": {
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ady.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.014778375625610352,
+              "url_com": 0.017722606658935547
+            }
+          },
+          {
+            "function": "title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 344176,
+            "size_compression_gzip": 205026,
+            "size_compression_brotli": 167987,
+            "size_compression_lz4": 337014,
+            "size_compression_zstd": 221485,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.007505893707275391,
+              "title_com": 0.0054929256439208984,
+              "text_ori": 0.04468894004821777,
+              "text_com": 0.009683609008789062
+            }
+          },
+          {
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 328349,
+            "size_compression_gzip": 195186,
+            "size_compression_brotli": 158854,
+            "size_compression_lz4": 317666,
+            "size_compression_zstd": 209372,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ady.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.016248703002929688,
+              "title_com": 0.01245427131652832,
+              "text_ori": 0.008168935775756836,
+              "text_com": 0.010425329208374023,
+              "url_ori": 0.0021431446075439453,
+              "url_com": 0.006926536560058594
+            }
+          },
+          {
+            "function": "title=transfer(url-prefix)",
+            "size_compression_snappy": 337023,
+            "size_compression_gzip": 200464,
+            "size_compression_brotli": 164007,
+            "size_compression_lz4": 330509,
+            "size_compression_zstd": 216871,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://ady.wikipedia.org/wiki/') AS title FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.009423494338989258,
+              "title_com": 0.014972448348999023
+            }
+          }
+        ]
+      },
+      {
+        "file": "20231101.ar",
+        "status": "processed",
+        "download_datetime": "2025-04-29 10:18:34",
+        "path": "./datasets/wikimedia/wikipedia/20231101.ar",
+        "size_original": 1323304271,
+        "size_snappy": 977621331,
+        "size_gzip": 564495063,
+        "size_brotli": 472697612,
+        "size_lz4": 946686703,
+        "size_zstd": 623495830,
+        "rows": 1000000,
+        "compress": [
+          {
+            "function": "url=offset+transfer(title)",
+            "size_compression_snappy": 952201657,
+            "size_compression_gzip": 551737830,
+            "size_compression_brotli": 461611447,
+            "size_compression_lz4": 916421091,
+            "size_compression_zstd": 606291226,
+            "query": {
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ar.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.19169282913208008,
+              "url_com": 3.9354050159454346
+            }
+          },
+          {
+            "function": "title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 971694860,
+            "size_compression_gzip": 560666848,
+            "size_compression_brotli": 469703510,
+            "size_compression_lz4": 940861038,
+            "size_compression_zstd": 619679319,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.31030964851379395,
+              "title_com": 8.459089756011963,
+              "text_ori": 13.543342590332031,
+              "text_com": 17.326791763305664
+            }
+          },
+          {
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 946275186,
+            "size_compression_gzip": 547909615,
+            "size_compression_brotli": 458617345,
+            "size_compression_lz4": 910595426,
+            "size_compression_zstd": 602474715,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ar.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.33222198486328125,
+              "title_com": 8.453408002853394,
+              "text_ori": 13.553331136703491,
+              "text_com": 17.261098623275757,
+              "url_ori": 0.33881473541259766,
+              "url_com": 11.427063465118408
+            }
+          },
+          {
+            "function": "title=transfer(url-prefix)",
+            "size_compression_snappy": 962640051,
+            "size_compression_gzip": 555500336,
+            "size_compression_brotli": 464851641,
+            "size_compression_lz4": 931695371,
+            "size_compression_zstd": 613530176,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://ar.wikipedia.org/wiki/') AS title FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.32173728942871094,
+              "title_com": 10.363605260848999
+            }
+          }
+        ]
+      },
+      {
+        "file": "20231101.de",
+        "status": "processed",
+        "download_datetime": "2025-04-29 10:19:08",
+        "path": "./datasets/wikimedia/wikipedia/20231101.de",
+        "size_original": 5771317942,
+        "size_snappy": 2736489149,
+        "size_gzip": 1753250587,
+        "size_brotli": 1432774865,
+        "size_lz4": 2779224352,
+        "size_zstd": 1956461958,
+        "rows": 1000000,
+        "compress": [
+          {
+            "function": "url=offset+transfer(title)",
+            "size_compression_snappy": 2718369382,
+            "size_compression_gzip": 1741305564,
+            "size_compression_brotli": 1422561310,
+            "size_compression_lz4": 2761315745,
+            "size_compression_zstd": 1944309473,
+            "query": {
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://de.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.18376445770263672,
+              "url_com": 3.3625402450561523
+            }
+          },
+          {
+            "function": "title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 2727218628,
+            "size_compression_gzip": 1747975907,
+            "size_compression_brotli": 1428527521,
+            "size_compression_lz4": 2769940564,
+            "size_compression_zstd": 1949991722,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.1928114891052246,
+              "title_com": 18.028475522994995,
+              "text_ori": 24.570136308670044,
+              "text_com": 28.176860332489014
+            }
+          },
+          {
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 2709098861,
+            "size_compression_gzip": 1736030884,
+            "size_compression_brotli": 1418313966,
+            "size_compression_lz4": 2752031957,
+            "size_compression_zstd": 1937839237,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://de.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.21020913124084473,
+              "title_com": 17.90546679496765,
+              "text_ori": 24.453842878341675,
+              "text_com": 27.989896774291992,
+              "url_ori": 0.3229653835296631,
+              "url_com": 19.89884066581726
+            }
+          },
+          {
+            "function": "title=transfer(url-prefix)",
+            "size_compression_snappy": 2721034017,
+            "size_compression_gzip": 1743186341,
+            "size_compression_brotli": 1424102977,
+            "size_compression_lz4": 2763213100,
+            "size_compression_zstd": 1945097967,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://de.wikipedia.org/wiki/') AS title FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.18927788734436035,
+              "title_com": 4.468607187271118
+            }
+          }
+        ]
+      },
+      {
+        "file": "20231101.ceb",
+        "status": "processed",
+        "download_datetime": "2025-04-29 10:19:12",
+        "path": "./datasets/wikimedia/wikipedia/20231101.ceb",
+        "size_original": 828085216,
+        "size_snappy": 92803831,
+        "size_gzip": 54532717,
+        "size_brotli": 44514426,
+        "size_lz4": 86584753,
+        "size_zstd": 56584507,
+        "rows": 1000000,
+        "compress": [
+          {
+            "function": "url=offset+transfer(title)",
+            "size_compression_snappy": 81159844,
+            "size_compression_gzip": 46861866,
+            "size_compression_brotli": 37780262,
+            "size_compression_lz4": 74766019,
+            "size_compression_zstd": 48833584,
+            "query": {
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ceb.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.16400885581970215,
+              "url_com": 3.0116593837738037
+            }
+          },
+          {
+            "function": "title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 88583021,
+            "size_compression_gzip": 51914372,
+            "size_compression_brotli": 42731549,
+            "size_compression_lz4": 83098581,
+            "size_compression_zstd": 54200641,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.13510847091674805,
+              "title_com": 0.4328641891479492,
+              "text_ori": 1.3987812995910645,
+              "text_com": 1.5281922817230225
+            }
+          },
+          {
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 76939034,
+            "size_compression_gzip": 44243521,
+            "size_compression_brotli": 35997385,
+            "size_compression_lz4": 71279847,
+            "size_compression_zstd": 46449718,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://ceb.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.13065242767333984,
+              "title_com": 0.43034911155700684,
+              "text_ori": 0.6602034568786621,
+              "text_com": 0.9470686912536621,
+              "url_ori": 0.19298243522644043,
+              "url_com": 3.659292459487915
+            }
+          },
+          {
+            "function": "title=transfer(url-prefix)",
+            "size_compression_snappy": 82320098,
+            "size_compression_gzip": 47863413,
+            "size_compression_brotli": 38405814,
+            "size_compression_lz4": 76061402,
+            "size_compression_zstd": 49549437,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://ceb.wikipedia.org/wiki/') AS title FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.13786721229553223,
+              "title_com": 4.057954549789429
+            }
+          }
+        ]
+      },
+      {
+        "file": "20231101.nl",
+        "status": "processed",
+        "download_datetime": "2025-04-29 10:19:16",
+        "path": "./datasets/wikimedia/wikipedia/20231101.nl",
+        "size_original": 1436843432,
+        "size_snappy": 856537242,
+        "size_gzip": 549510956,
+        "size_brotli": 462603125,
+        "size_lz4": 865758619,
+        "size_zstd": 597793998,
+        "rows": 1000000,
+        "compress": [
+          {
+            "function": "url=offset+transfer(title)",
+            "size_compression_snappy": 841323539,
+            "size_compression_gzip": 539433301,
+            "size_compression_brotli": 453826761,
+            "size_compression_lz4": 850589176,
+            "size_compression_zstd": 587519360,
+            "query": {
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://nl.wikipedia.org/wiki/' || quote(title) AS url FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.15874719619750977,
+              "url_com": 3.0466203689575195
+            }
+          },
+          {
+            "function": "title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 850061485,
+            "size_compression_gzip": 545541138,
+            "size_compression_brotli": 459261582,
+            "size_compression_lz4": 859538898,
+            "size_compression_zstd": 593423503,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.15853381156921387,
+              "title_com": 5.553678512573242,
+              "text_ori": 7.057876825332642,
+              "text_com": 8.232805252075195
+            }
+          },
+          {
+            "function": "url=offset+transfer(title), title=combine[:len], text=combine[len:]",
+            "size_compression_snappy": 834847782,
+            "size_compression_gzip": 535463483,
+            "size_compression_brotli": 450485218,
+            "size_compression_lz4": 844369455,
+            "size_compression_zstd": 583148865,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT SUBSTR(combine_title_text, 1, title_len) AS title FROM df",
+              "text_ori": "SELECT text FROM df",
+              "text_com": "SELECT SUBSTR(combine_title_text, title_len + 1) AS text FROM df",
+              "url_ori": "SELECT url FROM df",
+              "url_com": "SELECT 'https://nl.wikipedia.org/wiki/' || quote(SUBSTR(combine_title_text, 1, title_len)) AS url FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.15602326393127441,
+              "title_com": 5.539249658584595,
+              "text_ori": 6.961951971054077,
+              "text_com": 7.958146095275879,
+              "url_ori": 0.20956873893737793,
+              "url_com": 7.903232097625732
+            }
+          },
+          {
+            "function": "title=transfer(url-prefix)",
+            "size_compression_snappy": 843370129,
+            "size_compression_gzip": 540910358,
+            "size_compression_brotli": 454964806,
+            "size_compression_lz4": 852309152,
+            "size_compression_zstd": 588334994,
+            "query": {
+              "title_ori": "SELECT title FROM df",
+              "title_com": "SELECT strip_and_unquote(url, 'https://nl.wikipedia.org/wiki/') AS title FROM df"
+            },
+            "query_time": {
+              "title_ori": 0.15410923957824707,
+              "title_com": 4.389993190765381
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "HuggingFaceFW/fineweb": {
+    "configs": [
+      {
+        "file": "sample-10BT",
+        "status": "processed",
+        "download_datetime": "2025-05-02 14:40:06",
+        "path": "./datasets/HuggingFaceFW/fineweb/sample/10BT",
+        "size_original": 30639384917,
+        "size_snappy": 2036861286,
+        "size_gzip": 1304555928,
+        "size_brotli": 1117233751,
+        "size_lz4": 2078916387,
+        "size_zstd": 1427266717,
+        "rows": 1000000,
+        "compress": [
+          {
+            "function": "dump=file_path.split('/')[4].split('/')[0]",
+            "size_compression_snappy": 2036850933,
+            "size_compression_gzip": 1304549930,
+            "size_compression_brotli": 1117228637,
+            "size_compression_lz4": 2078905984,
+            "size_compression_zstd": 1427259905
+          },
+          {
+            "function": "file_path=file_path+dump+file_path",
+            "size_compression_snappy": 2035496849,
+            "size_compression_gzip": 1304414401,
+            "size_compression_brotli": 1117108748,
+            "size_compression_lz4": 2078761433,
+            "size_compression_zstd": 1427074982
+          },
+          {
+            "function": "combine all string columns",
+            "size_compression_snappy": 2064808011,
+            "size_compression_gzip": 1337756388,
+            "size_compression_brotli": 1142616262,
+            "size_compression_lz4": 2102381440,
+            "size_compression_zstd": 1469328673
+          },
+          {
+            "function": "linear regression: text_len to token_count",
+            "size_compression_snappy": 2036581881,
+            "size_compression_gzip": 1304151612,
+            "size_compression_brotli": 1116832093,
+            "size_compression_lz4": 2078636359,
+            "size_compression_zstd": 1426869733
+          },
+          {
+            "function": "remove prefixs",
+            "size_compression_snappy": 2033539538,
+            "size_compression_gzip": 1303614748,
+            "size_compression_brotli": 1116283513,
+            "size_compression_lz4": 2078274030,
+            "size_compression_zstd": 1426362003
+          },
+          {
+            "function": "split the id",
+            "size_compression_snappy": 2028296259,
+            "size_compression_gzip": 1301614507,
+            "size_compression_brotli": 1114656440,
+            "size_compression_lz4": 2069110002,
+            "size_compression_zstd": 1425216303
+          },
+          {
+            "function": "concat text and url",
+            "size_compression_snappy": 2040244944,
+            "size_compression_gzip": 1308849646,
+            "size_compression_brotli": 1121920674,
+            "size_compression_lz4": 2083204384,
+            "size_compression_zstd": 1433196298
+          },
+          {
+            "function": "concat text and url_last_part, url = url_prefix + url_last_part",
+            "size_compression_snappy": 2037796312,
+            "size_compression_gzip": 1308519786,
+            "size_compression_brotli": 1120692221,
+            "size_compression_lz4": 2080776975,
+            "size_compression_zstd": 1432063780
+          }
+        ]
+      }
+    ]
+  },
+  "Metanova/SAVI-2020": {
+    "configs": [
+      {
+        "file": "default",
+        "status": "processed",
+        "download_datetime": "2025-05-13 13:57:23",
+        "path": "./datasets/Metanova/SAVI-2020/default",
+        "size_original": 1459369994,
+        "size_snappy": 476431909,
+        "size_gzip": 271022175,
+        "size_brotli": 213915651,
+        "size_lz4": 445508239,
+        "size_zstd": 258567006,
+        "rows": 1000000,
+        "compress": [
+          {
+            "function": "remove product_hashisy, product_hashisy=product_name[:19]+'\"'",
+            "size_compression_snappy": 459473936,
+            "size_compression_gzip": 260523258,
+            "size_compression_brotli": 204057249,
+            "size_compression_lz4": 427882066,
+            "size_compression_zstd": 249895791
+          },
+          {
+            "function": "product_name = product_name[0] + product_hashisy[1:-1] + product_name[1:]",
+            "size_compression_snappy": 459736485,
+            "size_compression_gzip": 260841661,
+            "size_compression_brotli": 204493721,
+            "size_compression_lz4": 427910222,
+            "size_compression_zstd": 249251534
+          },
+          {
+            "function": "remove r1_ident, and r1_ident=r1_url.split('/')[-1], same for r2",
+            "size_compression_snappy": 474801278,
+            "size_compression_gzip": 269388370,
+            "size_compression_brotli": 213823678,
+            "size_compression_lz4": 445286450,
+            "size_compression_zstd": 258412260
+          },
+          {
+            "function": "r1_url = r1_url[:-1] + r1_ident[1:-1] + r1_url[-1], same for r2",
+            "size_compression_snappy": 474800989,
+            "size_compression_gzip": 269386737,
+            "size_compression_brotli": 213822639,
+            "size_compression_lz4": 445281675,
+            "size_compression_zstd": 258412162
+          },
+          {
+            "function": "function 1 + 4",
+            "size_compression_snappy": 457843016,
+            "size_compression_gzip": 258887820,
+            "size_compression_brotli": 203964237,
+            "size_compression_lz4": 427655502,
+            "size_compression_zstd": 249740947
+          }
+        ]
+      }
+    ]
+  },
+  "bigdata-pw/Flickr": {
+    "configs": [
+      {
+        "file": "",
+        "status": "processed",
+        "download_datetime": "2025-05-19 22:39:06",
+        "path": "./datasets/bigdata-pw/Flickr/",
+        "size_original": 7594417023,
+        "size_snappy": 491541045,
+        "size_gzip": 314557603,
+        "size_brotli": 288824398,
+        "size_lz4": 513704843,
+        "size_zstd": 306571968,
+        "rows": 1000000,
+        "compress": [
+          {
+            "function": "the urls have the same prefix and have same suffix for same columns",
+            "size_compression_snappy": 286275566,
+            "size_compression_gzip": 187220193,
+            "size_compression_brotli": 169180532,
+            "size_compression_lz4": 297670721,
+            "size_compression_zstd": 192281716
+          }
+        ]
+      }
+    ]
+  },
+  "vCache/SemBenchmarkLmArena": {
+    "configs": [
+      {
+        "file": "default",
+        "status": "processed",
+        "download_datetime": "2025-06-03 10:18:16",
+        "path": "./datasets/vCache/SemBenchmarkLmArena/default",
+        "size_original": 4419911035,
+        "size_snappy": 4318143482,
+        "size_gzip": 3165994202,
+        "size_brotli": 3120084324,
+        "size_lz4": 3986213333,
+        "size_zstd": 3574676287,
+        "rows": 63796
+      }
+    ]
+  },
+  "vCache/SemBenchmarkClassification": {
+    "configs": [
+      {
+        "file": "default",
+        "status": "processed",
+        "download_datetime": "2025-06-03 10:35:07",
+        "path": "./datasets/vCache/SemBenchmarkClassification/default",
+        "size_original": 1711303782,
+        "size_snappy": 1673925130,
+        "size_gzip": 1311899014,
+        "size_brotli": 1266929449,
+        "size_lz4": 1644752205,
+        "size_zstd": 1445318588,
+        "rows": 45000
+      }
+    ]
+  },
+  "nhagar/fineweb_urls": {
+    "configs": [
+      {
+        "file": "",
+        "status": "processed",
+        "download_datetime": "2025-06-06 23:51:59",
+        "path": "./datasets/nhagar/fineweb_urls/",
+        "size_original": 147411812968,
+        "size_snappy": 59181439,
+        "size_gzip": 38074768,
+        "size_brotli": 33300273,
+        "size_lz4": 60668849,
+        "size_zstd": 41363647,
+        "rows": 1000000,
+        "compress": [
+          {
+            "function": "domain are the infix of the url",
+            "size_compression_snappy": 49155689,
+            "size_compression_gzip": 31779836,
+            "size_compression_brotli": 27967584,
+            "size_compression_lz4": 50459812,
+            "size_compression_zstd": 34598479,
+            "query": {
+              "url_ori": "SELECT domain FROM df",
+              "url_com": "SELECT regexp_extract(url, 'https?://(?:[^./]+\\.)*([^./]+\\.[^./]+)', 1) AS domain FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.13015198707580566,
+              "url_com": 1.2295916080474854
+            }
+          },
+          {
+            "function": "remove the domain in url",
+            "size_compression_snappy": 50399035,
+            "size_compression_gzip": 32445511,
+            "size_compression_brotli": 28333014,
+            "size_compression_lz4": 51953838,
+            "size_compression_zstd": 35271104
+          },
+          {
+            "function": "domain are the infix of the url, and store the domain offset and length",
+            "size_compression_snappy": 49155689,
+            "size_compression_gzip": 32747002,
+            "size_compression_brotli": 28924099,
+            "size_compression_lz4": 51704639,
+            "size_compression_zstd": 35611245,
+            "query": {
+              "url_ori": "SELECT domain FROM df",
+              "url_com": "SELECT substr(url, domain_offset + 1, domain_length) AS domain FROM df"
+            },
+            "query_time": {
+              "url_ori": 0.12843608856201172,
+              "url_com": 0.17068243026733398
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
